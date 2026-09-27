@@ -56,15 +56,23 @@ def main():
     parser.add_argument('--admin-email', help='Administrator interaktiv anlegen (Passwortabfrage)')
     parser.add_argument('--dry-run', action='store_true', help='Nur Pfade und Kopierplan prüfen; keine Änderungen')
     parser.add_argument('--php', default='php', help='PHP-CLI, mindestens Version 8.4')
-    parser.add_argument('--composer', default='composer', help='Composer-Executable')
+    parser.add_argument('--composer', default='composer', help='Composer-Executable oder Pfad zu composer.phar (wird mit --php ausgeführt)')
     args = parser.parse_args()
     source, target = args.source.resolve(), args.target.resolve()
+    print(f'Arbeitsverzeichnis: {Path.cwd()}\nQuelle: {source}\nZiel: {target}', flush=True)
     if source == target or source in target.parents or target in source.parents:
         fail('Quelle und Ziel müssen getrennte, nicht ineinander liegende Verzeichnisse sein.')
-    for base in (source, target):
-        for name in ('composer.json', 'bin/console', 'public/index.php'):
-            if not (base / name).is_file():
-                fail(f'Kein vollständiges Symfony-Projekt: {base} ({name} fehlt).')
+    for label, base in (('Quellordner', source), ('Zielordner', target)):
+        if not base.is_dir():
+            fail(f'{label} existiert nicht als Verzeichnis: {base}. Relative Pfade gelten ab dem oben angezeigten Arbeitsverzeichnis. Bitte einen absoluten Pfad verwenden.')
+        missing = [name for name in ('composer.json', 'bin/console', 'public/index.php') if not (base / name).is_file()]
+        if missing:
+            hint = ''
+            if (base.parent / 'composer.json').is_file() and (base.parent / 'bin/console').is_file():
+                hint = f' Vermutlich wurde der DocumentRoot angegeben. Das Projektverzeichnis liegt unter: {base.parent}.'
+            elif label == 'Zielordner' and all((Path.cwd() / name).is_file() for name in ('composer.json', 'bin/console', 'public/index.php')):
+                hint = ' Das aktuelle Arbeitsverzeichnis ist ein Symfony-Projekt. Wenn dies das gewünschte Ziel ist, als Ziel einen Punkt (.) angeben.'
+            fail(f'{label} ist kein vollständiges Symfony-Projekt: {base}. Fehlend: {", ".join(missing)}.{hint} Es wurden keine Dateien verändert.')
     for name in ('composer.lock', 'src/Service/LicenseManager.php', 'src/Command/InitializeProductsCommand.php'):
         if not (source / name).is_file():
             fail(f'Lizenzserver-Quelldatei fehlt: {name}')
@@ -94,9 +102,22 @@ def main():
             print(f'  {relative}')
         print('Plan: Backup → Dateien → Composer → Produktionskonfiguration → Schlüssel → Migrationen → Produkt → Cache/Assets → Prüfung')
         return
-    for executable in (args.php, args.composer):
-        if not shutil.which(executable):
-            fail(f'Programm nicht gefunden: {executable}')
+    php_executable = shutil.which(args.php)
+    if not php_executable:
+        fail(f'PHP nicht gefunden: {args.php}. --php /vollstaendiger/pfad/php angeben.')
+    args.php = str(Path(php_executable).absolute())
+    composer_executable = shutil.which(args.composer)
+    composer_path = Path(composer_executable or args.composer).absolute()
+    if not composer_path.is_file():
+        fail(f'Composer nicht gefunden: {args.composer}. Mit --composer /vollstaendiger/pfad/composer.phar eine vorhandene Composer-2-Datei angeben. Eine PHAR-Datei benötigt keine Ausführungsrechte; sie wird mit --php gestartet.')
+    with composer_path.open('rb') as handle:
+        header = handle.read(1024)
+    if composer_path.suffix.lower() == '.phar' or b'<?php' in header:
+        composer_command = [args.php, str(composer_path)]
+    elif os.access(composer_path, os.X_OK):
+        composer_command = [str(composer_path)]
+    else:
+        fail(f'Composer-Datei ist weder ein PHP-/PHAR-Skript noch ausführbar: {composer_path}')
     os.umask(0o077)
     env = dict(os.environ, APP_ENV='prod', APP_DEBUG='0')
     run([args.php, '-r', 'exit(PHP_VERSION_ID >= 80400 && extension_loaded("pdo_mysql") && extension_loaded("sodium") ? 0 : 1);'], target, env)
@@ -114,19 +135,35 @@ def main():
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, destination)
         # Suppress Flex recipe changes and auto-scripts until target configuration is validated.
-        run([args.composer, 'install', '--no-dev', '--prefer-dist', '--optimize-autoloader', '--no-interaction', '--no-scripts', '--no-plugins'], target, env)
-        run([args.composer, 'dump-autoload', '--no-dev', '--optimize', '--no-scripts', '--no-interaction'], target, env)
-        run([args.composer, 'check-platform-reqs', '--no-dev'], target, env)
+        run([*composer_command, 'install', '--no-dev', '--prefer-dist', '--optimize-autoloader', '--no-interaction', '--no-scripts', '--no-plugins'], target, env)
+        run([*composer_command, 'dump-autoload', '--no-dev', '--optimize', '--no-scripts', '--no-interaction'], target, env)
+        run([*composer_command, 'check-platform-reqs', '--no-dev'], target, env)
         # Load actual text env files, ignoring any stale compiled .env.local.php.
         configure = r'''
 require 'vendor/autoload.php';
 (new Symfony\Component\Dotenv\Dotenv())->loadEnv('.env', 'APP_ENV', 'prod');
 $get = static fn ($name) => $_ENV[$name] ?? $_SERVER[$name] ?? getenv($name);
-if (!$get('APP_SECRET') || strlen($get('APP_SECRET')) < 16) { throw new RuntimeException('APP_SECRET im Ziel fehlt oder ist zu kurz.'); }
+$secret = $get('APP_SECRET');
+$persistSecret = false;
+if (false === $secret || null === $secret || '' === $secret) {
+    // Preserve a secret previously deployed only through the compiled env file.
+    $compiled = is_file('.env.local.php') ? require '.env.local.php' : [];
+    $secret = is_array($compiled) ? ($compiled['APP_SECRET'] ?? '') : '';
+    if ('' === $secret || null === $secret || false === $secret) {
+        $secret = bin2hex(random_bytes(32));
+        echo "APP_SECRET neu erzeugt; Speicherung in .env.prod.local (Wert wird nicht ausgegeben).\n";
+    }
+    $persistSecret = true;
+}
+if (!is_string($secret) || strlen($secret) < 16) { throw new RuntimeException('Vorhandener APP_SECRET ist zu kurz. Bitte im Ziel einen sicheren Wert mit mindestens 16 Zeichen konfigurieren; vorhandene Werte werden nicht automatisch ersetzt.'); }
 $url = $get('DATABASE_URL');
 if (!$url || !in_array(parse_url($url, PHP_URL_SCHEME), ['mysql', 'mariadb'], true)) { throw new RuntimeException('DATABASE_URL im Ziel muss die MariaDB/MySQL-Produktionsdatenbank angeben.'); }
 $path = '.env.prod.local';
 $text = is_file($path) ? file_get_contents($path) : '';
+if ($persistSecret) {
+    $text = preg_replace('/^(?:export\s+)?APP_SECRET\s*=.*$/m', '', $text);
+    $text .= "\nAPP_SECRET=".str_replace('$', '\\$', json_encode($secret, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES))."\n";
+}
 foreach (['APP_ENV' => 'prod', 'APP_DEBUG' => '0'] as $name => $value) {
     $text = preg_replace('/^(?:export\s+)?'.preg_quote($name, '/').'\s*=.*$/m', '', $text);
     $text .= "\n$name=$value\n";
@@ -138,7 +175,7 @@ file_put_contents($path, $text);
 chmod($path, 0600);
 '''
         run([args.php, '-r', configure], target, env)
-        run([args.composer, 'dump-env', 'prod'], target, env)
+        run([*composer_command, 'dump-env', 'prod'], target, env)
         os.chmod(target / '.env.local.php', 0o600)
         key_target.mkdir(parents=True, exist_ok=True)
         if args.keys_dir:

@@ -143,7 +143,7 @@ Das Administratorpasswort wird interaktiv verdeckt abgefragt. Bestehende Adminis
 
 Vorbereitung des Ziels:
 
-- In dessen Env-Dateien `DATABASE_URL` und einen ausreichend langen `APP_SECRET` für Produktion konfigurieren. Die `.env` und `.env.local` aus der Quelle werden nicht übernommen.
+- In dessen Env-Dateien `DATABASE_URL` für Produktion konfigurieren. Ein fehlender oder leerer `APP_SECRET` wird zufällig erzeugt und in `.env.prod.local` gespeichert. Ein vorhandener Wert bleibt erhalten; ein Wert mit weniger als 16 Zeichen führt zu einer verständlichen Fehlermeldung. Die `.env` und `.env.local` aus der Quelle werden nicht übernommen.
 - Vorab eine **Datenbanksicherung** erstellen. Das Skript erstellt nur eine private vollständige **Dateisicherung** neben dem Zielprojekt; ausreichend freien Speicher einplanen.
 - Als Website-/PHP-Benutzer ausführen. Env- und Schlüsseldateien erhalten restriktive Rechte. PHP-FPM muss diese Dateien lesen und `var/` beschreiben können.
 - Während des Deployments die Website im Hostingpanel in Wartung nehmen. Die Installation erfolgt im bestehenden Ordner und ist nicht atomar.
@@ -163,3 +163,23 @@ python3 -m unittest discover -s tests/deployment -v
 ```
 
 Die Tests führen das Skript in temporären Verzeichnissen aus; Composer/PHP-Deploymentbefehle werden dabei simuliert. Ein zusätzlicher Test prüft die Env-Verarbeitung mit echtem PHP und dem installierten Symfony Dotenv.
+
+### Hosting meldet „Programm nicht gefunden: composer“
+
+Wenn Composer nicht im SSH-PATH liegt, unterstützt `--composer` auch den vollständigen Pfad einer `composer.phar`. Diese Datei wird mit dem über `--php` gewählten PHP gestartet und benötigt keine Ausführungsrechte. Composer 2 kann über die [offizielle Downloadseite](https://getcomposer.org/download/) bezogen und außerhalb von `public/` hochgeladen werden.
+
+Beispiel aus dem Symfony-Zielverzeichnis (PHP-Pfad zuvor auf dem Hosting prüfen):
+
+```bash
+/opt/plesk/python/3/bin/python "$QUELLE/scripts/deploy.py" \
+    "$QUELLE" "$(pwd -P)" \
+    --keys-dir "$QUELLE/config/license" \
+    --php /opt/plesk/php/8.4/bin/php \
+    --composer "$QUELLE/composer.phar"
+```
+
+Bei Verwendung einer anderen PHP-Version muss der PHP-Pfad angepasst werden (mindestens 8.4). Es werden weder Docker noch DDEV benötigt.
+
+### Apache: 404 bei /login oder /admin
+
+Die Datei `public/.htaccess` wird über das Symfony-Apache-Pack bereitgestellt und vom Deployment mitkopiert. Bei manuellen Uploads müssen auch versteckte Dateien übertragen werden. DocumentRoot muss auf `ZIEL/public` zeigen. Apache muss Rewrite-Regeln aus `.htaccess` zulassen; bei reinem Nginx-Betrieb sind entsprechende Regeln im Hostingpanel nötig. Symfony-Routen lassen sich mit `php bin/console debug:router --env=prod` kontrollieren.
