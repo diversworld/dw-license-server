@@ -1,0 +1,1 @@
+Scaffold fuer Symfony Lizenzserver.
