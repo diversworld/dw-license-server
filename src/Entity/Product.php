@@ -3,20 +3,27 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {
     #[ORM\Id]
-	#[ORM\Column(type: 'uuid', unique: true)]
-	private ?Uuid $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?Uuid $id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Regex(pattern: '/^[a-z0-9][a-z0-9_-]*$/D')]
     private ?string $slug = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -32,38 +39,40 @@ class Product
     private ?string $price = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $active = null;
+    private ?bool $active = true;
 
     #[ORM\Column]
-    private ?\DateTime $createdAt = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $updatedAt = null;
+    private ?\DateTimeImmutable $updatedAt = null;
 
-	#[ORM\OneToMany(mappedBy: 'product',targetEntity: License::class)]
-	private Collection $licenses;
-	
-	#[ORM\OneToMany(mappedBy: 'product',targetEntity: UpdateRelease::class)]
-	private Collection $releases;
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: License::class)]
+    private Collection $licenses;
 
-	public function __construct()
-	{
-		$this->id = Uuid::v7();
-		$this->createdAt = new \DateTimeImmutable();
-	}
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: UpdateRelease::class)]
+    private Collection $releases;
+
+    public function __construct()
+    {
+        $this->licenses = new ArrayCollection();
+        $this->releases = new ArrayCollection();
+        $this->id = Uuid::v7();
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?Uuid
     {
         return $this->id;
     }
 
-	    public function setId(Uuid $id): static
+    public function setId(Uuid $id): static
     {
         $this->id = $id;
 
         return $this;
     }
-	
+
     public function getSlug(): ?string
     {
         return $this->slug;
@@ -148,27 +157,32 @@ class Product
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTime $createdAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTime
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTime $updatedAt): static
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name ?? $this->slug ?? "";
     }
 }

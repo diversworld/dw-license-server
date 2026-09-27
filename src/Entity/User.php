@@ -2,18 +2,19 @@
 
 namespace App\Entity;
 
-use App\Repository\DiversworldRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: DiversworldRepository::class)]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
-	#[ORM\Column(type: 'uuid', unique: true)]
-	private ?Uuid $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?Uuid $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
@@ -23,7 +24,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255)]
     private ?string $lastname = null;
-	
+
     /**
      * @var list<string>
      */
@@ -42,12 +43,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-	public function __construct()
-	{
-		$this->id = Uuid::v7();
-		$this->createdAt = new \DateTimeImmutable();
-	}
-    
+    public function __construct()
+    {
+        $this->id = Uuid::v7();
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
     public function getId(): ?Uuid
     {
         return $this->id;

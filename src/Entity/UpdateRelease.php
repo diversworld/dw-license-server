@@ -11,8 +11,8 @@ use Symfony\Component\Uid\Uuid;
 class UpdateRelease
 {
     #[ORM\Id]
-	#[ORM\Column(type: 'uuid', unique: true)]
-	private ?Uuid $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $version = null;
@@ -24,19 +24,18 @@ class UpdateRelease
     private ?string $packageUrl = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $releaseDate = null;
+    private ?\DateTimeImmutable $releaseDate = null;
 
     #[ORM\Column(nullable: true)]
     private ?bool $stable = null;
 
-	#[ORM\ManyToOne(inversedBy: 'releases')]
-	private ?Product $product = null;
+    #[ORM\ManyToOne(inversedBy: 'releases')]
+    private ?Product $product = null;
 
-	public function __construct()
-	{
-		$this->id = Uuid::v7();
-		$this->createdAt = new \DateTimeImmutable();
-	}
+    public function __construct()
+    {
+        $this->id = Uuid::v7();
+    }
 
 
     public function getId(): ?Uuid
@@ -80,12 +79,12 @@ class UpdateRelease
         return $this;
     }
 
-    public function getReleaseDate(): ?\DateTime
+    public function getReleaseDate(): ?\DateTimeImmutable
     {
         return $this->releaseDate;
     }
 
-    public function setReleaseDate(?\DateTime $releaseDate): static
+    public function setReleaseDate(?\DateTimeImmutable $releaseDate): static
     {
         $this->releaseDate = $releaseDate;
 
@@ -100,6 +99,18 @@ class UpdateRelease
     public function setStable(?bool $stable): static
     {
         $this->stable = $stable;
+
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): static
+    {
+        $this->product = $product;
 
         return $this;
     }

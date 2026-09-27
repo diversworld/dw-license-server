@@ -10,8 +10,8 @@ use Symfony\Component\Uid\Uuid;
 class ApiToken
 {
     #[ORM\Id]
-	#[ORM\Column(type: 'uuid', unique: true)]
-	private ?Uuid $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?Uuid $id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $token = null;
@@ -23,20 +23,20 @@ class ApiToken
     private ?bool $active = null;
 
     #[ORM\Column]
-    private ?\DateTime $ceratedAt = null;
+    private ?\DateTimeImmutable $ceratedAt = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $updatedAt = null;
+    private ?\DateTimeImmutable $updatedAt = null;
 
-	#[ORM\ManyToOne]
-	private ?Customer $customer = null;
-	
-	public function __construct()
-	{
-		$this->id = Uuid::v7();
-		$this->createdAt = new \DateTimeImmutable();
-	}
-	
+    #[ORM\ManyToOne]
+    private ?Customer $customer = null;
+
+    public function __construct()
+    {
+        $this->id = Uuid::v7();
+        $this->ceratedAt = new \DateTimeImmutable();
+    }
+
     public function getId(): ?Uuid
     {
         return $this->id;
@@ -85,30 +85,61 @@ class ApiToken
         return $this;
     }
 
-    public function getCeratedAt(): ?\DateTime
+    public function getCeratedAt(): ?\DateTimeImmutable
     {
         return $this->ceratedAt;
     }
 
-    public function setCeratedAt(\DateTime $ceratedAt): static
+    public function setCeratedAt(\DateTimeImmutable $ceratedAt): static
     {
         $this->ceratedAt = $ceratedAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTime
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTime $updatedAt): static
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
     }
-	
-	public function isExpired(): bool
-	{}
+
+    public function isExpired(): bool
+    {
+        return null !== $this->expiresAt && $this->expiresAt <= new \DateTimeImmutable();
+    }
+
+    public function getCustomer(): ?Customer
+    {
+        return $this->customer;
+    }
+
+    public function setCustomer(?Customer $customer): static
+    {
+        $this->customer = $customer;
+
+        return $this;
+    }
+
+    #[ORM\Column(nullable: true)]
+
+    private ?\DateTimeImmutable $expiresAt = null;
+
+    public function getExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->expiresAt;
+    }
+
+    public function setExpiresAt(?\DateTimeImmutable $expiresAt): static
+    {
+        $this->expiresAt = $expiresAt;
+
+        return $this;
+    }
+
 }

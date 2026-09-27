@@ -11,8 +11,8 @@ use Symfony\Component\Uid\Uuid;
 class LogEntry
 {
     #[ORM\Id]
-	#[ORM\Column(type: 'uuid', unique: true)]
-	private ?Uuid $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $action = null;
@@ -24,13 +24,13 @@ class LogEntry
     private ?string $ipAdress = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $createdAt = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
-	public function __construct()
-	{
-		$this->id = Uuid::v7();
-		$this->createdAt = new \DateTimeImmutable();
-	}
+    public function __construct()
+    {
+        $this->id = Uuid::v7();
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?Uuid
     {
@@ -73,12 +73,12 @@ class LogEntry
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(?\DateTime $createdAt): static
+    public function setCreatedAt(?\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 

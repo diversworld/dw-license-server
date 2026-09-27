@@ -3,14 +3,18 @@
 namespace App\Entity;
 
 use App\Repository\CustomerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer
 {
     #[ORM\Id]
-	#[ORM\Column(type: 'uuid', unique: true)]
-	private ?Uuid $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?Uuid $id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $company = null;
@@ -22,6 +26,8 @@ class Customer
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Email]
+    #[Assert\NotBlank]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
@@ -40,29 +46,30 @@ class Customer
     private ?string $vatId = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $active = null;
+    private ?bool $active = true;
 
     #[ORM\Column]
-    private ?\DateTime $createdAt = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $updatedAt = null;
+    private ?\DateTimeImmutable $updatedAt = null;
 
-	#[ORM\OneToMany(mappedBy: 'customer',targetEntity: License::class,cascade: ['persist'])]
-	private Collection $licenses;
+    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: License::class, cascade: ['persist'])]
+    private Collection $licenses;
 
-	public function __construct()
-	{
-		$this->id = Uuid::v7();
-		$this->createdAt = new \DateTimeImmutable();
-	}
-	
+    public function __construct()
+    {
+        $this->licenses = new ArrayCollection();
+        $this->id = Uuid::v7();
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
     public function getId(): ?Uuid
     {
         return $this->id;
     }
-	
-	public function setId(Uuid $id): static
+
+    public function setId(Uuid $id): static
     {
         $this->id = $id;
 
@@ -189,27 +196,32 @@ class Customer
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTime $createdAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTime
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTime $updatedAt): static
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return trim(($this->company ?? "")." ".($this->email ?? ""));
     }
 }

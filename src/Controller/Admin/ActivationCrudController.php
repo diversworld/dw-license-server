@@ -2,33 +2,34 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\User;
+use App\Entity\Activation;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\{Action, Actions, Crud};
 use EasyCorp\Bundle\EasyAdminBundle\Field\{ArrayField, AssociationField, BooleanField, ChoiceField, DateTimeField, EmailField, IntegerField, TextField, TextareaField};
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
-class UserCrudController extends AbstractCrudController
+class ActivationCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return User::class;
+        return Activation::class;
     }
 
     public function configureActions(Actions $actions): Actions
     {
-        return $actions->disable(Action::DELETE, Action::NEW, Action::EDIT);
+        return $actions->disable(Action::DELETE, Action::NEW);
     }
 
     public function configureFields(string $pageName): iterable
     {
         return [
-            EmailField::new('email'),
-            TextField::new('firstname'),
-            TextField::new('lastname'),
-            ArrayField::new('roles'),
-            BooleanField::new('active')->renderAsSwitch(false),
+            AssociationField::new('license', 'Lizenz')->hideOnForm(),
+            TextField::new('tenant', 'Mandant')->hideOnForm(),
+            TextField::new('domain', 'Domain')->hideOnForm(),
+            BooleanField::new('active', 'Aktiv')->renderAsSwitch(false),
+            DateTimeField::new('activatedAt', 'Aktiviert')->hideOnForm(),
+            DateTimeField::new('updatedAt', 'Zuletzt geprüft')->hideOnForm(),
         ];
     }
 }

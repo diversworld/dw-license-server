@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% block title %}Lizenzverwaltung – Anmeldung{% endblock %}
+{% block body %}
+<main style="max-width: 28rem; margin: 4rem auto; font-family: sans-serif">
+    <h1>Lizenzverwaltung</h1>
+    {% if error %}<p role="alert">Anmeldung fehlgeschlagen. Bitte Zugangsdaten prüfen.</p>{% endif %}
+    <form action="{{ path('app_login') }}" method="post">
+        <p><label>E-Mail <input type="email" name="_username" value="{{ last_username }}" required autocomplete="username"></label></p>
+        <p><label>Passwort <input type="password" name="_password" required autocomplete="current-password"></label></p>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit">Anmelden</button>
+    </form>
+</main>
+{% endblock %}
