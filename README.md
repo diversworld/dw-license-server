@@ -108,3 +108,58 @@ ddev exec php bin/console doctrine:schema:validate
 ```
 
 Die Tests decken Ausstellung, wiederholte Aktivierung, Limits, Sperren, Ablauf, Manipulation, Mandantenbindung, Offline-Modus, Wiederherstellung abgelaufener Online-Tokens sowie Login und Verwaltungsseiten ab. Ein Test prüft ausgegebene Tokens gegen eine Kopie des tatsächlichen Contao-Validators unter `tests/Fixtures`.
+
+## Installation in eine vorhandene Symfony-Umgebung
+
+Das Skript `scripts/deploy.py` läuft **auf dem Webserver**. Voraussetzung: Python 3.9+, PHP >= 8.4 mit PDO-MySQL und Sodium, Composer 2 sowie eine konfigurierte, erreichbare MySQL-/MariaDB-Datenbank. Es benötigt zwei getrennte Projektordner. Der Zielordner ist das Symfony-Projektverzeichnis **oberhalb von `public/`**, nicht der DocumentRoot.
+
+Zuerst den Kopierplan ohne Änderungen prüfen:
+
+```bash
+python3 /pfad/git-license/scripts/deploy.py \
+    /pfad/git-license /pfad/symfony-ziel --dry-run \
+    --keys-dir /sicherer/pfad/bisherige-lizenzschluessel
+```
+
+Bestehende Lizenzen übernehmen:
+
+```bash
+python3 /pfad/git-license/scripts/deploy.py \
+    /pfad/git-license /pfad/symfony-ziel \
+    --keys-dir /sicherer/pfad/bisherige-lizenzschluessel
+```
+
+Das Schlüsselverzeichnis muss die zusammengehörigen Dateien `private.key` und `public.key` aus `config/license/` enthalten. Bereits vorhandene Zielschlüssel werden niemals durch andere Schlüssel ersetzt. Wenn die Dateien schon im Ziel unter `config/license/` liegen, entfällt `--keys-dir`. Bestehende Lizenzdaten müssen vorab separat in die Zieldatenbank importiert werden; das Skript importiert keine Datenbanken.
+
+Für eine **neue Installation ohne bisherige Lizenzen**:
+
+```bash
+python3 /pfad/git-license/scripts/deploy.py \
+    /pfad/git-license /pfad/symfony-ziel \
+    --generate-keys --admin-email admin@example.org
+```
+
+Das Administratorpasswort wird interaktiv verdeckt abgefragt. Bestehende Administratoren werden nicht überschrieben; bei importierten Benutzern `--admin-email` weglassen. PHP und Composer können bei Bedarf über `--php /pfad/php` und `--composer /pfad/composer` gewählt werden. Composer muss dieselbe geeignete PHP-Version verwenden.
+
+Vorbereitung des Ziels:
+
+- In dessen Env-Dateien `DATABASE_URL` und einen ausreichend langen `APP_SECRET` für Produktion konfigurieren. Die `.env` und `.env.local` aus der Quelle werden nicht übernommen.
+- Vorab eine **Datenbanksicherung** erstellen. Das Skript erstellt nur eine private vollständige **Dateisicherung** neben dem Zielprojekt; ausreichend freien Speicher einplanen.
+- Als Website-/PHP-Benutzer ausführen. Env- und Schlüsseldateien erhalten restriktive Rechte. PHP-FPM muss diese Dateien lesen und `var/` beschreiben können.
+- Während des Deployments die Website im Hostingpanel in Wartung nehmen. Die Installation erfolgt im bestehenden Ordner und ist nicht atomar.
+
+Ablauf: Pfade/Schlüssel prüfen → Zielverzeichnis sichern → Anwendungsdateien kopieren → Composer ohne Entwicklungspakete installieren → Produktions-Env ergänzen und kompilieren → Schlüssel bereitstellen/prüfen → Cache und Container prüfen → Migrationen anwenden → erstes Modul registrieren → Assets installieren → Schema prüfen.
+
+Erhalten bleiben lokale Env-Dateien (ergänzt wird `.env.prod.local`, neu kompiliert wird `.env.local.php`), JWT-Schlüssel, Secrets, Daten und zusätzliche Dateien im Ziel. Gleichnamige Anwendungsdateien und die Composer-Dateien werden ersetzt. Eine bestehende fremde Symfony-Anwendung sollte deshalb nicht als Ziel verwendet werden; vorgesehen ist die bereitgestellte Symfony-Basis oder eine ältere Version dieses Lizenzservers. Symlinks in den verwalteten Schreibpfaden werden abgewiesen.
+
+Bei Fehlern stoppt das Skript und nennt den Sicherungspfad. Es setzt bereits ausgeführte Migrationen nicht automatisch zurück. Eine Wiederherstellung muss Dateien und Datenbank gemeinsam berücksichtigen. Alte Sicherungen enthalten Zugangsdaten und sollten geschützt aufbewahrt bzw. nach erfolgreicher Abnahme gelöscht werden.
+
+Im Hostingpanel anschließend DocumentRoot auf **`ZIEL/public`** setzen und HTTPS sowie Symfony-Rewrite-Regeln konfigurieren. Das Skript verändert keine Webserver-, DNS- oder Zertifikatseinstellungen. Bei aktivem OPcache ohne Zeitstempelprüfung PHP-FPM nach dem Deployment über das Hostingpanel neu laden.
+
+Skripttests (ohne Produktivzugriff):
+
+```bash
+python3 -m unittest discover -s tests/deployment -v
+```
+
+Die Tests führen das Skript in temporären Verzeichnissen aus; Composer/PHP-Deploymentbefehle werden dabei simuliert. Ein zusätzlicher Test prüft die Env-Verarbeitung mit echtem PHP und dem installierten Symfony Dotenv.
