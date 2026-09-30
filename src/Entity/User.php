@@ -155,7 +155,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 	public function setMobile(?string $mobile): static
 	{
-		$this->phone = $mobile;
+		$this->mobile = $mobile;
 
 		return $this;
 	}
