@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Neues Kennwort | Diversworld
+{% endblock %}
+
+{% block body %}
+
+<div class="login-area min-vh-100 d-flex align-items-center justify-content-center p-4">
+
+    <div class="login-wrapper">
+
+        <div class="card login-card">
+            <div class="card-body">
+
+                <h2 class="fw-bold mb-2">
+                    Neues Kennwort festlegen
+                </h2>
+
+                <p class="text-secondary mb-4">
+                    Gib dein neues Kennwort zweimal ein.
+                </p>
+
+                {{ form_start(resetForm) }}
+
+                    <div class="mb-3">
+                        {{ form_row(resetForm.plainPassword.first) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_row(resetForm.plainPassword.second) }}
+                    </div>
+
+                    <div class="alert alert-info mt-4">
+                        Das Kennwort muss mindestens
+                        12 Zeichen lang sein.
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary w-100"
+                    >
+                        Kennwort speichern
+                    </button>
+
+                {{ form_end(resetForm) }}
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

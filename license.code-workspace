@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../../sources/contao-issue-service-bundle"
+		},
+		{
+			"path": "../../sources/lizenz-server"
 		}
 	],
 	"settings": {

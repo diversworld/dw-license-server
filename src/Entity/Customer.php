@@ -42,6 +42,12 @@ class Customer
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $country = null;
 
+	#[ORM\Column(length: 50, nullable: true)]
+	private ?string $mobile = null;
+
+	#[ORM\Column(length: 50, nullable: true)]
+	private ?string $phone = null;
+
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $vatId = null;
 
@@ -159,6 +165,30 @@ class Customer
 
         return $this;
     }
+
+	public function getMobile(): ?string
+	{
+		return $this->mobile;
+	}
+
+	public function setMobile(?string $mobile): static
+	{
+		$this->phone = $mobile;
+
+		return $this;
+	}
+	
+	public function getPhone(): ?string
+	{
+		return $this->phone;
+	}
+
+	public function setPhone(?string $phone): static
+	{
+		$this->phone = $phone;
+
+		return $this;
+	}
 
     public function getCountry(): ?string
     {

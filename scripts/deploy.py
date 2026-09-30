@@ -47,6 +47,21 @@ def run(command, target, env):
     subprocess.run(list(map(str, command)), cwd=target, env=env, check=True)
 
 
+def publish_asset_permissions(target):
+    # Static files are served by Apache/nginx, often under another user than PHP.
+    # Keep secret files outside public/ under the restrictive deployment umask.
+    public = target / 'public'
+    validate_destination(target, Path('public/bundles'))
+    public.chmod(0o755)
+    bundles = public / 'bundles'
+    if bundles.is_dir():
+        paths = [bundles, *bundles.rglob('*')]
+        for path in paths:
+            validate_destination(target, path.relative_to(target))
+        for path in paths:
+            path.chmod(0o755 if path.is_dir() else 0o644)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path, help='Git-Projektverzeichnis des Lizenzservers')
@@ -197,6 +212,8 @@ if (false === $secret || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES |
             ['app:license:init'], ['assets:install', 'public'], ['doctrine:schema:validate'],
         ):
             run([args.php, 'bin/console', *command, '--env=prod'], target, env)
+            if command[0] == 'assets:install':
+                publish_asset_permissions(target)
         if args.admin_email:
             run([args.php, 'bin/console', 'app:admin:create', args.admin_email, '--env=prod'], target, env)
     except Exception:

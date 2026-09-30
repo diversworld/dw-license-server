@@ -3,9 +3,14 @@
 namespace App\Controller\Admin;
 
 use App\Entity\User;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Config\{Action, Actions, Crud};
-use EasyCorp\Bundle\EasyAdminBundle\Field\{ArrayField, AssociationField, BooleanField, ChoiceField, DateTimeField, EmailField, IntegerField, TextField, TextareaField};
+use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
@@ -18,17 +23,59 @@ class UserCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        return $actions->disable(Action::DELETE, Action::NEW, Action::EDIT);
+        return $actions
+            ->disable(
+                Action::DELETE,
+                Action::NEW
+            );
     }
 
     public function configureFields(string $pageName): iterable
     {
-        return [
-            EmailField::new('email'),
-            TextField::new('firstname'),
-            TextField::new('lastname'),
-            ArrayField::new('roles'),
-            BooleanField::new('active')->renderAsSwitch(false),
-        ];
+        yield FormField::addFieldset('Persönliche Daten')
+            ->setIcon('fa fa-user');
+
+        yield TextField::new('firstname', 'Vorname')
+            ->setColumns(6);
+
+        yield TextField::new('lastname', 'Nachname')
+            ->setColumns(6);
+
+        yield EmailField::new('email', 'E-Mail-Adresse')
+            ->setColumns(12)
+            ->setHelp(
+                'Diese E-Mail-Adresse wird auch für die Anmeldung verwendet.'
+            );
+
+        yield FormField::addFieldset('Anschrift')
+            ->setIcon('fa fa-address-card');
+
+        yield TextField::new('street', 'Straße')
+            ->setColumns(8);
+
+        yield TextField::new('postalCode', 'PLZ')
+            ->setColumns(4);
+
+        yield TextField::new('city', 'Wohnort')
+            ->setColumns(12);
+
+        yield FormField::addFieldset('Kontaktdaten')
+            ->setIcon('fa fa-phone');
+
+        yield TextField::new('mobile', 'Mobil')
+            ->setColumns(6);
+
+        yield TextField::new('phone', 'Telefon')
+            ->setColumns(6);
+
+        yield FormField::addFieldset('Berechtigungen')
+            ->setIcon('fa fa-shield');
+
+        yield ArrayField::new('roles', 'Rollen')
+            ->setColumns(6);
+
+        yield BooleanField::new('active', 'Aktiv')
+            ->renderAsSwitch(false)
+            ->setColumns(6);
     }
 }

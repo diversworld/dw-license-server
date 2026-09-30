@@ -36,4 +36,11 @@ class LicenseCrudController extends AbstractCrudController
             DateTimeField::new('lastValidationAt', 'Letzte Prüfung')->hideOnForm(),
         ];
     }
+	
+	public function configureCrud(Crud $crud): Crud
+	{
+		return $crud
+			->setEntityLabelInSingular('Lizenz')
+			->setEntityLabelInPlural('Lizenzen');
+	}
 }

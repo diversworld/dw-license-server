@@ -1,23 +1,200 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="de">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>
+			{% block title %}
+				Diversworld Lizenzverwaltung
+			{% endblock %}
+		</title>
+		<meta name="robots" content="noindex,nofollow">
+		<link rel="icon" type="image/x-icon" href="favicon.ico">
+		<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+		{# Bootstrap #}
+			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+		{# Bootstrap Icons #}
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-        {% block javascripts %}
-        {% endblock %}
+		{% block stylesheets %}
+			<style>
+				:root {
+					--dw-primary: #003366;
+					--dw-primary-dark: #1d4ed8;
+					--dw-background: #f4f7fb;
+				}
 
-        {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
+				html,
+				body {
+					min-height: 100%;
+				}
+
+				body {
+					min-height: 100vh;
+					background: var(--dw-background);
+				}
+
+				.login-layout {
+					min-height: 100vh;
+				}
+
+				/*
+				 * Branding
+				 */
+				.login-brand {
+					position: relative;
+					overflow: hidden;
+					min-height: 100vh;
+					color: #fff;
+					background: linear-gradient(145deg,#111827 0%,#172554 50%,#1d4ed8 100%);
+				}
+
+				.login-brand::before {
+					content: "";
+					position: absolute;
+					width: 500px;
+					height: 500px;
+					right: -250px;
+					top: -220px;
+					border-radius: 50%;
+					background: rgba(255, 255, 255, 0.06);
+				}
+
+				.login-brand::after {
+					content: "";
+					position: absolute;
+					width: 400px;
+					height: 400px;
+					left: -220px;
+					bottom: -220px;
+					border-radius: 50%;
+					background: rgba(255, 255, 255, 0.05);
+				}
+
+				.brand-content {
+					position: relative;
+					z-index: 1;
+				}
+
+				.brand-logo, .brand-logo img {
+					width: 200x;
+					height: 74px;
+					display: inline-flex;
+					align-items: center;
+					justify-content: center;
+					border-radius: 12px;
+					font-weight: 700;
+					//background: rgba(255, 255, 255, 0.15);
+					//border: 1px solid rgba(255, 255, 255, 0.15);
+				}
+
+				.brand-title {
+					font-size: clamp(2.4rem, 4vw, 4rem);
+					font-weight: 700;
+					line-height: 1.05;
+					letter-spacing: -0.04em;
+				}
+
+				.brand-description {
+					max-width: 520px;
+					color: #cbd5e1;
+					font-size: 1.05rem;
+					line-height: 1.7;
+				}
+
+				.feature-icon {
+					width: 28px;
+					height: 28px;
+					display: inline-flex;
+					align-items: center;
+					justify-content: center;
+					flex-shrink: 0;
+					border-radius: 50%;
+					background: rgba(255, 255, 255, 0.12);
+				}
+
+				/*
+				 * Login
+				 */
+				.login-area {
+					min-height: 100vh;
+					background: radial-gradient(circle at 90% 10%, #dbeafe, transparent 30%), #f8fafc;
+				}
+
+				.login-wrapper {
+					width: 100%;
+					max-width: 470px;
+				}
+
+				.login-card {
+					border: 1px solid #e2e8f0;
+					border-radius: 16px;
+					box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
+				}
+
+				.login-card .card-body {
+					padding: 2.5rem;
+				}
+
+				.form-control {
+					min-height: 48px;
+				}
+
+				.form-control:focus {
+					border-color: var(--dw-primary);
+					box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.12);
+				}
+
+				.btn-primary {
+					min-height: 48px;
+					background: var(--dw-primary);
+					border-color: var(--dw-primary);
+					font-weight: 600;
+				}
+
+				.btn-primary:hover {
+					background: var(--dw-primary-dark);
+					border-color: var(--dw-primary-dark);
+				}
+
+				.forgot-password {
+					font-size: 0.875rem;
+					text-decoration: none;
+				}
+
+				.forgot-password:hover {
+					text-decoration: underline;
+				}
+
+				@media (max-width: 991.98px) {
+					.login-brand {
+						min-height: auto;
+					}
+
+					.login-area {
+						min-height: calc(100vh - 90px);
+					}
+				}
+			</style>
+		{% endblock %}
+		
+		{% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
         {% if frankenphp_hot_reload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+			<meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
+			<script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
+			<script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+	</head>
+
+	<body>
+		{% block body %}
+		{% endblock %}
+
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+		></script>
+
+		{% block javascripts %}
+		{% endblock %}
+	</body>
 </html>

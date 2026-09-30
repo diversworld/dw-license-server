@@ -7,9 +7,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'],message: 'Diese E-Mail-Adresse wird bereits verwendet.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -33,6 +35,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?string $password = null;
+
+	#[ORM\Column(length: 255, nullable: true)]
+	private ?string $street = null;
+
+	#[ORM\Column(length: 20, nullable: true)]
+	private ?string $postalCode = null;
+
+	#[ORM\Column(length: 255, nullable: true)]
+	private ?string $city = null;
+
+	#[ORM\Column(length: 50, nullable: true)]
+	private ?string $mobile = null;
+
+	#[ORM\Column(length: 50, nullable: true)]
+	private ?string $phone = null;
 
     #[ORM\Column]
     private bool $active = true;
@@ -94,6 +111,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return trim(($this->firstname ?? '') . ' ' . ($this->lastname ?? ''));
     }
+
+	public function getStreet(): ?string
+	{
+		return $this->street;
+	}
+
+	public function setStreet(?string $street): static
+	{
+		$this->street = $street;
+
+		return $this;
+	}
+
+	public function getPostalCode(): ?string
+	{
+		return $this->postalCode;
+	}
+
+	public function setPostalCode(?string $postalCode): static
+	{
+		$this->postalCode = $postalCode;
+
+		return $this;
+	}
+
+	public function getCity(): ?string
+	{
+		return $this->city;
+	}
+
+	public function setCity(?string $city): static
+	{
+		$this->city = $city;
+
+		return $this;
+	}
+
+	public function getMobile(): ?string
+	{
+		return $this->mobile;
+	}
+
+	public function setMobile(?string $mobile): static
+	{
+		$this->phone = $mobile;
+
+		return $this;
+	}
+	
+	public function getPhone(): ?string
+	{
+		return $this->phone;
+	}
+
+	public function setPhone(?string $phone): static
+	{
+		$this->phone = $phone;
+
+		return $this;
+	}
 
     public function isActive(): bool
     {

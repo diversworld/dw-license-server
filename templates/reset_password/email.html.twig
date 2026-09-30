@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+
+    <title>
+        Kennwort zurücksetzen
+    </title>
+</head>
+
+<body
+    style="
+        margin: 0;
+        padding: 0;
+        background: #f4f7fb;
+        font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+        color: #172033;
+    "
+>
+
+<table
+    width="100%"
+    cellpadding="0"
+    cellspacing="0"
+    style="
+        padding: 40px 20px;
+        background: #f4f7fb;
+    "
+>
+    <tr>
+        <td align="center">
+
+            <table
+                width="600"
+                cellpadding="0"
+                cellspacing="0"
+                style="
+                    max-width: 600px;
+                    background: #ffffff;
+                    border-radius: 12px;
+                "
+            >
+
+                <tr>
+                    <td
+                        style="
+                            padding: 32px;
+                            background: #172554;
+                            color: #ffffff;
+                            border-radius:
+                                12px 12px 0 0;
+                        "
+                    >
+
+                        <strong
+                            style="
+                                font-size: 20px;
+                            "
+                        >
+                            Diversworld
+                        </strong>
+
+                        <div
+                            style="
+                                margin-top: 5px;
+                                color: #bfdbfe;
+                            "
+                        >
+                            Lizenzverwaltung
+                        </div>
+
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td
+                        style="
+                            padding: 35px 32px;
+                        "
+                    >
+
+                        <h2
+                            style="
+                                margin-top: 0;
+                            "
+                        >
+                            Kennwort zurücksetzen
+                        </h2>
+
+                        <p>
+                            Hallo
+                            {{ user.firstname }},
+                        </p>
+
+                        <p
+                            style="
+                                line-height: 1.6;
+                            "
+                        >
+                            für dein Benutzerkonto wurde
+                            das Zurücksetzen des Kennworts
+                            angefordert.
+                        </p>
+
+                        <p
+                            style="
+                                line-height: 1.6;
+                            "
+                        >
+                            Klicke auf die folgende
+                            Schaltfläche, um ein neues
+                            Kennwort festzulegen:
+                        </p>
+
+
+                        <p
+                            style="
+                                margin:
+                                    30px 0;
+                            "
+                        >
+
+                            <a
+                                href="{{
+                                    url(
+                                        'app_reset_password',
+                                        {
+                                            token:
+                                                resetToken.token
+                                        }
+                                    )
+                                }}"
+                                style="
+                                    display:
+                                        inline-block;
+
+                                    padding:
+                                        14px 24px;
+
+                                    background:
+                                        #2563eb;
+
+                                    color:
+                                        #ffffff;
+
+                                    text-decoration:
+                                        none;
+
+                                    border-radius:
+                                        7px;
+
+                                    font-weight:
+                                        bold;
+                                "
+                            >
+                                Kennwort zurücksetzen
+                            </a>
+
+                        </p>
+
+
+                        <p
+                            style="
+                                color: #64748b;
+                                font-size: 14px;
+                                line-height: 1.6;
+                            "
+                        >
+                            Falls du das Zurücksetzen
+                            nicht angefordert hast,
+                            kannst du diese Nachricht
+                            ignorieren.
+                        </p>
+
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td
+                        style="
+                            padding: 20px 32px;
+                            border-top:
+                                1px solid #e2e8f0;
+
+                            color: #64748b;
+                            font-size: 12px;
+                        "
+                    >
+                        &copy;
+                        {{ "now"|date("Y") }}
+                        Diversworld
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

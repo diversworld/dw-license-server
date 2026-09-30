@@ -40,6 +40,12 @@ import os,sys
 from pathlib import Path
 with open(os.environ['DEPLOY_TEST_LOG'], 'a') as f: f.write(repr(sys.argv[1:])+'\\n')
 if 'dump-env' in sys.argv: Path('.env.local.php').write_text('compiled production env')
+if 'assets:install' in sys.argv:
+    assets = Path('public/bundles/easyadmin')
+    assets.mkdir(parents=True, exist_ok=True)
+    (assets / 'app.css').write_text('body {}')
+    assets.chmod(0o700)
+    (assets / 'app.css').chmod(0o600)
 if os.environ.get('DEPLOY_TEST_FAIL') and 'doctrine:migrations:migrate' in sys.argv: sys.exit(9)
 ''')
         self.runner.chmod(0o755)
@@ -61,6 +67,8 @@ if os.environ.get('DEPLOY_TEST_FAIL') and 'doctrine:migrations:migrate' in sys.a
         self.assertEqual('production credentials', (self.target / '.env.local').read_text())
         self.assertEqual('production defaults', (self.target / '.env').read_text())
         self.assertEqual('keep-private.key', (self.target / 'config/license/private.key').read_text())
+        self.assertEqual(0o755, (self.target / 'public/bundles/easyadmin').stat().st_mode & 0o777)
+        self.assertEqual(0o644, (self.target / 'public/bundles/easyadmin/app.css').stat().st_mode & 0o777)
         log = self.log.read_text()
         self.assertIn('--no-plugins', log)
         self.assertLess(log.index('dump-env'), log.index('doctrine:migrations:migrate'))
