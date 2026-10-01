@@ -60,8 +60,7 @@ class ProfileCrudController extends AbstractCrudController
                 'Diese E-Mail-Adresse wird auch für die Anmeldung verwendet.'
             );
 
-/*
-		yield ImageField::new('profileImage', 'Profilbild')
+/*		yield ImageField::new('profileImage', 'Profilbild')
 			->setBasePath('/uploads/profile')
 			->setUploadDir('public/uploads/profile')
 			->setUploadedFileNamePattern('[uuid].[extension]')
