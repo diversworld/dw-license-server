@@ -143,10 +143,17 @@ class DashboardController extends AbstractDashboardController
         );
     }
 
-    public function configureUserMenu(
-        UserInterface $user
-    ): UserMenu {
-        $name = $user->getUserIdentifier();
+	public function configureUserMenu(
+		UserInterface $user
+	): UserMenu {
+		$name = $user->getUserIdentifier();
+
+		if (
+			$user instanceof User
+			&& $user->getFullname() !== ''
+		) {
+			$name = $user->getFullname();
+		}
 
 		$userMenu = parent::configureUserMenu($user)
 			->setName($name);
@@ -160,24 +167,22 @@ class DashboardController extends AbstractDashboardController
 		} else {
 			$avatarUrl = '/images/Diversworld_Viking.png';
 		}
+		return $userMenu
+			->setAvatarUrl($avatarUrl)
+			->addMenuItems([
+				MenuItem::linkToRoute(
+					'Mein Profil',
+					'fa fa-user',
+					'dashboard_profile'
+				),
 
-        return parent::configureUserMenu($user)
-            ->setName($name)
-            ->displayUserName(true)
-            ->addMenuItems([
-                MenuItem::linkToRoute(
-                    'Mein Profil',
-                    'fa fa-user',
-                    'dashboard_profile'
-                ),
-
-                MenuItem::linkToRoute(
-                    'Kennwort ändern',
-                    'fa fa-lock',
-                    'dashboard_password'
-                ),
-            ]);
-    }
+				MenuItem::linkToRoute(
+					'Kennwort ändern',
+					'fa fa-lock',
+					'dashboard_password'
+				),
+			]);
+	}
 
     #[Route(
         '/admin/profil',
