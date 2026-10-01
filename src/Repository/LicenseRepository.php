@@ -16,6 +16,137 @@ class LicenseRepository extends ServiceEntityRepository
         parent::__construct($registry, License::class);
     }
 
+        /**
+     * Liefert die Lizenzstatistik gruppiert nach Modul/Produkt.
+     */
+    public function getStatisticsByProduct(): array
+    {
+        $now = new \DateTimeImmutable();
+ 
+        return $this->createQueryBuilder('l')
+            ->select('p.id AS productId')
+            ->addSelect('p.name AS productName')
+            ->addSelect('p.slug AS productSlug')
+ 
+            ->addSelect('COUNT(l.id) AS total')
+ 
+            ->addSelect(
+                "SUM(
+                    CASE
+                        WHEN l.status = 'active'
+                        AND (l.expiresAt IS NULL OR l.expiresAt > :now)
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS active"
+            )
+ 
+            ->addSelect(
+                "SUM(
+                    CASE
+                        WHEN l.status = 'suspended'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS suspended"
+            )
+ 
+            ->addSelect(
+                "SUM(
+                    CASE
+                        WHEN l.status = 'revoked'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS revoked"
+            )
+ 
+            ->addSelect(
+                "SUM(
+                    CASE
+                        WHEN l.expiresAt IS NOT NULL
+                        AND l.expiresAt <= :now
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS expired"
+            )
+ 
+            ->innerJoin('l.product', 'p')
+            ->setParameter('now', $now)
+            ->groupBy('p.id')
+            ->addGroupBy('p.name')
+            ->addGroupBy('p.slug')
+            ->orderBy('p.name', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+    }
+ 
+    /**
+     * Liefert die Gesamtstatistik aller Lizenzen.
+     */
+    public function getTotalStatistics(): array
+    {
+        $now = new \DateTimeImmutable();
+ 
+        $result = $this->createQueryBuilder('l')
+            ->select('COUNT(l.id) AS total')
+ 
+            ->addSelect(
+                "SUM(
+                    CASE
+                        WHEN l.status = 'active'
+                        AND (l.expiresAt IS NULL OR l.expiresAt > :now)
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS active"
+            )
+ 
+            ->addSelect(
+                "SUM(
+                    CASE
+                        WHEN l.status = 'suspended'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS suspended"
+            )
+ 
+            ->addSelect(
+                "SUM(
+                    CASE
+                        WHEN l.status = 'revoked'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS revoked"
+            )
+ 
+            ->addSelect(
+                "SUM(
+                    CASE
+                        WHEN l.expiresAt IS NOT NULL
+                        AND l.expiresAt <= :now
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS expired"
+            )
+ 
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getSingleResult();
+ 
+        return [
+            'total' => (int) ($result['total'] ?? 0),
+            'active' => (int) ($result['active'] ?? 0),
+            'suspended' => (int) ($result['suspended'] ?? 0),
+            'revoked' => (int) ($result['revoked'] ?? 0),
+            'expired' => (int) ($result['expired'] ?? 0),
+        ];
+    }
+
 //    /**
 //     * @return License[] Returns an array of License objects
 //     */

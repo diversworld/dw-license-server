@@ -1,7 +1,209 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
-{% block content_title %}Lizenzverwaltung{% endblock %}
-{% block main %}
-<p>Legen Sie einen Kunden und eine Lizenz für das gewünschte Modul an. Über „Installation zuweisen / Token“ binden Sie die Lizenz an Mandant und Domain.</p>
-<p>Für die SLA-Funktionen des Issue-Service-Moduls muss die Lizenz das Feature <code>sla</code> enthalten.</p>
-<p>Unter „Installationen“ können Sie einzelne Zuordnungen sperren. Bereits ausgegebene Tokens bleiben bis zur nächsten Onlineprüfung beziehungsweise bis zum Ablauf gültig.</p>
+
+{% block content_title %}
+    Lizenzverwaltung
 {% endblock %}
+
+{% block main %}
+    {% block info %}
+    <div class="row mb-4 alert alert-info">
+        <div class="col-12">
+            <p>Legen Sie einen Kunden und eine Lizenz für das gewünschte Modul an. Über „Installation zuweisen / Token“ binden Sie die Lizenz an Mandant und Domain.</p>
+            <p>Für die SLA-Funktionen des Issue-Service-Moduls muss die Lizenz das Feature <code>sla</code> enthalten.</p>
+            <p>Unter „Installationen“ können Sie einzelne Zuordnungen sperren. Bereits ausgegebene Tokens bleiben bis zur nächsten Onlineprüfung beziehungsweise bis zum Ablauf gültig.</p>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block overview %}
+       {# ============================================================
+       ==  Gesamtübersicht
+       ============================================================ #}
+        <div class="row mb-4">   
+            <div class="col-md-6 col-xl mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-muted mb-2">
+                            Lizenzen gesamt
+                        </div>
+                        <div class="fs-1 fw-bold">
+                            {{ licenseTotals.total }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-muted mb-2">
+                            Aktiv
+                        </div>
+                        <div class="fs-1 fw-bold text-success">
+                            {{ licenseTotals.active }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-muted mb-2">
+                            Gesperrt
+                        </div>
+                        <div class="fs-1 fw-bold text-warning">
+                            {{ licenseTotals.suspended }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-muted mb-2">
+                            Widerrufen
+                        </div>
+                        <div class="fs-1 fw-bold text-danger">
+                            {{ licenseTotals.revoked }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-muted mb-2">
+                            Abgelaufen
+                        </div>
+                        <div class="fs-1 fw-bold text-secondary">
+                            {{ licenseTotals.expired }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+    {% block modules %}
+        {# ============================================================
+        == Statistik pro Modul
+        ============================================================ #}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    Lizenzen nach Modul
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if licenseStatistics is empty %}
+                    <div class="p-4 text-muted">
+                        Es wurden noch keine Lizenzen registriert.
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Modul
+                                    </th>
+                                    <th class="text-center">
+                                        Gesamt
+                                    </th>
+                                    <th class="text-center">
+                                        Aktiv
+                                    </th>
+                                    <th class="text-center">
+                                        Gesperrt
+                                    </th>
+                                    <th class="text-center">
+                                        Widerrufen
+                                    </th>
+                                    <th class="text-center">
+                                        Abgelaufen
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for statistic in licenseStatistics %}
+                                    <tr>
+                                        <td>
+                                            <strong>
+                                                {{ statistic.productName }}
+                                            </strong>
+        
+                                            {% if statistic.productSlug %}
+                                                <div class="text-muted small">
+                                                    {{ statistic.productSlug }}
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary">
+                                                {{ statistic.total }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">
+                                                {{ statistic.active }}
+                                            </span>
+                                        </td>    
+                                        <td class="text-center">
+                                            {% if statistic.suspended > 0 %}
+                                                <span class="badge bg-warning text-dark">
+                                                    {{ statistic.suspended }}
+                                                </span>
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if statistic.revoked > 0 %}
+                                                <span class="badge bg-danger">
+                                                    {{ statistic.revoked }}
+                                                </span>
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if statistic.expired > 0 %}
+                                                <span class="badge bg-secondary">
+                                                    {{ statistic.expired }}
+                                                </span>
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold">
+                                    <td>
+                                        Gesamt
+                                    </td>
+                                    <td class="text-center">
+                                        {{ licenseTotals.total }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ licenseTotals.active }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ licenseTotals.suspended }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ licenseTotals.revoked }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ licenseTotals.expired }}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endblock %} 
+{% endblock %}
+

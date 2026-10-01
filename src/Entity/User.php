@@ -51,6 +51,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 	#[ORM\Column(length: 50, nullable: true)]
 	private ?string $phone = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+	private ?string $profileImage = null;
+
     #[ORM\Column]
     private bool $active = true;
 
@@ -172,6 +175,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 		return $this;
 	}
 
+    public function getProfileImage(): ?string
+	{
+		return $this->profileImage;
+	}
+
+	public function setProfileImage(?string $profileImage): static
+	{
+		$this->profileImage = $profileImage;
+
+		return $this;
+	}
+
+	public function getProfileImageUrl(): string
+	{
+		if ($this->profileImage) {
+			return '/uploads/profile/' . $this->profileImage;
+		}
+
+		return '/images/Diversworld_Viking.png';
+	}
+    
     public function isActive(): bool
     {
         return $this->active;

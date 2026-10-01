@@ -1,0 +1,60 @@
+# translations/messages.en.yaml
+entities:
+    App\Entity\Customer:
+        singular: 'Kunde'
+        plural: 'Kunden'
+        properties:
+            title: 'Name'
+            email: 'E-Mail-Adresse'
+            phone: 'Telefonnummer'
+            address: 'Adresse'
+            city: 'Stadt'
+            state: 'Bundesland'
+            zipCode: 'Postleitzahl'
+            publishedAt: 'Erstellungsdatum'
+            updatedAt: 'Aktualisierungsdatum'
+            isPublished: 'Aktiv?'
+
+    App\Entity\User:
+        singular: 'Benutzer'
+        plural: 'Benutzer'
+        properties:
+            email: '-Mail-Adresse'
+            phone: 'Telefonnummer'
+            address: 'Adresse'
+            city: 'Stadt'
+            state: 'Bundesland'
+            zipCode: 'Postleitzahl'
+            createdAt: 'Registrierungsdatum'
+            fullName: 'Vollständiger Name'
+            password: 'Kennwort'
+            updatedAt: 'Aktualisierungsdatum'
+            isPublished: 'Aktiv?'
+
+    App\Entity\Product:
+        singular: 'Produkt'
+        plural: 'Produkte'
+        properties:
+            name: 'Name'
+            createdAt: 'Erstellungsdatum'
+            updatedAt: 'Aktualisierungsdatum'
+            isPublished: 'Aktiv?'
+
+    App\Entity\License:
+        singular: 'Lizenz'
+        plural: 'Lizenzen'
+        properties:
+            key: 'Lizenzschlüssel'
+            createdAt: 'Erstellungsdatum'
+            updatedAt: 'Aktualisierungsdatum'
+            isPublished: 'Aktiv?'
+
+
+    App\Entity\Activation:
+        singular: 'Installation'
+        plural: 'Installationen'
+        properties:
+            email: 'E-Mail-Adresse'
+            createdAt: 'Erstellungsdatum'
+            updatedAt: 'Aktualisierungsdatum'
+            isPublished: 'Aktiv?'

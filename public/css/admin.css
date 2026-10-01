@@ -1,0 +1,32 @@
+/* EasyAdmin Sprach-Flaggen */
+
+.locale-flag {
+    display: inline-block;
+    width: 20px;
+    height: 14px;
+
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    border-radius: 2px;
+
+    /* Font-Awesome-Verhalten neutralisieren */
+    font-family: initial !important;
+}
+
+.locale-flag::before {
+    content: none !important;
+}
+
+.locale-flag-de {
+    background-image: url('/images/flags/de.svg');
+}
+
+.locale-flag-gb {
+    background-image: url('/images/flags/gb.svg');
+}
+
+.locale-flag-fr {
+    background-image: url('/images/flags/fr.svg');
+}

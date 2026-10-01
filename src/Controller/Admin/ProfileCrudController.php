@@ -12,6 +12,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -59,6 +60,50 @@ class ProfileCrudController extends AbstractCrudController
                 'Diese E-Mail-Adresse wird auch für die Anmeldung verwendet.'
             );
 
+/*
+		yield ImageField::new('profileImage', 'Profilbild')
+			->setBasePath('/uploads/profile')
+			->setUploadDir('public/uploads/profile')
+			->setUploadedFileNamePattern('[uuid].[extension]')
+			->setRequired(false)
+			->setColumns(12)
+			->setHelp(
+				'Erlaubte Formate: JPG, PNG oder WebP. Maximale Dateigröße: 5 MB.'
+			)
+			->setFormTypeOption(
+				'attr',
+				[
+					'accept' => 'image/jpeg,image/png,image/webp',
+				]
+			)
+			->setFormTypeOption(
+				'constraints',
+				[
+					new Assert\Image(
+						maxSize: '5M',
+						mimeTypes: [
+							'image/jpeg',
+							'image/png',
+							'image/webp',
+						],
+						mimeTypesMessage:
+							'Bitte lade ein JPG-, PNG- oder WebP-Bild hoch.',
+						maxSizeMessage:
+							'Das Profilbild darf maximal 5 MB groß sein.',
+					),
+				]
+			);*/
+		yield ImageField::new('profileImage', 'Profilbild')
+			->setBasePath('/uploads/profile')
+			->setUploadDir('public/uploads/profile')
+			->setUploadedFileNamePattern('[uuid].[extension]')
+			->setRequired(false)
+			->setColumns(12)
+			->setHelp('Profilbild als JPG, PNG oder WebP.')
+			->setFormTypeOption('attr', [
+				'accept' => 'image/jpeg,image/png,image/webp',
+			]);
+        
         yield FormField::addFieldset('Anschrift')
             ->setIcon('fa fa-address-card');
 

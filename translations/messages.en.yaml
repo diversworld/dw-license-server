@@ -1,0 +1,77 @@
+# translations/messages.en.yaml
+entities:
+    App\Entity\Customer:
+        singular: 'Customer'
+        plural: 'Customers'
+        properties:
+            title: 'Name'
+            email: 'Email Address'
+            phone: 'Phone Number'
+            address: 'Address'
+            city: 'City'
+            state: 'State'
+            zipCode: 'ZIP Code'
+            publishedAt: 'Creation Date'
+            isPublished: 'Active?'
+
+    App\Entity\User:
+        singular: 'User'
+        plural: 'Users'
+        properties:
+            email: 'Email Address'
+            phone: 'Phone Number'
+            address: 'Address'
+            city: 'City'
+            state: 'State'
+            zipCode: 'ZIP Code'
+            createdAt: 'Registration Date'
+            fullName: 'Full Name'
+            password: 'Password'
+            updatedAt: 'Update Date'
+            isPublished: 'Active?'
+
+    App\Entity\Product:
+        singular: 'Product'
+        plural: 'Products'
+        properties:
+            name: 'Name'
+            description: 'Description'
+            price: 'Price'
+            stock: 'Stock'
+            category: 'Category'
+            image: 'Image'
+            sku: 'SKU'
+            barcode: 'Barcode'
+            createdAt: 'Creation Date'
+            updatedAt: 'Update Date'
+            isPublished: 'Active?'
+
+    App\Entity\License:
+        singular: 'License'
+        plural: 'Licenses'
+        properties:
+            key: 'License Key'
+            email: 'Email Address'
+            phone: 'Phone Number'
+            address: 'Address'
+            city: 'City'
+            state: 'State'
+            zipCode: 'ZIP Code'
+            createdAt: 'Creation Date'
+            updatedAt: 'Update Date'
+            isPublished: 'Active?'
+
+
+    App\Entity\Activation:
+        singular: 'Installation'
+        plural: 'Installations'
+        properties:
+            email: 'Email Address'
+            phone: 'Phone Number'
+            address: 'Address'
+            city: 'City'
+            state: 'State'
+            zipCode: 'ZIP Code'
+            createdAt: 'Creation Date'
+            updatedAt: 'Update Date'
+            isPublished: 'Active?'
