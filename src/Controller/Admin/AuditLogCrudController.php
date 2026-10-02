@@ -23,8 +23,6 @@ final class AuditLogCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInPlural('Audit Logs')
-            ->setEntityLabelInSingular('Audit Log')
             ->setDefaultSort([
                 'createdAt' => 'DESC',
             ]);

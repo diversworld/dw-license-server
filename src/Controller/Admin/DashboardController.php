@@ -334,6 +334,7 @@ class DashboardController extends AbstractDashboardController
             [
                 'passwordForm' =>
                     $form->createView(),
+                    
                 'auditEntries' => $this->auditRepository->count([]),
             ]
         );

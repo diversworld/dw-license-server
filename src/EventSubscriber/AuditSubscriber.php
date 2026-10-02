@@ -5,90 +5,100 @@ declare(strict_types=1);
 namespace App\EventSubscriber;
 
 use App\Audit\AuditableEntityInterface;
+use App\Entity\AuditLog;
 use App\Entity\User;
 use App\Service\AuditService;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Event\PostRemoveEventArgs;
 use Doctrine\ORM\Event\PostUpdateEventArgs;
+use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Bundle\SecurityBundle\Security;
 
 #[AsDoctrineListener(event: Events::postPersist)]
 #[AsDoctrineListener(event: Events::postUpdate)]
+#[AsDoctrineListener(event: Events::preRemove)]
 #[AsDoctrineListener(event: Events::postRemove)]
 final class AuditSubscriber
 {
+    /** @var \WeakMap<object, array{type: string, identifier: string, id: ?string, table: string}> */
+    private \WeakMap $removedEntities;
+
     public function __construct(
         private readonly AuditService $auditService,
         private readonly Security $security,
     ) {
+        $this->removedEntities = new \WeakMap();
     }
 
     public function postPersist(PostPersistEventArgs $args): void
     {
-        $entity = $args->getObject();
-
-        if (!$entity instanceof AuditableEntityInterface) {
-            return;
-        }
-
-        $this->auditService->log(
-            $entity->getAuditType() . '.created',
-            $entity->getAuditType(),
-            $entity->getAuditIdentifier(),
-            method_exists($entity, 'getId')
-                ? (string) $entity->getId()
-                : null,
-            'Datensatz erstellt',
-            $this->getCurrentUser()
-        );
+        $this->record($args->getObject(), $args->getObjectManager(), 'created', 'Datensatz erstellt');
     }
 
     public function postUpdate(PostUpdateEventArgs $args): void
     {
+        $this->record($args->getObject(), $args->getObjectManager(), 'updated', 'Datensatz geändert');
+    }
+
+    public function preRemove(PreRemoveEventArgs $args): void
+    {
         $entity = $args->getObject();
-
-        if (!$entity instanceof AuditableEntityInterface) {
-            return;
+        if (!$entity instanceof AuditLog) {
+            // Doctrine clears generated identifiers before postRemove is dispatched.
+            $this->removedEntities[$entity] = $this->describe($entity, $args->getObjectManager());
         }
-
-        $this->auditService->log(
-            $entity->getAuditType() . '.updated',
-            $entity->getAuditType(),
-            $entity->getAuditIdentifier(),
-            method_exists($entity, 'getId')
-                ? (string) $entity->getId()
-                : null,
-            'Datensatz geändert',
-            $this->getCurrentUser()
-        );
     }
 
     public function postRemove(PostRemoveEventArgs $args): void
     {
-        $entity = $args->getObject();
+        $this->record($args->getObject(), $args->getObjectManager(), 'deleted', 'Datensatz gelöscht');
+        unset($this->removedEntities[$args->getObject()]);
+    }
 
-        if (!$entity instanceof AuditableEntityInterface) {
+    private function record(object $entity, EntityManagerInterface $em, string $action, string $message): void
+    {
+        if ($entity instanceof AuditLog) {
             return;
         }
 
+        $description = $action === 'deleted' && isset($this->removedEntities[$entity])
+            ? $this->removedEntities[$entity]
+            : $this->describe($entity, $em);
+        $user = $this->security->getUser();
+        if (!$user instanceof User || !$em->contains($user) || $em->getUnitOfWork()->isScheduledForDelete($user) || ($user === $entity && $action === 'deleted')) {
+            $user = null;
+        }
+
         $this->auditService->log(
-            $entity->getAuditType() . '.deleted',
-            $entity->getAuditType(),
-            $entity->getAuditIdentifier(),
-            null,
-            'Datensatz gelöscht',
-            $this->getCurrentUser()
+            $description['type'].'.'.$action,
+            $description['type'],
+            $description['identifier'],
+            $description['id'],
+            $message,
+            $user,
+            [
+                'table' => $description['table'],
+                'changedFields' => array_keys($em->getUnitOfWork()->getEntityChangeSet($entity)),
+            ],
         );
     }
 
-    private function getCurrentUser(): ?User
+    /** @return array{type: string, identifier: string, id: ?string, table: string} */
+    private function describe(object $entity, EntityManagerInterface $em): array
     {
-        $user = $this->security->getUser();
+        $metadata = $em->getClassMetadata($entity::class);
+        $ids = array_map(static fn (mixed $value): string => (string) $value, $metadata->getIdentifierValues($entity));
+        $id = $ids === [] ? null : implode(':', $ids);
+        $type = $entity instanceof AuditableEntityInterface ? $entity->getAuditType() : $metadata->getTableName();
 
-        return $user instanceof User
-            ? $user
-            : null;
+        return [
+            'type' => $type,
+            'identifier' => $entity instanceof AuditableEntityInterface ? $entity->getAuditIdentifier() : $type.':'.($id ?? 'new'),
+            'id' => $id,
+            'table' => $metadata->getTableName(),
+        ];
     }
 }

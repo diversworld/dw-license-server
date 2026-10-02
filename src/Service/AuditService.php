@@ -56,7 +56,7 @@ final class AuditService
                 $request?->headers->get('User-Agent')
             );
 
-        $this->repository->save($log);
+        $this->repository->append($log);
 
         return $log;
     }

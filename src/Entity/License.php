@@ -11,7 +11,7 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LicenseRepository::class)]
-class License
+class License 
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
