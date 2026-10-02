@@ -198,3 +198,10 @@ audit:
         'no': 'No'
         legacy: 'Previous and new values were not saved for this older entry.'
         empty: 'No change details available.'
+
+dashboard:
+    title: 'Diversworld License Management'
+    overview: 'Dashboard'
+    logoff: 'Log Off'
+    profile: 'My Profile'
+    change_password: 'Change Password'

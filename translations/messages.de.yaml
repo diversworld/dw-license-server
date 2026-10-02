@@ -198,3 +198,10 @@ audit:
         'no': 'Nein'
         legacy: 'Vorherige und neue Werte wurden für diesen älteren Eintrag nicht gespeichert.'
         empty: 'Keine Änderungsdetails vorhanden.'
+
+dashboard:
+    title: 'Diversworld Lizenzverwaltung'
+    overview: 'Übersicht'
+    logoff: 'Abmelden'
+    profile: 'Mein Profil'
+    change_password: 'Kennwort ändern'

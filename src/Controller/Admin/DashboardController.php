@@ -16,6 +16,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Theme;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Locale;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
@@ -44,6 +45,7 @@ class DashboardController extends AbstractDashboardController
         private readonly ActivationRepository $activationRepository,
         private readonly AdminUrlGenerator $adminUrlGenerator,
         private readonly AuditLogRepository $auditRepository,
+        private readonly TranslatorInterface $translator,
     )
     {
     }
@@ -75,7 +77,7 @@ class DashboardController extends AbstractDashboardController
     {
         return Dashboard::new()
             // the name visible to end users
-            ->setTitle('Diversworld Lizenzverwaltung')
+            ->setTitle($this->translator->trans('dashboard.title', domain: 'messages'))
             ->setFaviconPath('favicon.ico')
             ->useEntityTranslations()
             ->setTranslationDomain('messages')
@@ -118,7 +120,7 @@ class DashboardController extends AbstractDashboardController
             ->setLocales([
                 Locale::new('de', 'DE Deutsch', 'locale-flag locale-flag-de'), // locale without custom options
                 Locale::new('en', 'GB English', 'locale-flag locale-flag-gb'), // custom label and icon
-				Locale::new('fr', 'FR Franais', 'locale-flag locale-flag-fr') // custom label and icon
+				Locale::new('fr', 'FR Français', 'locale-flag locale-flag-fr') // custom label and icon
             ]);
     }
 
@@ -131,7 +133,7 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard( 
-            'Dashboard',
+            'dashboard.overview',
             'fa fa-home'
         );
 
@@ -176,7 +178,7 @@ class DashboardController extends AbstractDashboardController
         );
 
         yield MenuItem::linkToLogout(
-            'Abmelden',
+            'dashboard.logoff',
             icon:   'fa fa-sign-out'
         );
     }
@@ -209,13 +211,13 @@ class DashboardController extends AbstractDashboardController
 			->setAvatarUrl($avatarUrl)
 			->addMenuItems([
 				MenuItem::linkToRoute(
-					'Mein Profil',
+					'dashboard.profile',
 					'fa fa-user',
 					'dashboard_profile'
 				),
 
 				MenuItem::linkToRoute(
-					'Kennwort ändern',
+					'dashboard.change_password',
 					'fa fa-lock',
 					'dashboard_password'
 				),

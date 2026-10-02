@@ -152,7 +152,7 @@ entities:
             token: "Token"
             name: "Nom"
             active: "Actif"
-            createdAt: "Date de création"
+            ceratedAt: "Date de création"
             updatedAt: "Date de mise à jour"
             expiresAt: "Valable jusqu'à"
             customer: "Client"
@@ -200,3 +200,10 @@ audit:
         'no': "Non"
         legacy: "Les valeurs précédentes et nouvelles n'ont pas été enregistrées pour cette ancienne entrée."
         empty: "Aucun détail de modification disponible."
+
+dashboard:
+    title: 'Diversworld – Gestion des licences'
+    overview: 'Tableau de bord'
+    logoff: 'Se déconnecter'
+    profile: 'Mon profil'
+    change_password: 'Changer le mot de passe'
