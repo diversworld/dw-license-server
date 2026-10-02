@@ -247,3 +247,10 @@ dashboard:
 license_status.active: 'Active'
 license_status.suspended: 'Paused'
 license_status.revoked: 'Revoked'
+
+# Optional authenticator enrollment
+"two_factor.qr_alt": "QR code for authenticator setup"
+"two_factor.qr_help": "Scan the QR code with your authenticator app, or enter the key below manually."
+"two_factor.optional_help": "Setup is optional. Skipping applies to this session; declining stops future prompts. You can set up 2FA later from the user menu."
+"two_factor.skip": "Skip for now"
+"two_factor.decline": "Decline 2FA"

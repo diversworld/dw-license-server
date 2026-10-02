@@ -216,11 +216,16 @@ class DashboardController extends AbstractDashboardController
 					'dashboard_profile'
 				),
 
-				MenuItem::linkToRoute(
-					'dashboard.change_password',
+                MenuItem::linkToRoute(
+                    'dashboard.change_password',
 					'fa fa-lock',
-					'dashboard_password'
-				),
+                    'dashboard_password'
+                ),
+                MenuItem::linkToUrl(
+                    'two_factor.setup',
+                    'fa fa-shield',
+                    $this->generateUrl('two_factor_setup')
+                ),
 			]);
 	}
 

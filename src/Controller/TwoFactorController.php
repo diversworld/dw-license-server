@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Service\TwoFactorQrCode;
 use Doctrine\ORM\EntityManagerInterface;
 use Scheb\TwoFactorBundle\Security\Http\Authenticator\TwoFactorAuthenticator;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
@@ -39,7 +40,7 @@ class TwoFactorController extends AbstractController
     #[Route('/security/2fa/setup', name: 'two_factor_setup', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_VIEWER')]
     #[RateLimit('two_factor')]
-    public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens, \Symfony\Contracts\Translation\TranslatorInterface $translator): Response
+    public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens, \Symfony\Contracts\Translation\TranslatorInterface $translator, TwoFactorQrCode $qrCode): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -53,7 +54,7 @@ class TwoFactorController extends AbstractController
         $session->set('two_factor_setup_secret', $secret);
         $pending = clone $user;
         $pending->enableTwoFactor($secret, []);
-        $form = $this->createFormBuilder()
+        $form = $this->createFormBuilder(null, ['action' => $this->generateUrl('two_factor_setup')])
             ->add('password', PasswordType::class, ['label' => 'two_factor.password', 'constraints' => [new NotBlank(), new UserPassword()]])
             ->add('code', TextType::class, ['label' => 'two_factor.code', 'constraints' => [new NotBlank()], 'attr' => ['autocomplete' => 'one-time-code', 'inputmode' => 'numeric']])
             ->getForm()->handleRequest($request);
@@ -66,6 +67,7 @@ class TwoFactorController extends AbstractController
                 $user->enableTwoFactor($secret, $codes);
                 $em->flush();
                 $session->remove('two_factor_setup_secret');
+                $session->remove('two_factor_enrollment_skipped_for');
                 $session->migrate(true);
                 $tokens->getToken()->setAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE, true);
             }
@@ -73,7 +75,27 @@ class TwoFactorController extends AbstractController
 
         return $this->render('security/two_factor_setup.html.twig', [
             'form' => $form->createView(), 'secret' => $codes === [] ? $secret : null,
-            'provisioningUri' => $codes === [] ? $totp->getQRContent($pending) : null, 'codes' => $codes,
+            'qrCode' => $codes === [] ? $qrCode->dataUri($totp->getQRContent($pending)) : null, 'codes' => $codes,
         ], new Response(headers: ['Cache-Control' => 'no-store']));
+    }
+
+    #[Route('/security/2fa/decision/{decision}', name: 'two_factor_decision', requirements: ['decision' => 'skip|decline'], methods: ['POST'])]
+    #[IsGranted('ROLE_VIEWER')]
+    public function decide(string $decision, Request $request, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $user->isTotpAuthenticationEnabled()
+            || !$this->isCsrfTokenValid('two_factor_decision', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+        if ($decision === 'decline') {
+            $user->declineTwoFactor();
+            $em->flush();
+        } else {
+            $request->getSession()->set('two_factor_enrollment_skipped_for', (string) $user->getId());
+        }
+        $request->getSession()->remove('two_factor_setup_secret');
+
+        return $this->redirectToRoute('admin');
     }
 }

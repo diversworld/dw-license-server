@@ -1,16 +1,44 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}{{ 'two_factor.title'|trans }}{% endblock %}
+
 {% block body %}
 <main class="container" style="max-width: 32rem; margin: 3rem auto">
-    <h1>{{ 'two_factor.title'|trans }}</h1>
-    <p>{{ 'two_factor.challenge_help'|trans }}</p>
-    {% if authenticationError %}<p role="alert">{{ authenticationError|trans(authenticationErrorData, 'SchebTwoFactorBundle') }}</p>{% endif %}
-    <form action="{{ path('2fa_login_check') }}" method="post">
-        <label for="auth-code">{{ 'two_factor.code'|trans }}</label>
-        <input id="auth-code" name="{{ authCodeParameterName }}" autocomplete="one-time-code" required autofocus>
-        <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
-        <button type="submit">{{ 'two_factor.verify'|trans }}</button>
-    </form>
-    <a href="{{ logoutPath }}">{{ 'dashboard.logoff'|trans }}</a>
+    <div class="two-factor-container">
+        <h1>{{ 'two_factor.title'|trans }}</h1>
+        <div class="two-factor-description">
+            <p>{{ 'two_factor.challenge_help'|trans }}</p>
+        </div>
+        {% if authenticationError %}
+        <div class="alert alert-danger d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>
+                    {{ authenticationError|trans(authenticationErrorData, 'SchebTwoFactorBundle') }}
+                </div>
+            </div>
+        {% endif %}
+         <div class="card login-card">
+            <div class="card-body">
+                <div class="mb-4">
+                    <form action="{{ path('2fa_login_check') }}" method="post">
+                        <div class="mb-3">
+                            <label for="auth-code">{{ 'two_factor.code'|trans }}</label>    
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <input id="auth-code" name="{{ authCodeParameterName }}" autocomplete="one-time-code" required autofocus>
+                                </div>
+                            </div>
+                        <div class="mb-3">
+                            <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+                            <button type="submit">{{ 'two_factor.verify'|trans }}</button>
+                        </div>
+                    </form>
+                    <a href="{{ logoutPath }}">{{ 'dashboard.logoff'|trans }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 {% endblock %}

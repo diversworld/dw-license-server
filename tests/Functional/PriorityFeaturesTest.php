@@ -123,6 +123,11 @@ class PriorityFeaturesTest extends WebTestCase
         $crawler = $this->client->followRedirect();
         self::assertResponseIsSuccessful();
         $secret = $crawler->filter('main > code')->text();
+        $qrData = $crawler->filter('img.two-factor-qr')->attr('src');
+        self::assertStringStartsWith('data:image/svg+xml;base64,', $qrData);
+        $svg = base64_decode(substr($qrData, strlen('data:image/svg+xml;base64,')), true);
+        self::assertStringContainsString('<svg', $svg);
+        self::assertStringContainsString('<path', $svg);
         $this->client->submitForm('Zwei-Faktor-Anmeldung aktivieren', ['form[password]' => 'test-password-1234', 'form[code]' => 'invalid']);
         self::assertFalse($user->isTotpAuthenticationEnabled());
         self::assertStringContainsString('Der Code ist ungültig.', $this->client->getResponse()->getContent());
@@ -156,6 +161,76 @@ class PriorityFeaturesTest extends WebTestCase
         $this->client->request('GET', '/admin/de');
         self::assertResponseIsSuccessful();
         self::assertFalse(static::getContainer()->get(BackupCodeManager::class)->isBackupCode($user, 'recovery-code'));
+    }
+
+    public function testSkippingAllowsRoleActionsForThisSessionAndPromptsAgainNextSession(): void
+    {
+        $user = $this->user('ROLE_ADMIN', false);
+        $this->client->loginUser($user);
+        $this->client->request('GET', '/security/2fa/setup');
+        $this->client->submitForm('Für jetzt überspringen');
+        self::assertResponseRedirects();
+        $this->client->followRedirect();
+        self::assertResponseIsSuccessful();
+        $this->client->request('GET', static::getContainer()->get('router')->generate('admin_product_new'));
+        self::assertResponseIsSuccessful();
+        $user = $this->em->find(User::class, $user->getId());
+        self::assertFalse($user->isTotpAuthenticationEnabled());
+        self::assertFalse($user->hasDeclinedTwoFactor());
+        $this->client->restart();
+        $this->client->loginUser($user);
+        $this->client->request('GET', '/admin/de');
+        self::assertResponseRedirects('/security/2fa/setup');
+    }
+
+    public function testDecliningPersistsAndEnrollmentRemainsAvailable(): void
+    {
+        $user = $this->user('ROLE_SALES', false);
+        $this->client->loginUser($user);
+        $this->client->request('GET', '/security/2fa/setup');
+        $this->client->submitForm('2FA ablehnen');
+        self::assertResponseRedirects();
+        $user = $this->em->find(User::class, $user->getId());
+        self::assertTrue($user->hasDeclinedTwoFactor());
+        $this->client->restart();
+        $this->client->loginUser($user);
+        $this->client->request('GET', '/admin/de');
+        self::assertResponseIsSuccessful();
+        $setupLink = $this->client->getCrawler()->selectLink('Authenticator einrichten')->first()->link();
+        $this->client->request('GET', static::getContainer()->get('router')->generate('admin_license_new'));
+        self::assertResponseIsSuccessful();
+        $this->client->request('GET', static::getContainer()->get('router')->generate('admin_product_new'));
+        self::assertResponseStatusCodeSame(403);
+        $crawler = $this->client->click($setupLink);
+        self::assertResponseIsSuccessful();
+        $secret = $crawler->filter('main > code')->text();
+        $this->client->submitForm('Zwei-Faktor-Anmeldung aktivieren', ['form[password]' => 'test-password-1234', 'form[code]' => \OTPHP\TOTP::createFromSecret($secret)->now()]);
+        self::assertResponseIsSuccessful();
+        $user = $this->em->find(User::class, $user->getId());
+        self::assertTrue($user->isTotpAuthenticationEnabled());
+        self::assertFalse($user->hasDeclinedTwoFactor());
+    }
+
+    public function testEnrollmentDecisionsRejectInvalidCsrfAndCannotDisableActiveTotp(): void
+    {
+        $user = $this->user('ROLE_ADMIN', false);
+        $this->client->loginUser($user);
+        $crawler = $this->client->request('GET', '/security/2fa/setup');
+        $form = $crawler->selectButton('2FA ablehnen')->form();
+        $token = $form->getPhpValues()['_token'];
+        $this->client->request('POST', '/security/2fa/decision/decline', ['_token' => 'invalid']);
+        self::assertResponseStatusCodeSame(403);
+        $user = $this->em->find(User::class, $user->getId());
+        self::assertFalse($user->hasDeclinedTwoFactor());
+        $user->enableTwoFactor(self::SECRET, []);
+        $this->em->flush();
+        $this->client->loginUser($user, 'main', ['2fa_complete' => true]);
+        foreach (['skip', 'decline'] as $decision) {
+            $this->client->request('POST', '/security/2fa/decision/'.$decision, ['_token' => $token]);
+            self::assertResponseStatusCodeSame(403);
+        }
+        $user = $this->em->find(User::class, $user->getId());
+        self::assertTrue($user->isTotpAuthenticationEnabled());
     }
 
     public function testRolesAndLicenceActionsRecordActorReasonAndState(): void

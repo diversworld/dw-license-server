@@ -9,9 +9,20 @@
         <a href="{{ path('admin') }}">{{ 'dashboard.overview'|trans }}</a>
     {% else %}
         <p>{{ 'two_factor.setup_help'|trans }}</p>
+        <img class="two-factor-qr" src="{{ qrCode }}" alt="{{ 'two_factor.qr_alt'|trans }}" width="256" height="256">
+        <p>{{ 'two_factor.qr_help'|trans }}</p>
         <p>{{ app.user.userIdentifier }} — Diversworld — TOTP, SHA1, 6 digits, 30 seconds</p>
         <code>{{ secret }}</code>
         {{ form_start(form) }}{{ form_widget(form) }}<button type="submit">{{ 'two_factor.enable'|trans }}</button>{{ form_end(form) }}
+        <p>{{ 'two_factor.optional_help'|trans }}</p>
+        <form action="{{ path('two_factor_decision', {decision: 'skip'}) }}" method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('two_factor_decision') }}">
+            <button type="submit">{{ 'two_factor.skip'|trans }}</button>
+        </form>
+        <form action="{{ path('two_factor_decision', {decision: 'decline'}) }}" method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('two_factor_decision') }}">
+            <button type="submit">{{ 'two_factor.decline'|trans }}</button>
+        </form>
     {% endif %}
 </main>
 {% endblock %}

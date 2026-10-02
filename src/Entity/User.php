@@ -286,6 +286,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
     #[ORM\Column(length: 128, nullable: true)]
     private ?string $totpSecret = null;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $twoFactorDeclined = false;
+
+    public function hasDeclinedTwoFactor(): bool
+    {
+        return $this->twoFactorDeclined;
+    }
+
+    public function declineTwoFactor(): void
+    {
+        if ($this->isTotpAuthenticationEnabled()) {
+            throw new \LogicException('An active authenticator cannot be declined.');
+        }
+        $this->twoFactorDeclined = true;
+    }
+
     #[ORM\Column(type: 'json', options: ['default' => '[]'])]
     private array $backupCodeHashes = [];
 
@@ -306,6 +322,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
 
     public function enableTwoFactor(string $secret, array $codes): void
     {
+        $this->twoFactorDeclined = false;
         $this->totpSecret = $secret;
         $this->backupCodeHashes = array_map(static fn (string $code): string => hash('sha256', $code), $codes);
     }

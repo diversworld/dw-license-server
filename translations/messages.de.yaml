@@ -247,3 +247,10 @@ dashboard:
 license_status.active: 'Aktiv'
 license_status.suspended: 'Pausiert'
 license_status.revoked: 'Widerrufen'
+
+# Optional authenticator enrollment
+"two_factor.qr_alt": "QR-Code für die Authenticator-Einrichtung"
+"two_factor.qr_help": "Scanne den QR-Code mit deiner Authenticator-App. Alternativ kannst du den Schlüssel unten manuell eingeben."
+"two_factor.optional_help": "Die Einrichtung ist freiwillig. Überspringen gilt für diese Sitzung; bei Ablehnen wirst du nicht erneut gefragt. Du kannst 2FA später über das Benutzermenü einrichten."
+"two_factor.skip": "Für jetzt überspringen"
+"two_factor.decline": "2FA ablehnen"

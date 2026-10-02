@@ -249,3 +249,10 @@ dashboard:
 license_status.active: 'Active'
 license_status.suspended: 'Suspendue'
 license_status.revoked: 'Révoquée'
+
+# Optional authenticator enrollment
+"two_factor.qr_alt": "Code QR pour configurer l’authentificateur"
+"two_factor.qr_help": "Scannez le code QR avec votre application ou saisissez la clé ci-dessous manuellement."
+"two_factor.optional_help": "La configuration est facultative. Ignorer s’applique à cette session ; refuser arrête les rappels. Vous pouvez configurer la 2FA plus tard dans le menu utilisateur."
+"two_factor.skip": "Ignorer pour le moment"
+"two_factor.decline": "Refuser la 2FA"

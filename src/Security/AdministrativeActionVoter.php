@@ -37,8 +37,11 @@ class AdministrativeActionVoter extends Voter
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?\Symfony\Component\Security\Core\Authorization\Voter\Vote $vote = null): bool
     {
         $user = $token->getUser();
-        if (!$user instanceof User || !$user->isActive() || !$user->isTotpAuthenticationEnabled()
-            || !$token->hasAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE) || !$token->getAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE)) {
+        if (!$user instanceof User || !$user->isActive()) {
+            return false;
+        }
+        if ($user->isTotpAuthenticationEnabled() && (!$token->hasAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE)
+            || !$token->getAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE))) {
             return false;
         }
 

@@ -25,10 +25,16 @@ class RequireTwoFactorEnrollment
             return;
         }
         $user = $this->security->getUser();
-        if ($user instanceof User && !$user->isTotpAuthenticationEnabled()) {
-            $event->setResponse(new RedirectResponse($this->router->generate('two_factor_setup')));
+        if (!$user instanceof User) {
+            return;
+        }
+        if (!$user->isTotpAuthenticationEnabled()) {
+            $skipped = $event->getRequest()->getSession()->get('two_factor_enrollment_skipped_for') === (string) $user->getId();
+            if (!$user->hasDeclinedTwoFactor() && !$skipped) {
+                $event->setResponse(new RedirectResponse($this->router->generate('two_factor_setup')));
+            }
         } elseif (!$this->tokens->getToken()?->hasAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE) || !$this->tokens->getToken()->getAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE)) {
-            // Sessions created before 2FA became mandatory must authenticate again.
+            // Users with an active authenticator must still complete their challenge.
             $this->security->logout(false);
             $event->setResponse(new RedirectResponse($this->router->generate('app_login')));
         }
