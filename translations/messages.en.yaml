@@ -75,3 +75,14 @@ entities:
             createdAt: 'Creation Date'
             updatedAt: 'Update Date'
             isPublished: 'Active?'
+
+    App\Entity\AuditLog:
+        singular: 'Audit Log Entry'
+        plural: 'Audit Log Entries'
+        properties:
+            action: 'Action'
+            entity: 'Entity'
+            user: 'User'
+            createdAt: 'Creation Date'
+            updatedAt: 'Update Date'
+            isPublished: 'Active?'

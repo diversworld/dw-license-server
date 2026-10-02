@@ -18,22 +18,9 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+        autowire: true
+        autoconfigure: true
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    App\Service\AuditService:
-        arguments:
-        $auditRepository: '@App\Repository\LicenseAuditLogRepository'
-        $requestStack: '@request_stack'
-
-    App\EventSubscriber\LicenseAuditSubscriber:
-        arguments:
-            $security: '@security.helper'
-            $requestStack: '@request_stack'
-        tags:
-            - { name: doctrine.event_listener, event: postPersist }
-            - { name: doctrine.event_listener, event: postUpdate }
-            - { name: doctrine.event_listener, event: postRemove }
-            - { name: doctrine.event_listener, event: postFlush }
-            

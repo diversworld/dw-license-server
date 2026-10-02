@@ -58,3 +58,14 @@ entities:
             createdAt: 'Erstellungsdatum'
             updatedAt: 'Aktualisierungsdatum'
             isPublished: 'Aktiv?'
+
+    App\Entity\AuditLog:
+        singular: 'Audit-Eintrag'
+        plural: 'Audit-Einträge'
+        properties:
+            action: 'Aktion'
+            entity: 'Entität'
+            user: 'Benutzer'
+            createdAt: 'Erstellungsdatum'
+            updatedAt: 'Aktualisierungsdatum'
+            isPublished: 'Aktiv?'

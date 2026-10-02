@@ -25,6 +25,8 @@ use App\Repository\CustomerRepository;
 use App\Repository\LicenseRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use App\Controller\Admin\LicenseCrudController;
+use App\Controller\Admin\AuditLogCrudController;
+use App\Repository\AuditLogRepository;
 
 
 #[AdminDashboard(routePath: '/admin/{_locale}', routeName: 'admin', routeOptions: ['requirements' => ['_locale' => 'de|en|fr'], 'defaults' => ['_locale' => 'de'],'methods' => ['GET'],],)]
@@ -36,6 +38,7 @@ class DashboardController extends AbstractDashboardController
         private readonly CustomerRepository $customerRepository,
         private readonly ActivationRepository $activationRepository,
         private readonly AdminUrlGenerator $adminUrlGenerator,
+        private readonly AuditLogRepository $auditRepository,
     )
     {
     }
@@ -54,6 +57,8 @@ class DashboardController extends AbstractDashboardController
                     ->getDashboardStatistics(),
             ],
     
+            'auditEntries' => $this->auditRepository->count([]),
+
             'productStatistics' => $this->licenseRepository
                 ->getStatisticsByProduct(),
     
@@ -125,11 +130,15 @@ class DashboardController extends AbstractDashboardController
             'fa fa-home'
         );
 
+        yield MenuItem::section('Kunden');
+
         yield MenuItem::linkTo(
             CustomerCrudController::class,
             //'Kunden',
             icon: 'fa fa-users'
         );
+
+        yield MenuItem::section('Produkte');
 
         yield MenuItem::linkTo(
             ProductCrudController::class,
@@ -137,6 +146,7 @@ class DashboardController extends AbstractDashboardController
             icon: 'fa fa-cubes'
         );
 
+        yield MenuItem::section('Lizenzen');
         yield MenuItem::linkTo(
             LicenseCrudController::class,
             //'Lizenzen',
@@ -149,6 +159,14 @@ class DashboardController extends AbstractDashboardController
             icon: 'fa fa-globe'
         );
 
+        yield MenuItem::section('Audit');
+
+        yield MenuItem::linkTo(
+            AuditLogCrudController::class,
+            icon: 'fa fa-history'
+        );
+
+        yield MenuItem::section('Benutzer');
         yield MenuItem::linkTo(
             UserCrudController::class,
             //'Administratoren',
@@ -316,6 +334,7 @@ class DashboardController extends AbstractDashboardController
             [
                 'passwordForm' =>
                     $form->createView(),
+                'auditEntries' => $this->auditRepository->count([]),
             ]
         );
     }
