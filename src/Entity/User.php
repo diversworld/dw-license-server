@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[UniqueEntity(fields: ['email'],message: 'Diese E-Mail-Adresse wird bereits verwendet.')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface, \Scheb\TwoFactorBundle\Model\BackupCodeInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
@@ -31,6 +31,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string>
      */
     #[ORM\Column]
+    #[\Symfony\Component\Validator\Constraints\Choice(choices: ['ROLE_ADMIN', 'ROLE_SUPPORT', 'ROLE_SALES', 'ROLE_VIEWER', 'ROLE_USER'], multiple: true)]
     private array $roles = [];
 
     #[ORM\Column]
@@ -282,6 +283,50 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[ORM\Column(length: 128, nullable: true)]
+    private ?string $totpSecret = null;
+
+    #[ORM\Column(type: 'json', options: ['default' => '[]'])]
+    private array $backupCodeHashes = [];
+
+    public function isTotpAuthenticationEnabled(): bool
+    {
+        return $this->totpSecret !== null;
+    }
+
+    public function getTotpAuthenticationUsername(): string
+    {
+        return $this->getUserIdentifier();
+    }
+
+    public function getTotpAuthenticationConfiguration(): ?\Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface
+    {
+        return $this->totpSecret === null ? null : new \Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration($this->totpSecret, 'sha1', 30, 6);
+    }
+
+    public function enableTwoFactor(string $secret, array $codes): void
+    {
+        $this->totpSecret = $secret;
+        $this->backupCodeHashes = array_map(static fn (string $code): string => hash('sha256', $code), $codes);
+    }
+
+    public function isBackupCode(string $code): bool
+    {
+        foreach ($this->backupCodeHashes as $hash) {
+            if (hash_equals($hash, hash('sha256', trim($code)))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function invalidateBackupCode(string $code): void
+    {
+        $hash = hash('sha256', trim($code));
+        $this->backupCodeHashes = array_values(array_filter($this->backupCodeHashes, static fn (string $candidate): bool => !hash_equals($candidate, $hash)));
+    }
+
     public function eraseCredentials(): void
     {
     }
@@ -294,6 +339,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'crc32c',
             $this->password ?? ''
         );
+
+        $data["\0" . self::class . "\0totpSecret"] = null;
+        $data["\0" . self::class . "\0backupCodeHashes"] = [];
 
         return $data;
     }

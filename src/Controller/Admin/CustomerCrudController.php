@@ -8,7 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\{Action, Actions, Crud};
 use EasyCorp\Bundle\EasyAdminBundle\Field\{ArrayField, AssociationField, BooleanField, ChoiceField, DateTimeField, EmailField, ImageField, IntegerField, TextField, TextareaField, FormField};
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_VIEWER')]
 class CustomerCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -18,7 +18,7 @@ class CustomerCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        return $actions->disable(Action::DELETE);
+        return $actions->disable(Action::DELETE)->setPermission(Action::NEW, 'CUSTOMER_MANAGE')->setPermission(Action::EDIT, 'CUSTOMER_MANAGE');
     }
 
     public function configureFields(string $pageName): iterable

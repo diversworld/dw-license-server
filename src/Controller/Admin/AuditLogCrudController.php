@@ -33,7 +33,7 @@ final class AuditLogCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        return $actions->disable(Action::NEW);
+        return $actions->disable(Action::NEW, Action::EDIT, Action::DELETE);
     }
 
     public function configureFields(string $pageName): iterable

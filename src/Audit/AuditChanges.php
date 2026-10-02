@@ -39,7 +39,7 @@ final class AuditChanges
 
     private function normalize(mixed $value, string $field, EntityManagerInterface $em): mixed
     {
-        if (preg_match('/password|token|secret|licensekey|selector/i', $field)) {
+        if (preg_match('/password|token|secret|licensekey|selector|backupcode|recoverycode/i', $field)) {
             return $value === null ? null : '[redacted]';
         }
         if ($value instanceof \DateTimeInterface) {

@@ -36,7 +36,7 @@ use App\Entity\Activation;
 
 
 #[AdminDashboard(routePath: '/admin/{_locale}', routeName: 'admin', routeOptions: ['requirements' => ['_locale' => 'de|en|fr|es'], 'defaults' => ['_locale' => 'de'],'methods' => ['GET'],],)]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_VIEWER')]
 class DashboardController extends AbstractDashboardController
 {
     public function __construct(

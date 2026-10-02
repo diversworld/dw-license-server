@@ -11,6 +11,12 @@ security:
                 class: App\Entity\User
                 property: email
 
+    role_hierarchy:
+        ROLE_VIEWER: [ROLE_USER]
+        ROLE_SUPPORT: [ROLE_VIEWER, ROLE_LICENSE_OPERATE, ROLE_ACTIVATION_MANAGE]
+        ROLE_SALES: [ROLE_VIEWER, ROLE_CUSTOMER_MANAGE, ROLE_LICENSE_SELL]
+        ROLE_ADMIN: [ROLE_SUPPORT, ROLE_SALES, ROLE_PRODUCT_MANAGE, ROLE_USER_MANAGE, ROLE_LICENSE_REVOKE]
+
     firewalls:
         dev:
             # Ensure dev tools and static assets are always allowed
@@ -26,6 +32,11 @@ security:
                 enable_csrf: true
                 default_target_path: admin
             login_throttling: ~
+            two_factor:
+                auth_form_path: 2fa_login
+                check_path: 2fa_login_check
+                enable_csrf: true
+                post_only: true
             logout:
                 path: app_logout
                 target: app_login
@@ -39,11 +50,12 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
+        - { path: ^/logout, roles: PUBLIC_ACCESS }
+        - { path: ^/security/2fa, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/admin, roles: ROLE_VIEWER }
         - { path: ^/kennwort-zuruecksetzen, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
     security:

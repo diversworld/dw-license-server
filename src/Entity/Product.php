@@ -181,6 +181,44 @@ class Product
         return $this;
     }
 
+    #[ORM\Column(options: ['default' => 86400])]
+    #[Assert\Range(min: 60, max: 31536000)]
+    private int $tokenLifetimeSeconds = 86400;
+
+    public function getTokenLifetimeSeconds(): int
+    {
+        return $this->tokenLifetimeSeconds;
+    }
+
+    public function setTokenLifetimeSeconds(int $seconds): static
+    {
+        if ($seconds < 60 || $seconds > 31536000) {
+            throw new \InvalidArgumentException('Invalid product token policy.');
+        }
+        $this->tokenLifetimeSeconds = $seconds;
+
+        return $this;
+    }
+
+    #[ORM\Column(options: ['default' => 2592000])]
+    #[Assert\Range(min: 0, max: 31536000)]
+    private int $gracePeriodSeconds = 2592000;
+
+    public function getGracePeriodSeconds(): int
+    {
+        return $this->gracePeriodSeconds;
+    }
+
+    public function setGracePeriodSeconds(int $seconds): static
+    {
+        if ($seconds < 0 || $seconds > 31536000) {
+            throw new \InvalidArgumentException('Invalid product token policy.');
+        }
+        $this->gracePeriodSeconds = $seconds;
+
+        return $this;
+    }
+
     public function __toString(): string
     {
         return $this->name ?? $this->slug ?? "";

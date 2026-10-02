@@ -7,13 +7,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('USER_MANAGE')]
 class UserCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -71,7 +72,7 @@ class UserCrudController extends AbstractCrudController
         yield FormField::addFieldset('Berechtigungen')
             ->setIcon('fa fa-shield');
 
-        yield ArrayField::new('roles', 'Rollen')
+        yield ChoiceField::new('roles', 'Rollen')->setChoices(['Administration' => 'ROLE_ADMIN', 'Support' => 'ROLE_SUPPORT', 'Vertrieb' => 'ROLE_SALES', 'Leserechte' => 'ROLE_VIEWER'])->allowMultipleChoices()
             ->setColumns(6);
 
         yield BooleanField::new('active', 'Aktiv')

@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('LICENSE_ISSUE')]
 class IssueLicenseController extends AbstractController
 {
     #[Route('/admin/licenses/{id}/issue', name: 'admin_license_issue', methods: ['GET', 'POST'])]
@@ -28,7 +28,7 @@ class IssueLicenseController extends AbstractController
             $data = $form->getData();
             try {
                 $token = $manager->activate(new ActivationRequest($license->getLicenseKey(), $license->getProduct()->getSlug(), $data['tenant'], $data['domain']));
-                $publicKey = base64_encode($signer->publicKey());
+                $publicKey = json_encode($signer->publicKeys(), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
             } catch (HttpException $e) {
                 $form->addError(new FormError($e->getMessage()));
             }

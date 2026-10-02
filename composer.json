@@ -16,14 +16,19 @@
         "easycorp/easyadmin-bundle": "^5.6.1",
         "lexik/jwt-authentication-bundle": "^3.2",
         "nelmio/api-doc-bundle": "^5.13.0",
+        "scheb/2fa-backup-code": "^8.6",
+        "scheb/2fa-bundle": "^8.6",
+        "scheb/2fa-totp": "^8.6",
         "symfony/apache-pack": ">=1.0.1",
         "symfony/console": "8.1.*",
         "symfony/dotenv": "8.1.*",
+        "symfony/filesystem": "8.1.*",
         "symfony/flex": "^2.11",
         "symfony/framework-bundle": "8.1.*",
         "symfony/lock": "8.1.*",
         "symfony/mailer": "8.1.*",
         "symfony/monolog-bundle": "^4.1",
+        "symfony/process": "8.1.*",
         "symfony/rate-limiter": "8.1.*",
         "symfony/runtime": "8.1.*",
         "symfony/security-bundle": "8.1.*",
@@ -31,9 +36,9 @@
         "symfony/twig-bundle": "8.1.*",
         "symfony/validator": "8.1.*",
         "symfony/yaml": "8.1.*",
+        "symfonycasts/reset-password-bundle": ">=1.25",
         "twig/extra-bundle": "^2.12|^3.29",
-        "twig/twig": "^2.12|^3.30",
-        "symfonycasts/reset-password-bundle": ">=1.25"
+        "twig/twig": "^2.12|^3.30"
     },
     "config": {
         "allow-plugins": {

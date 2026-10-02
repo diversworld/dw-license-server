@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'two_factor.setup'|trans }}{% endblock %}
+{% block body %}
+<main class="container" style="max-width: 40rem; margin: 3rem auto">
+    <h1>{{ 'two_factor.setup'|trans }}</h1>
+    {% if codes is not empty %}
+        <p>{{ 'two_factor.recovery_help'|trans }}</p>
+        <ul>{% for code in codes %}<li><code>{{ code }}</code></li>{% endfor %}</ul>
+        <a href="{{ path('admin') }}">{{ 'dashboard.overview'|trans }}</a>
+    {% else %}
+        <p>{{ 'two_factor.setup_help'|trans }}</p>
+        <p>{{ app.user.userIdentifier }} — Diversworld — TOTP, SHA1, 6 digits, 30 seconds</p>
+        <code>{{ secret }}</code>
+        {{ form_start(form) }}{{ form_widget(form) }}<button type="submit">{{ 'two_factor.enable'|trans }}</button>{{ form_end(form) }}
+    {% endif %}
+</main>
+{% endblock %}

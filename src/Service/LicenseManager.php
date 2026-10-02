@@ -112,7 +112,12 @@ class LicenseManager
     private function issue(License $license, Activation $activation): string
     {
         $now = new \DateTimeImmutable();
-        $expires = $license->getExpiresAt()?->getTimestamp() ?? $now->getTimestamp() + 31 * 86400;
+        $product = $license->getProduct();
+        $refresh = $now->getTimestamp() + $product->getTokenLifetimeSeconds();
+        $graceUntil = $refresh + $product->getGracePeriodSeconds();
+        $expires = 'offline' === $license->getMode()
+            ? $license->getExpiresAt()->getTimestamp()
+            : min($license->getExpiresAt()?->getTimestamp() ?? PHP_INT_MAX, $graceUntil);
         $claims = [
             'license_id' => $license->getId()->toRfc4122(),
             'activation_id' => $activation->getId(),
@@ -122,7 +127,8 @@ class LicenseManager
             'issued_at' => $now->getTimestamp(),
             'expires_at' => $expires,
             'mode' => $license->getMode(),
-            'refresh_after' => min($expires, $now->getTimestamp() + 86400),
+            'refresh_after' => min($expires, $refresh),
+            'grace_until' => min($expires, $graceUntil),
             'status' => 'valid',
             'features' => $license->getFeatures(),
         ];

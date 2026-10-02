@@ -16,7 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_VIEWER')]
 class ProfileCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
