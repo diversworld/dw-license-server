@@ -16,6 +16,27 @@ class ActivationRepository extends ServiceEntityRepository
         parent::__construct($registry, Activation::class);
     }
 
+    public function getDashboardStatistics(): array
+    {
+        $result = $this->createQueryBuilder('a')
+            ->select('COUNT(a.id) AS total')
+            ->addSelect("
+                SUM(
+                    CASE
+                        WHEN a.active = true
+                        THEN 1 ELSE 0
+                    END
+                ) AS active
+            ")
+            ->getQuery()
+            ->getSingleResult();
+    
+        return [
+            'total' => (int) ($result['total'] ?? 0),
+            'active' => (int) ($result['active'] ?? 0),
+        ];
+    }
+
 //    /**
 //     * @return Activation[] Returns an array of Activation objects
 //     */

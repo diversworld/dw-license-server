@@ -16,6 +16,28 @@ class CustomerRepository extends ServiceEntityRepository
         parent::__construct($registry, Customer::class);
     }
 
+
+    public function getDashboardStatistics(): array
+    {
+        $result = $this->createQueryBuilder('c')
+            ->select('COUNT(c.id) AS total')
+            ->addSelect("
+                SUM(
+                    CASE
+                        WHEN c.active = true
+                        THEN 1 ELSE 0
+                    END
+                ) AS active
+            ")
+            ->getQuery()
+            ->getSingleResult();
+    
+        return [
+            'total' => (int) ($result['total'] ?? 0),
+            'active' => (int) ($result['active'] ?? 0),
+        ];
+    }
+
 //    /**
 //     * @return Customer[] Returns an array of Customer objects
 //     */

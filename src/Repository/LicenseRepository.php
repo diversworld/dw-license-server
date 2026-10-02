@@ -16,7 +16,78 @@ class LicenseRepository extends ServiceEntityRepository
         parent::__construct($registry, License::class);
     }
 
-        /**
+    public function getDashboardStatistics(): array
+    {
+        $now = new \DateTimeImmutable();
+        $expiresSoon = $now->modify('+30 days');
+    
+        $result = $this->createQueryBuilder('l')
+            ->select('COUNT(l.id) AS total')
+    
+            ->addSelect("
+                SUM(
+                    CASE
+                        WHEN l.status = 'active'
+                        AND (
+                            l.expiresAt IS NULL
+                            OR l.expiresAt > :now
+                        )
+                        THEN 1 ELSE 0
+                    END
+                ) AS active
+            ")
+    
+            ->addSelect("
+                SUM(
+                    CASE
+                        WHEN l.status = 'suspended'
+                        THEN 1 ELSE 0
+                    END
+                ) AS suspended
+            ")
+    
+            ->addSelect("
+                SUM(
+                    CASE
+                        WHEN l.status = 'revoked'
+                        THEN 1 ELSE 0
+                    END
+                ) AS revoked
+            ")
+    
+            ->addSelect("
+                SUM(
+                    CASE
+                        WHEN l.expiresAt IS NOT NULL
+                        AND l.expiresAt <= :now
+                        THEN 1 ELSE 0
+                    END
+                ) AS expired
+            ")
+    
+            ->addSelect("
+                SUM(
+                    CASE
+                        WHEN l.status = 'active'
+                        AND l.expiresAt > :now
+                        AND l.expiresAt <= :expiresSoon
+                        THEN 1 ELSE 0
+                    END
+                ) AS expiring
+            ")
+    
+            ->setParameter('now', $now)
+            ->setParameter('expiresSoon', $expiresSoon)
+            ->getQuery()
+            ->getSingleResult();
+    
+        return array_map(
+            static fn ($value): int => (int) ($value ?? 0),
+            $result
+        );
+    }
+
+    /**
      * Liefert die Lizenzstatistik gruppiert nach Modul/Produkt.
      */
     public function getStatisticsByProduct(): array
@@ -27,6 +98,8 @@ class LicenseRepository extends ServiceEntityRepository
             ->select('p.id AS productId')
             ->addSelect('p.name AS productName')
             ->addSelect('p.slug AS productSlug')
+            ->addSelect('p.active AS productActive')
+            ->addSelect('(SELECT COUNT(a.id) FROM App\Entity\Activation a JOIN a.license activationLicense WHERE activationLicense.product = p AND a.active = true) AS activationCount')
  
             ->addSelect('COUNT(l.id) AS total')
  
@@ -77,6 +150,7 @@ class LicenseRepository extends ServiceEntityRepository
             ->groupBy('p.id')
             ->addGroupBy('p.name')
             ->addGroupBy('p.slug')
+            ->addGroupBy('p.active')
             ->orderBy('p.name', 'ASC')
             ->getQuery()
             ->getArrayResult();

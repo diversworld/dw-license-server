@@ -51,13 +51,13 @@ class UserCrudController extends AbstractCrudController
             ->setIcon('fa fa-address-card');
 
         yield TextField::new('street', 'Straße')
-            ->setColumns(8);
+            ->setColumns(9);
 
         yield TextField::new('postalCode', 'PLZ')
             ->setColumns(4);
 
         yield TextField::new('city', 'Wohnort')
-            ->setColumns(12);
+            ->setColumns(8);
 
         yield FormField::addFieldset('Kontaktdaten')
             ->setIcon('fa fa-phone');

@@ -3,7 +3,6 @@
 namespace App\Controller\Admin;
 
 use App\Entity\User;
-use App\Repository\LicenseRepository;
 use App\Form\ChangePasswordType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
@@ -21,26 +20,45 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Theme;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Locale;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
+use App\Repository\ActivationRepository;
+use App\Repository\CustomerRepository;
+use App\Repository\LicenseRepository;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use App\Controller\Admin\LicenseCrudController;
+
 
 #[AdminDashboard(routePath: '/admin/{_locale}', routeName: 'admin', routeOptions: ['requirements' => ['_locale' => 'de|en|fr'], 'defaults' => ['_locale' => 'de'],'methods' => ['GET'],],)]
 #[IsGranted('ROLE_ADMIN')]
 class DashboardController extends AbstractDashboardController
 {
-    public function __construct(private readonly LicenseRepository $licenseRepository)
+    public function __construct(
+        private readonly LicenseRepository $licenseRepository,
+        private readonly CustomerRepository $customerRepository,
+        private readonly ActivationRepository $activationRepository,
+        private readonly AdminUrlGenerator $adminUrlGenerator,
+    )
     {
     }
 
     public function index(): Response
     {
-        return $this->render(
-            'admin/dashboard.html.twig',
-            [
-                'licenseStatistics' =>
-                    $this->licenseRepository->getStatisticsByProduct(),
-                'licenseTotals' =>
-                    $this->licenseRepository->getTotalStatistics(),
-            ]
-        );
+        return $this->render('admin/dashboard.html.twig', [
+            'stats' => [
+                'customers' => $this->customerRepository
+                    ->getDashboardStatistics(),
+    
+                'licenses' => $this->licenseRepository
+                    ->getDashboardStatistics(),
+    
+                'activations' => $this->activationRepository
+                    ->getDashboardStatistics(),
+            ],
+    
+            'productStatistics' => $this->licenseRepository
+                ->getStatisticsByProduct(),
+    
+            'dashboardUrls' => $this->createDashboardUrls(),
+        ]);
     }
 
 	public function configureDashboard(): Dashboard
@@ -209,6 +227,32 @@ class DashboardController extends AbstractDashboardController
             ->generateUrl();
 
         return $this->redirect($url);
+    }
+
+    private function createLicenseUrl(?string $view = null): string
+    {
+        $url = $this->adminUrlGenerator
+            ->unsetAll()
+            ->setController(LicenseCrudController::class)
+            ->setAction(Crud::PAGE_INDEX);
+    
+        if ($view !== null) {
+            $url->set('licenseView', $view);
+        }
+    
+        return $url->generateUrl();
+    }
+    
+    private function createDashboardUrls(): array
+    {
+        return [
+            'licenses' => $this->createLicenseUrl(),
+            'activeLicenses' => $this->createLicenseUrl('active'),
+            'expiringLicenses' => $this->createLicenseUrl('expiring'),
+            'expiredLicenses' => $this->createLicenseUrl('expired'),
+            'suspendedLicenses' => $this->createLicenseUrl('suspended'),
+            'revokedLicenses' => $this->createLicenseUrl('revoked'),
+        ];
     }
 
     #[Route(
