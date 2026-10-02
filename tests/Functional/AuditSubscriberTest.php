@@ -214,6 +214,27 @@ class AuditSubscriberTest extends WebTestCase
         self::assertSame(['old' => 'Initial', 'new' => null], $changes['changelog']);
     }
 
+    public function testAuditEntriesCannotBeCreatedManually(): void
+    {
+        $user = (new User())->setEmail('audit-admin@example.org')->setFirstname('Test')->setLastname('Admin')
+            ->setPassword('test')->setRoles(['ROLE_ADMIN']);
+        $this->em->persist($user);
+        $this->em->flush();
+        $this->client->loginUser($user);
+        $router = static::getContainer()->get('router');
+
+        $this->client->request('GET', $router->generate('admin_audit_log_index', ['_locale' => 'de']));
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('a.action-new');
+
+        $newUrl = $router->generate('admin_audit_log_new', ['_locale' => 'de']);
+        foreach (['GET', 'POST'] as $method) {
+            $this->client->request($method, $newUrl);
+            self::assertResponseStatusCodeSame(403);
+        }
+        self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT COUNT(*) FROM audit_log'));
+    }
+
     private function assertEntry(string $table, string $action, string $id): array
     {
         $entries = $this->em->getConnection()->fetchAllAssociative('SELECT * FROM audit_log WHERE event_type = ? AND entity_id = ?', [$table.'.'.$action, $id]);
