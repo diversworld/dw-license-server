@@ -27,6 +27,9 @@ class LicenseKeysCommand extends Command
 
             return Command::SUCCESS;
         }
+        if (file_exists($this->directory.'/keyring.json') || is_dir($this->directory.'/keys')) {
+            throw new \RuntimeException('Ein Schlüsselring existiert bereits. Fehlende Schlüssel aus dem bisherigen Schlüsselverzeichnis wiederherstellen.');
+        }
         $pair = sodium_crypto_sign_keypair();
         $oldMask = umask(0077);
         try {

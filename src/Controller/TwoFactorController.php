@@ -39,7 +39,7 @@ class TwoFactorController extends AbstractController
     #[Route('/security/2fa/setup', name: 'two_factor_setup', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_VIEWER')]
     #[RateLimit('two_factor')]
-    public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens): Response
+    public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens, \Symfony\Contracts\Translation\TranslatorInterface $translator): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -60,7 +60,7 @@ class TwoFactorController extends AbstractController
         $codes = [];
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$totp->checkCode($pending, $form->get('code')->getData())) {
-                $form->get('code')->addError(new \Symfony\Component\Form\FormError('two_factor.invalid_code'));
+                $form->get('code')->addError(new \Symfony\Component\Form\FormError($translator->trans('two_factor.invalid_code')));
             } else {
                 $codes = array_map(static fn (): string => bin2hex(random_bytes(10)), range(1, 10));
                 $user->enableTwoFactor($secret, $codes);

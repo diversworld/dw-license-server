@@ -125,6 +125,7 @@ class PriorityFeaturesTest extends WebTestCase
         $secret = $crawler->filter('main > code')->text();
         $this->client->submitForm('Zwei-Faktor-Anmeldung aktivieren', ['form[password]' => 'test-password-1234', 'form[code]' => 'invalid']);
         self::assertFalse($user->isTotpAuthenticationEnabled());
+        self::assertStringContainsString('Der Code ist ungültig.', $this->client->getResponse()->getContent());
         $this->client->submitForm('Zwei-Faktor-Anmeldung aktivieren', ['form[password]' => 'test-password-1234', 'form[code]' => \OTPHP\TOTP::createFromSecret($secret)->now()]);
         self::assertResponseIsSuccessful();
         $user = $this->em->find(User::class, $user->getId());
@@ -215,6 +216,34 @@ class PriorityFeaturesTest extends WebTestCase
         self::assertResponseRedirects('/login');
         $this->license = $this->em->find(License::class, $this->license->getId());
         self::assertSame('active', $this->license->getStatus());
+    }
+
+    public function testRolePermissionsApplyToCrudRoutesAndActionForms(): void
+    {
+        $router = static::getContainer()->get('router');
+        foreach ([
+            'ROLE_VIEWER' => ['admin_license_new' => 403, 'admin_customer_new' => 403, 'admin_product_new' => 403, 'admin_user_index' => 403, 'admin_license_index' => 200],
+            'ROLE_SUPPORT' => ['admin_license_new' => 403, 'admin_customer_new' => 403, 'admin_product_new' => 403, 'admin_license_index' => 200],
+            'ROLE_SALES' => ['admin_license_new' => 200, 'admin_customer_new' => 200, 'admin_product_new' => 403, 'admin_user_index' => 403],
+        ] as $role => $routes) {
+            $user = $this->user($role);
+            $this->client->loginUser($user, 'main', ['2fa_complete' => true]);
+            foreach ($routes as $route => $status) {
+                $this->client->request('GET', $router->generate($route, ['_locale' => 'de']));
+                self::assertResponseStatusCodeSame($status);
+            }
+            $this->client->request('GET', $router->generate('admin_license_history', ['id' => (string) $this->license->getId(), '_locale' => 'en']));
+            self::assertResponseIsSuccessful();
+            self::assertSelectorTextContains('h1', 'License history');
+        }
+        $user = $this->user('ROLE_SUPPORT');
+        $this->client->loginUser($user, 'main', ['2fa_complete' => true]);
+        $this->client->request('GET', '/admin/licenses/'.$this->license->getId().'/actions/pause');
+        self::assertResponseIsSuccessful();
+        $this->client->submitForm('Aktion ausführen', ['form[reason]' => 'Support incident']);
+        self::assertResponseRedirects();
+        $this->client->request('GET', '/admin/licenses/'.$this->license->getId().'/actions/reactivate');
+        self::assertResponseIsSuccessful();
     }
 
     private function user(string $role, bool $enabled = true): User
