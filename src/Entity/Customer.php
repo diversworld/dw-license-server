@@ -30,6 +30,9 @@ class Customer
     #[Assert\NotBlank]
     private ?string $email = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+	private ?string $logoImage = null;
+
     #[ORM\Column(length: 255)]
     private ?string $street = null;
 
@@ -117,6 +120,27 @@ class Customer
 
         return $this;
     }
+
+    public function getLogoImage(): ?string
+	{
+		return $this->logoImage;
+	}
+
+	public function setLogoImage(?string $logoImage): static
+	{
+		$this->logoImage = $logoImage;
+
+		return $this;
+	}
+
+	public function getLogoImageUrl(): string
+	{
+		if ($this->logoImage) {
+			return '/uploads/profile/' . $this->logoImage;
+		}
+
+		return '/images/Diversworld_Viking.png';
+	}
 
     public function getEmail(): ?string
     {

@@ -48,7 +48,7 @@ class DashboardController extends AbstractDashboardController
         return Dashboard::new()
             // the name visible to end users
             ->setTitle('Diversworld Lizenzverwaltung')
-            ->setFaviconPath('favicon.svg')
+            ->setFaviconPath('favicon.ico')
             ->useEntityTranslations()
             ->setTranslationDomain('messages')
             // the domain used by default is 'messages'

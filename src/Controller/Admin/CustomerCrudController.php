@@ -5,7 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Customer;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\{Action, Actions, Crud};
-use EasyCorp\Bundle\EasyAdminBundle\Field\{ArrayField, AssociationField, BooleanField, ChoiceField, DateTimeField, EmailField, IntegerField, TextField, TextareaField, FormField};
+use EasyCorp\Bundle\EasyAdminBundle\Field\{ArrayField, AssociationField, BooleanField, ChoiceField, DateTimeField, EmailField, ImageField, IntegerField, TextField, TextareaField, FormField};
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
@@ -40,6 +40,17 @@ class CustomerCrudController extends AbstractCrudController
 			->setHelp(
 			'Diese E-Mail-Adresse wird auch für die Anmeldung verwendet.'
 		);
+
+		yield ImageField::new('logoImage', 'Logo')
+			->setBasePath('/uploads/profile')
+			->setUploadDir('public/uploads/profile')
+			->setUploadedFileNamePattern('[uuid].[extension]')
+			->setRequired(false)
+			->setColumns(12)
+			->setHelp('Profilbild als JPG, PNG oder WebP.')
+			->setFormTypeOption('attr', [
+				'accept' => 'image/jpeg,image/png,image/webp',
+			]);
 
 		yield FormField::addFieldset('Anschrift')
 			->setIcon('fa fa-address-card');
