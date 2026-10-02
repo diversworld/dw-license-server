@@ -35,7 +35,7 @@ use App\Entity\User;
 use App\Entity\Activation;
 
 
-#[AdminDashboard(routePath: '/admin/{_locale}', routeName: 'admin', routeOptions: ['requirements' => ['_locale' => 'de|en|fr'], 'defaults' => ['_locale' => 'de'],'methods' => ['GET'],],)]
+#[AdminDashboard(routePath: '/admin/{_locale}', routeName: 'admin', routeOptions: ['requirements' => ['_locale' => 'de|en|fr|es'], 'defaults' => ['_locale' => 'de'],'methods' => ['GET'],],)]
 #[IsGranted('ROLE_ADMIN')]
 class DashboardController extends AbstractDashboardController
 {
@@ -80,10 +80,9 @@ class DashboardController extends AbstractDashboardController
             ->setTitle($this->translator->trans('dashboard.title', domain: 'messages'))
             ->setFaviconPath('favicon.ico')
             ->useEntityTranslations()
-            ->setTranslationDomain('messages')
             // the domain used by default is 'messages'
-            //->setTranslationDomain('my-custom-domain')
-
+            ->setTranslationDomain('messages')
+            
             // set this option if you prefer the page content to span the entire
             // browser width, instead of the default design which sets a max width
             //->renderContentMaximized()
@@ -120,14 +119,15 @@ class DashboardController extends AbstractDashboardController
             ->setLocales([
                 Locale::new('de', 'DE Deutsch', 'locale-flag locale-flag-de'), // locale without custom options
                 Locale::new('en', 'GB English', 'locale-flag locale-flag-gb'), // custom label and icon
-				Locale::new('fr', 'FR Français', 'locale-flag locale-flag-fr') // custom label and icon
+				Locale::new('fr', 'FR Français', 'locale-flag locale-flag-fr'), // custom label and icon
+                Locale::new('es', 'ES Español', 'locale-flag locale-flag-es') // custom label and icon
             ]);
     }
 
     public function configureAssets(): Assets
 	{
 		return parent::configureAssets()
-			->addCssFile('css/admin.css');
+			->addCssFile('css/admin.css?v=20261002-es');
 	}
 		
     public function configureMenuItems(): iterable
