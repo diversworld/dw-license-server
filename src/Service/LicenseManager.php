@@ -37,7 +37,7 @@ class LicenseManager
             throw new HttpException(503, 'License is busy. Please retry.');
         }
         try {
-            return $this->em->wrapInTransaction(function () use ($license, $request): string {
+            return $this->em->getConnection()->transactional(function () use ($license, $request): string {
                 // The database row lock also serializes requests across server instances.
                 $this->em->refresh($license, LockMode::PESSIMISTIC_WRITE);
                 $this->assertUsable($license);
@@ -59,7 +59,10 @@ class LicenseManager
                     $this->audit('activated', $license, $activation);
                 }
 
-                return $this->issue($license, $activation);
+                $token = $this->issue($license, $activation);
+                $this->em->flush();
+
+                return $token;
             });
         } finally {
             $lock->release();
@@ -85,12 +88,27 @@ class LicenseManager
             || $license->getProduct()?->getSlug() !== ($claims['product'] ?? null) || 'online' !== $license->getMode()) {
             throw new HttpException(403, 'Installation disabled or unknown.');
         }
-        $this->assertUsable($license);
-        $token = $this->issue($license, $activation);
-        $this->audit('refreshed', $license, $activation);
-        $this->em->flush();
+        $lock = $this->lockFactory->createLock('license.'.$license->getId(), 30);
+        if (!$lock->acquire()) {
+            throw new HttpException(503, 'License is busy. Please retry.');
+        }
+        try {
+            return $this->em->getConnection()->transactional(function () use ($license, $activation): string {
+                $this->em->refresh($license, LockMode::PESSIMISTIC_WRITE);
+                $this->em->refresh($activation, LockMode::PESSIMISTIC_WRITE);
+                if (!$activation->isActive()) {
+                    throw new HttpException(403, 'Installation disabled.');
+                }
+                $this->assertUsable($license);
+                $token = $this->issue($license, $activation);
+                $this->audit('refreshed', $license, $activation);
+                $this->em->flush();
 
-        return $token;
+                return $token;
+            });
+        } finally {
+            $lock->release();
+        }
     }
 
     private function assertUsable(License $license): void

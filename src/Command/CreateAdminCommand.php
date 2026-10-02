@@ -23,12 +23,18 @@ class CreateAdminCommand extends Command
 
     protected function configure(): void
     {
+        $this->addOption('role', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'admin, support, sales oder viewer', 'admin');
         $this->addArgument('email', InputArgument::REQUIRED)->addArgument('firstname', InputArgument::OPTIONAL, '', 'Admin')->addArgument('lastname', InputArgument::OPTIONAL, '', '');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $role = strtoupper($input->getOption('role'));
+        if (!in_array($role, ['ADMIN', 'SUPPORT', 'SALES', 'VIEWER'], true)) {
+            $io->error('Unbekannte Rolle.');
+            return Command::FAILURE;
+        }
         $email = strtolower(trim($input->getArgument('email')));
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $this->users->findOneBy(['email' => $email])) {
             $io->error('E-Mail ungültig oder Benutzer existiert bereits.');
@@ -47,11 +53,11 @@ class CreateAdminCommand extends Command
 
             return $value;
         });
-        $user = (new User())->setEmail($email)->setFirstname($input->getArgument('firstname'))->setLastname($input->getArgument('lastname'))->setRoles(['ROLE_ADMIN']);
+        $user = (new User())->setEmail($email)->setFirstname($input->getArgument('firstname'))->setLastname($input->getArgument('lastname'))->setRoles(['ROLE_'.$role]);
         $user->setPassword($this->hasher->hashPassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();
-        $io->success('Administrator angelegt.');
+        $io->success('Benutzer angelegt; TOTP wird bei der ersten Anmeldung eingerichtet.');
 
         return Command::SUCCESS;
     }

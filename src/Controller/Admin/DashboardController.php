@@ -175,7 +175,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(
             UserCrudController::class,
             icon: 'fa fa-user-shield'
-        );
+        )->setPermission('USER_MANAGE');
 
         yield MenuItem::linkToLogout(
             'dashboard.logoff',

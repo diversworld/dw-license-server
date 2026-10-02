@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Install the license application into an existing Symfony project (Python 3.9+)."""
 import argparse
+import json
 import os
 from pathlib import Path
 import shutil
@@ -101,10 +102,25 @@ def main():
     key_target = target / 'config/license'
     key_source = args.keys_dir.resolve() if args.keys_dir else key_target
     has_private = (key_target / 'private.key').exists()
-    if args.generate_keys and (has_private or (key_target / 'public.key').exists()):
+    if args.generate_keys and (has_private or (key_target / 'public.key').exists() or (key_target / 'keyring.json').exists() or (key_target / 'keys').exists()):
         fail('Eine Schlüsseldatei existiert bereits. --generate-keys entfernen.')
+    key_files = [Path('private.key'), Path('public.key')]
+    if (key_source / 'keyring.json').exists():
+        validate_destination(key_source, Path('keyring.json'))
+        ring = json.loads((key_source / 'keyring.json').read_text())
+        keys = ring.get('publicKeys', {})
+        if not isinstance(keys, dict) or ring.get('active') not in keys or ring.get('legacy') not in keys:
+            fail('Ungültige Signierschlüsselliste.')
+        key_files.append(Path('keyring.json'))
+        for key_id in keys:
+            if len(key_id) != 16 or any(c not in '0123456789abcdef' for c in key_id):
+                fail('Ungültige Schlüsselkennung.')
+            if key_id != ring['legacy']:
+                key_files.append(Path('keys') / f'{key_id}.key')
     if not args.generate_keys:
-        for name in ('private.key', 'public.key'):
+        for name in key_files:
+            validate_destination(key_source, name)
+            validate_destination(key_target, name)
             if not (key_source / name).is_file():
                 fail(f'{key_source / name} fehlt. --keys-dir angeben oder für einen Neustart --generate-keys wählen.')
             existing = key_target / name
@@ -194,8 +210,9 @@ chmod($path, 0600);
         os.chmod(target / '.env.local.php', 0o600)
         key_target.mkdir(parents=True, exist_ok=True)
         if args.keys_dir:
-            for name in ('private.key', 'public.key'):
+            for name in key_files:
                 if not (key_target / name).exists():
+                    (key_target / name).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
                     with (key_target / name).open('xb') as handle:
                         handle.write((key_source / name).read_bytes())
                     os.chmod(key_target / name, 0o600)
@@ -205,6 +222,9 @@ chmod($path, 0600);
 $secret = base64_decode(trim(file_get_contents('config/license/private.key')), true);
 $public = base64_decode(trim(file_get_contents('config/license/public.key')), true);
 if (false === $secret || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES || false === $public || !hash_equals(sodium_crypto_sign_publickey_from_secretkey($secret), $public)) { throw new RuntimeException('Ungültiges oder nicht zusammengehöriges Ed25519-Schlüsselpaar.'); }
+require 'vendor/autoload.php';
+$signer = new App\Service\LicenseSigner(getcwd().'/config/license/private.key');
+$signer->publicKey();
 '''], target, env)
         for command in (
             ['cache:clear'], ['lint:container'],

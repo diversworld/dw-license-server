@@ -207,3 +207,45 @@ dashboard:
     logoff: 'Se déconnecter'
     profile: 'Mon profil'
     change_password: 'Changer le mot de passe'
+
+# License policies, lifecycle and two-factor authentication
+"two_factor.title": "Authentification à deux facteurs"
+"two_factor.setup": "Configurer l’authentificateur"
+"two_factor.setup_help": "Ajoutez cette clé secrète dans votre application, puis confirmez votre mot de passe et le code actuel."
+"two_factor.challenge_help": "Saisissez le code actuel ou un code de récupération inutilisé."
+"two_factor.recovery_help": "Conservez ces codes en lieu sûr. Ils ne sont affichés qu’une fois et sont à usage unique."
+"two_factor.password": "Mot de passe actuel"
+"two_factor.code": "Code d’authentification"
+"two_factor.invalid_code": "Le code est invalide."
+"two_factor.verify": "Vérifier"
+"two_factor.enable": "Activer l’authentification à deux facteurs"
+"policy.token_help": "Secondes avant le prochain contrôle en ligne (60 à 31536000)."
+"policy.grace_help": "Secondes supplémentaires sans contact serveur. 0 arrête l’utilisation à la fin de la durée du jeton."
+"entities.App\\Entity\\Product.properties.tokenLifetimeSeconds": "Durée du jeton (secondes)"
+"entities.App\\Entity\\Product.properties.gracePeriodSeconds": "Délai de grâce (secondes)"
+"license_action.renew": "Prolonger"
+"license_action.pause": "Suspendre"
+"license_action.revoke": "Révoquer"
+"license_action.reactivate": "Réactiver"
+"license_action.history": "Historique de la licence"
+"license_action.reason": "Motif"
+"license_action.actor": "Effectué par"
+"license_action.time": "Date"
+"license_action.action": "Action"
+"license_action.change": "Modification"
+"license_action.expires_at": "Nouvelle date d’expiration"
+"license_action.confirm": "Exécuter l’action"
+"license_action.saved": "Action enregistrée."
+"license_action.unlimited": "Illimité"
+"license_action.empty": "Aucune action pour cette licence."
+"license_action.invalid_reason": "Le motif doit contenir 3 à 1000 caractères."
+"license_action.invalid_expiry": "La nouvelle date doit être future et postérieure à la date précédente."
+"license_action.invalid_transition": "Cette action est impossible dans l’état actuel. Prolongez d’abord les licences expirées."
+"license_action.token_notice": "Les jetons en ligne existants expirent à la fin de leur durée plus le délai de grâce. Les jetons hors ligne restent valables jusqu’à leur expiration."
+"role.admin": "Administration"
+"role.support": "Assistance"
+"role.sales": "Ventes"
+"role.viewer": "Lecture seule"
+license_status.active: 'Active'
+license_status.suspended: 'Suspendue'
+license_status.revoked: 'Révoquée'

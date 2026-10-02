@@ -1,6 +1,7 @@
 """Tests execute the deployment CLI; PHP and Composer are controlled test doubles."""
 import os
 import ast
+import json
 import shutil
 from pathlib import Path
 import subprocess
@@ -76,6 +77,26 @@ if os.environ.get('DEPLOY_TEST_FAIL') and 'doctrine:migrations:migrate' in sys.a
         backups = list(self.root.glob('*backup*/application.tar.gz'))
         self.assertEqual(1, len(backups))
         self.assertEqual(0o700, backups[0].parent.stat().st_mode & 0o777)
+
+    def test_rotated_keyring_is_copied_with_private_keys_without_replacing_existing_keys(self):
+        keys = self.root / 'rotated keys'
+        (keys / 'keys').mkdir(parents=True)
+        for name in ('private.key', 'public.key'):
+            (keys / name).write_text('keep-'+name)
+        ring = {'legacy': 'aaaaaaaaaaaaaaaa', 'active': 'bbbbbbbbbbbbbbbb',
+                'publicKeys': {'aaaaaaaaaaaaaaaa': 'old-public', 'bbbbbbbbbbbbbbbb': 'new-public'}}
+        (keys / 'keyring.json').write_text(json.dumps(ring))
+        (keys / 'keys/bbbbbbbbbbbbbbbb.key').write_text('new-secret')
+        result = self.execute('--keys-dir', str(keys))
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(ring, json.loads((self.target / 'config/license/keyring.json').read_text()))
+        private = self.target / 'config/license/keys/bbbbbbbbbbbbbbbb.key'
+        self.assertEqual('new-secret', private.read_text())
+        self.assertEqual(0o600, private.stat().st_mode & 0o777)
+        (keys / 'keyring.json').write_text(json.dumps(dict(ring, active='aaaaaaaaaaaaaaaa')))
+        result = self.execute('--keys-dir', str(keys))
+        self.assertNotEqual(0, result.returncode)
+        self.assertEqual(ring, json.loads((self.target / 'config/license/keyring.json').read_text()))
 
     def test_real_php_configuration_preserves_credentials(self):
         vendor = SCRIPT.parent.parent / 'vendor'

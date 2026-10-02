@@ -10,7 +10,7 @@
         <h2>Signierte Lizenz</h2>
         <p>Dieses Token in der Contao-Lizenzverwaltung einfügen oder als Datei mit der Endung .lic speichern und importieren.</p>
         <textarea readonly rows="8" style="width:100%" aria-label="Signierte Lizenz">{{ token }}</textarea>
-        <h2>Öffentlicher Ed25519-Prüfschlüssel</h2><p>Diesen Schlüssel in Contao als <code>contao_issue_service.license_public_key</code> eintragen. Die Datei <code>config/jwt/public.pem</code> gehört zur separaten JWT-Anmeldung und ist hierfür ungeeignet.</p><pre style="white-space:pre-wrap">{{ public_key }}</pre>
+        <h2>Öffentliche Ed25519-Prüfschlüssel</h2><p>Diese JSON-Schlüsselliste in Contao als <code>contao_issue_service.license_public_key</code> eintragen. Die Datei <code>config/jwt/public.pem</code> gehört zur separaten JWT-Anmeldung und ist hierfür ungeeignet.</p><pre style="white-space:pre-wrap">{{ public_key }}</pre>
         <p>Validierungs-Endpunkt: <code>{{ url('api_license_validate') }}</code></p>
     {% endif %}
 </main>

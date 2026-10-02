@@ -15,7 +15,7 @@ ddev exec php bin/console app:admin:create admin@example.org
 
 Der letzte Befehl fragt das Passwort verdeckt ab und überschreibt keine vorhandenen Benutzer. Es gibt keine voreingestellten Zugangsdaten.
 
-`config/license/private.key` enthält den Base64-Ed25519-Secret-Key. Beide Schlüsseldateien sind git-ignoriert. Den privaten Schlüssel sichern und nur für den PHP-Prozess lesbar bereitstellen. Die Schlüsselgenerierung ersetzt keine vorhandenen Schlüssel. Bei einem Serverumzug denselben Schlüssel sicher übernehmen; ein neuer Schlüssel macht bestehende Tokens ungültig. `config/license/public.key` wird in den Contao-Installationen hinterlegt. Nicht `config/jwt/public.pem` verwenden: Dieser RSA-Schlüssel kann die Ed25519-Lizenzen nicht prüfen. Die Lexik-JWT-Schlüssel sind davon unabhängig und werden für dieses Lizenzprotokoll nicht verwendet.
+`config/license/private.key` enthält den Base64-Ed25519-Secret-Key. Beide Schlüsseldateien sind git-ignoriert. Den privaten Schlüssel sichern und nur für den PHP-Prozess lesbar bereitstellen. Die Schlüsselgenerierung ersetzt keine vorhandenen Schlüssel. Bei einem Serverumzug das gesamte Verzeichnis `config/license/` einschließlich `keyring.json` und `keys/` sicher übernehmen. `config/license/public.key` wird in den Contao-Installationen hinterlegt. Nicht `config/jwt/public.pem` verwenden: Dieser RSA-Schlüssel kann die Ed25519-Lizenzen nicht prüfen. Die Lexik-JWT-Schlüssel sind davon unabhängig und werden für dieses Lizenzprotokoll nicht verwendet.
 
 Für mehrere Serverinstanzen benötigt `LOCK_DSN` einen gemeinsamen unterstützten Symfony-Lock-Store; zusätzlich serialisiert eine Datenbank-Zeilensperre konkurrierende Aktivierungen. Rate-Limiter und Sessions sollten dann ebenfalls einen gemeinsamen Store verwenden. Der Standard ist für einen einzelnen DDEV-/Serverprozess-Verbund eingerichtet.
 
@@ -29,13 +29,13 @@ Für mehrere Serverinstanzen benötigt `LOCK_DSN` einen gemeinsamen unterstützt
 
 Eine wiederholte Aktivierung derselben Domain und desselben Mandanten verbraucht keinen weiteren Platz. Gesperrte Installationen werden durch erneute Aktivierungsanfragen nicht automatisch aktiviert. Eine neue Domain verbraucht einen Platz. Für einen Umzug die alte Installation sperren und die neue Domain zuweisen. Mandantenkennung und Domain einer bestehenden Aktivierung sind nicht editierbar.
 
-Online-Tokens sollen nach 24 Stunden erneuert werden. Das vorhandene Bundle gewährt anschließend maximal 30 Tage Kulanz; ein gesetztes Lizenzablaufdatum bleibt die harte Grenze. Unbefristete Online-Lizenzen erhalten jeweils ein Token für 31 Tage. Offline-Lizenzen benötigen ein explizites Ablaufdatum. Eine Sperre kann lokal bereits ausgegebene Tokens erst beim nächsten erfolgreichen Serverkontakt oder bei deren Ablauf unwirksam machen.
+Die Tokenlaufzeit und zusätzliche Kulanzzeit werden je Produkt in Sekunden konfiguriert (Standard: 86400 und 2592000). Online-Tokens enthalten `refresh_after` und `grace_until`; `expires_at` ist spätestens das Ende der Kulanzzeit, auch bei langfristigen oder unbefristeten Lizenzen. Ein gesetztes Lizenzablaufdatum bleibt die frühere harte Grenze. 0 Sekunden Kulanz beendet die Nutzung direkt nach der Tokenlaufzeit. Änderungen der Produktpolitik wirken auf neu ausgestellte Tokens; bestehende Tokens behalten ihre signierten Fristen. Offline-Lizenzen benötigen ein explizites Ablaufdatum. Eine Sperre kann lokal bereits ausgegebene Tokens erst beim nächsten erfolgreichen Serverkontakt oder bei deren Ablauf unwirksam machen.
 
 Die Domainbindung beruht auf vertrauenswürdiger Contao-Konfiguration und beweist keine DNS-Inhaberschaft. Wer PHP-Code und Konfiguration seiner Installation kontrolliert, kann lokale Lizenzprüfungen verändern.
 
 ## Contao Issue Service Bundle
 
-Abgestimmt mit `/home/diversworld/sources/contao-issue-service-bundle/docs/SLA_LICENSE.md` und dessen `LicenseValidationService`. Das Client-Repository wird von diesem Projekt nicht verändert.
+Abgestimmt mit `/home/diversworld/sources/contao-issue-service-bundle/docs/SLA_LICENSE.md` und dessen `LicenseValidationService`. Der Validator im Client-Repository wurde für `kid`, öffentliche Schlüssellisten und `grace_until` angepasst. Dieses Client-Update muss vor der ersten Schlüsselrotation verteilt werden. Einzelne Base64-Prüfschlüssel und alte Tokens bleiben kompatibel.
 
 In der **Contao-Anwendung** unter `config/services.yaml`:
 
@@ -56,6 +56,44 @@ ddev exec php vendor/bin/contao-console issue:license:validate --online
 ```
 
 `--offline-file` importiert auch ein initiales Online-Token. Das Bundle unterstützt aktuell den Import signierter Tokens und deren Erneuerung; es besitzt noch keinen Eingabedialog für den rohen Lizenzschlüssel.
+
+## Signierschlüssel rotieren
+
+Rotation ersetzt niemals den bisherigen Schlüssel. Neue Tokens tragen eine signierte Schlüsselkennung `kid`; Tokens ohne Kennung werden weiterhin mit dem ursprünglichen Schlüssel geprüft.
+
+```bash
+php bin/console app:license:rotate prepare
+php bin/console app:license:rotate public-keys
+# Zuerst den aktualisierten Client und die ausgegebene öffentliche JSON-Liste verteilen.
+php bin/console app:license:rotate activate SCHLUESSELKENNUNG
+```
+
+Die vollständige öffentliche JSON-Liste als String in `contao_issue_service.license_public_key` konfigurieren. `public.key` bleibt der ursprüngliche Prüfschlüssel; nach Rotation die Liste aus `public-keys` verwenden. Bei nicht aktualisierten Clients die Aktivierung verschieben. Die Signierdateien und `keyring.json` bleiben privat und git-ignoriert. Auch eine Rückkehr zu einer früheren Schlüsselkennung ist über `activate` möglich; alte öffentliche Schlüssel bleiben erhalten.
+
+## Zwei-Faktor-Anmeldung und Rollen
+
+Bei der ersten Anmeldung müssen Verwaltungsbenutzer ihren Authenticator mit dem angezeigten Geheimnis einrichten und Passwort sowie aktuellen TOTP-Code bestätigen. Es gelten TOTP/SHA1, sechs Ziffern und 30 Sekunden. Danach werden zehn einmalige Wiederherstellungscodes genau einmal angezeigt; in der Datenbank liegen nur deren SHA-256-Hashes. Bei weiteren Anmeldungen folgt auf das Passwort die TOTP-Abfrage. Authenticator-Geheimnisse und Wiederherstellungscodes werden im AuditLog geschwärzt. Bestehende Sitzungen ohne abgeschlossene Zwei-Faktor-Anmeldung müssen sich erneut anmelden.
+
+| Rolle | Berechtigungen |
+| --- | --- |
+| Administration | Alle Verwaltungsaktionen einschließlich Rollen, Produkteinstellungen und Widerruf |
+| Support | Lesen, Installationen verwalten, Tokens ausstellen, pausieren und reaktivieren |
+| Vertrieb | Lesen, Kunden und Lizenzen anlegen/bearbeiten, verlängern und Tokens ausstellen |
+| Nur Lesen | Dashboard, Lizenzlisten und Historie lesen |
+
+Jeder Benutzer kann sein eigenes Profil pflegen. Rollen werden in der Benutzerverwaltung ausgewählt. Neue Benutzer werden mit verdeckter Passwortabfrage angelegt:
+
+```bash
+php bin/console app:admin:create support@example.org Vorname Nachname --role=support
+```
+
+Zulässige Rollenoptionen: `admin`, `support`, `sales`, `viewer`. Änderungen und sensible Aktionen werden zusätzlich serverseitig durch Voter geprüft.
+
+## Lizenzaktionen und Historie
+
+In der Lizenzliste stehen Verlängern, Pausieren, Widerrufen, Reaktivieren und Lizenzhistorie bereit. Jede Änderung benötigt eine Begründung mit 3 bis 1000 Zeichen. Die Historie speichert Bearbeiter, Zeitpunkt, Begründung sowie Status und Ablaufdatum vor und nach der Aktion. Sie ist über die Anwendung unveränderlich; auch AuditLogs dürfen weder manuell angelegt, bearbeitet noch gelöscht werden.
+
+Verlängern verlangt ein zukünftiges Ablaufdatum nach dem bisherigen Datum und lässt den Status unverändert. Pausieren ist für aktive Lizenzen möglich. Widerrufen verlangt Administrationsrechte. Abgelaufene Lizenzen müssen vor einer Reaktivierung verlängert werden. Status und das spätere Ablaufdatum werden über diese Vorgänge geändert; ein initiales Ablaufdatum kann beim Anlegen gesetzt werden. Bereits ausgegebene Online-Tokens bleiben bis zum nächsten Serverkontakt oder ihrer signierten harten Grenze verwendbar. Offline-Tokens bleiben bis zu ihrem Ablaufdatum verwendbar und lassen sich ohne Serverkontakt nicht vorzeitig sperren.
 
 ## JSON-API
 
@@ -129,7 +167,7 @@ python3 /pfad/git-license/scripts/deploy.py \
     --keys-dir /sicherer/pfad/bisherige-lizenzschluessel
 ```
 
-Das Schlüsselverzeichnis muss die zusammengehörigen Dateien `private.key` und `public.key` aus `config/license/` enthalten. Bereits vorhandene Zielschlüssel werden niemals durch andere Schlüssel ersetzt. Wenn die Dateien schon im Ziel unter `config/license/` liegen, entfällt `--keys-dir`. Bestehende Lizenzdaten müssen vorab separat in die Zieldatenbank importiert werden; das Skript importiert keine Datenbanken.
+Das Schlüsselverzeichnis muss die zusammengehörigen Dateien `private.key` und `public.key` aus `config/license/` enthalten. Bei bereits erfolgter Rotation auch `keyring.json` und alle Dateien unter `keys/` übernehmen. Bereits vorhandene Zielschlüssel werden niemals durch andere Schlüssel ersetzt. Wenn die Dateien schon im Ziel unter `config/license/` liegen, entfällt `--keys-dir`. Bestehende Lizenzdaten müssen vorab separat in die Zieldatenbank importiert werden; das Skript importiert keine Datenbanken.
 
 Für eine **neue Installation ohne bisherige Lizenzen**:
 

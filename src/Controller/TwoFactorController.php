@@ -21,9 +21,12 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 class TwoFactorController extends AbstractController
 {
     #[Route('/2fa', name: '2fa_login', methods: ['GET'])]
-    public function challenge(): never
+    public function challenge(Request $request, #[\Symfony\Component\DependencyInjection\Attribute\Autowire(service: 'scheb_two_factor.form_controller')] \Scheb\TwoFactorBundle\Controller\FormController $controller): Response
     {
-        throw new \LogicException('Handled by the two-factor firewall.');
+        $response = $controller->form($request);
+        $response->headers->set('Cache-Control', 'no-store');
+
+        return $response;
     }
 
     #[Route('/2fa_check', name: '2fa_login_check', methods: ['POST'])]

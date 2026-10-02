@@ -40,6 +40,7 @@ class LicenseFlowTest extends WebTestCase
         $product = (new Product())->setSlug('test-'.$id)->setName('Issue Service')->setActive(true);
         $this->license = (new License())->setCustomer($customer)->setProduct($product)->setFeatures(['sla']);
         $user = (new User())->setEmail($this->email)->setFirstname('Test')->setLastname('Admin')->setRoles(['ROLE_ADMIN']);
+        $user->enableTwoFactor('JBSWY3DPEHPK3PXP', []);
         $user->setPassword(static::getContainer()->get(UserPasswordHasherInterface::class)->hashPassword($user, 'test-password-1234'));
         foreach ([$customer, $product, $this->license, $user] as $entity) {
             $em->persist($entity);
@@ -131,6 +132,12 @@ class LicenseFlowTest extends WebTestCase
         $this->client->submitForm('Anmelden', ['_username' => $this->email, '_password' => 'test-password-1234']);
         self::assertResponseRedirects();
         $this->client->followRedirect();
+        self::assertResponseRedirects('/2fa');
+        $this->client->followRedirect();
+        self::assertResponseIsSuccessful();
+        $this->client->submitForm('Bestätigen', ['_auth_code' => \OTPHP\TOTP::createFromSecret('JBSWY3DPEHPK3PXP')->now()]);
+        self::assertResponseRedirects();
+        $this->client->followRedirect();
         self::assertResponseIsSuccessful();
         $router = static::getContainer()->get('router');
         foreach (['admin_customer_index', 'admin_product_index', 'admin_license_index', 'admin_activation_index', 'admin_user_index', 'admin_customer_new', 'admin_product_new', 'admin_license_new'] as $route) {
@@ -147,8 +154,8 @@ class LicenseFlowTest extends WebTestCase
     public function testAdministratorCanCreateLicense(): void
     {
         $user = static::getContainer()->get(EntityManagerInterface::class)->getRepository(User::class)->findOneBy(['email' => $this->email]);
-        $this->client->loginUser($user);
-        $crawler = $this->client->request('GET', '/admin/license/new');
+        $this->client->loginUser($user, 'main', ['2fa_complete' => true]);
+        $crawler = $this->client->request('GET', static::getContainer()->get('router')->generate('admin_license_new'));
         self::assertResponseIsSuccessful();
         $form = $crawler->filter('form[name="License"]')->form();
         $values = $form->getPhpValues();

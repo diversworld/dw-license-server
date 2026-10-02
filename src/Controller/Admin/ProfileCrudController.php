@@ -27,6 +27,7 @@ class ProfileCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
+            ->setEntityPermission('PROFILE_SELF')
             ->setPageTitle(Crud::PAGE_EDIT, 'Mein Profil')
             ->setEntityLabelInSingular('Profil')
             ->setEntityLabelInPlural('Profile');

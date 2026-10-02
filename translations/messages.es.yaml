@@ -207,3 +207,45 @@ dashboard:
     logoff: 'Cerrar sesión'
     profile: 'Mi perfil'
     change_password: 'Cambiar contraseña'
+
+# License policies, lifecycle and two-factor authentication
+"two_factor.title": "Autenticación de dos factores"
+"two_factor.setup": "Configurar autenticador"
+"two_factor.setup_help": "Añade esta clave secreta a tu aplicación y confirma tu contraseña y el código actual."
+"two_factor.challenge_help": "Introduce el código actual o un código de recuperación sin usar."
+"two_factor.recovery_help": "Guarda estos códigos de forma segura. Solo se muestran una vez y son de un solo uso."
+"two_factor.password": "Contraseña actual"
+"two_factor.code": "Código de autenticación"
+"two_factor.invalid_code": "El código no es válido."
+"two_factor.verify": "Verificar"
+"two_factor.enable": "Activar autenticación de dos factores"
+"policy.token_help": "Segundos hasta la siguiente comprobación (60 a 31536000)."
+"policy.grace_help": "Segundos adicionales sin conexión. 0 finaliza el uso al vencer el token."
+"entities.App\\Entity\\Product.properties.tokenLifetimeSeconds": "Duración del token (segundos)"
+"entities.App\\Entity\\Product.properties.gracePeriodSeconds": "Periodo de gracia (segundos)"
+"license_action.renew": "Ampliar"
+"license_action.pause": "Pausar"
+"license_action.revoke": "Revocar"
+"license_action.reactivate": "Reactivar"
+"license_action.history": "Historial de licencia"
+"license_action.reason": "Motivo"
+"license_action.actor": "Realizado por"
+"license_action.time": "Fecha"
+"license_action.action": "Acción"
+"license_action.change": "Cambio"
+"license_action.expires_at": "Nueva fecha de vencimiento"
+"license_action.confirm": "Ejecutar acción"
+"license_action.saved": "Acción guardada."
+"license_action.unlimited": "Ilimitado"
+"license_action.empty": "Todavía no hay acciones."
+"license_action.invalid_reason": "El motivo debe contener entre 3 y 1000 caracteres."
+"license_action.invalid_expiry": "La nueva fecha debe ser futura y posterior a la anterior."
+"license_action.invalid_transition": "Esta acción no está disponible en el estado actual. Amplía primero las licencias vencidas."
+"license_action.token_notice": "Los tokens en línea existentes vencen al finalizar su duración más el periodo de gracia. Los tokens sin conexión siguen válidos hasta su vencimiento."
+"role.admin": "Administración"
+"role.support": "Soporte"
+"role.sales": "Ventas"
+"role.viewer": "Solo lectura"
+license_status.active: 'Activa'
+license_status.suspended: 'Pausada'
+license_status.revoked: 'Revocada'

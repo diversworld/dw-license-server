@@ -205,3 +205,45 @@ dashboard:
     logoff: 'Abmelden'
     profile: 'Mein Profil'
     change_password: 'Kennwort ändern'
+
+# License policies, lifecycle and two-factor authentication
+"two_factor.title": "Zwei-Faktor-Anmeldung"
+"two_factor.setup": "Authenticator einrichten"
+"two_factor.setup_help": "Füge diesen geheimen Schlüssel in deiner Authenticator-App hinzu. Bestätige danach dein Passwort und den aktuellen Code."
+"two_factor.challenge_help": "Gib den aktuellen App-Code oder einen unbenutzten Wiederherstellungscode ein."
+"two_factor.recovery_help": "Bewahre diese Codes sicher auf. Sie werden nur jetzt angezeigt und können jeweils einmal verwendet werden."
+"two_factor.password": "Aktuelles Passwort"
+"two_factor.code": "Authentifizierungscode"
+"two_factor.invalid_code": "Der Code ist ungültig."
+"two_factor.verify": "Bestätigen"
+"two_factor.enable": "Zwei-Faktor-Anmeldung aktivieren"
+"policy.token_help": "Sekunden bis zur nächsten Online-Prüfung (60 bis 31536000)."
+"policy.grace_help": "Zusätzliche Sekunden ohne Serverkontakt. 0 beendet die Nutzung direkt nach der Tokenlaufzeit."
+"entities.App\\Entity\\Product.properties.tokenLifetimeSeconds": "Tokenlaufzeit (Sekunden)"
+"entities.App\\Entity\\Product.properties.gracePeriodSeconds": "Kulanzzeit (Sekunden)"
+"license_action.renew": "Verlängern"
+"license_action.pause": "Pausieren"
+"license_action.revoke": "Widerrufen"
+"license_action.reactivate": "Reaktivieren"
+"license_action.history": "Lizenzhistorie"
+"license_action.reason": "Begründung"
+"license_action.actor": "Bearbeiter"
+"license_action.time": "Zeitpunkt"
+"license_action.action": "Aktion"
+"license_action.change": "Änderung"
+"license_action.expires_at": "Neues Ablaufdatum"
+"license_action.confirm": "Aktion ausführen"
+"license_action.saved": "Lizenzaktion gespeichert."
+"license_action.unlimited": "Unbegrenzt"
+"license_action.empty": "Keine Lizenzaktionen vorhanden."
+"license_action.invalid_reason": "Die Begründung muss 3 bis 1000 Zeichen enthalten."
+"license_action.invalid_expiry": "Das neue Ablaufdatum muss in der Zukunft und nach dem bisherigen Datum liegen."
+"license_action.invalid_transition": "Diese Aktion ist im aktuellen Zustand nicht möglich. Abgelaufene Lizenzen zuerst verlängern."
+"license_action.token_notice": "Bereits ausgestellte Online-Tokens laufen spätestens nach Tokenlaufzeit plus Kulanzzeit aus. Offline-Tokens gelten bis zu ihrem Ablaufdatum."
+"role.admin": "Administration"
+"role.support": "Support"
+"role.sales": "Vertrieb"
+"role.viewer": "Nur Lesen"
+license_status.active: 'Aktiv'
+license_status.suspended: 'Pausiert'
+license_status.revoked: 'Widerrufen'

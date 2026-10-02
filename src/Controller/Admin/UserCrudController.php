@@ -72,7 +72,7 @@ class UserCrudController extends AbstractCrudController
         yield FormField::addFieldset('Berechtigungen')
             ->setIcon('fa fa-shield');
 
-        yield ChoiceField::new('roles', 'Rollen')->setChoices(['Administration' => 'ROLE_ADMIN', 'Support' => 'ROLE_SUPPORT', 'Vertrieb' => 'ROLE_SALES', 'Leserechte' => 'ROLE_VIEWER'])->allowMultipleChoices()
+        yield ChoiceField::new('roles', 'Rollen')->setChoices(['role.admin' => 'ROLE_ADMIN', 'role.support' => 'ROLE_SUPPORT', 'role.sales' => 'ROLE_SALES', 'role.viewer' => 'ROLE_VIEWER'])->allowMultipleChoices()
             ->setColumns(6);
 
         yield BooleanField::new('active', 'Aktiv')

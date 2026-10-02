@@ -205,3 +205,45 @@ dashboard:
     logoff: 'Log Off'
     profile: 'My Profile'
     change_password: 'Change Password'
+
+# License policies, lifecycle and two-factor authentication
+"two_factor.title": "Two-factor authentication"
+"two_factor.setup": "Set up authenticator"
+"two_factor.setup_help": "Add this secret to your authenticator app, then confirm your password and the current code."
+"two_factor.challenge_help": "Enter the current app code or an unused recovery code."
+"two_factor.recovery_help": "Store these codes safely. They are shown only once and each can be used once."
+"two_factor.password": "Current password"
+"two_factor.code": "Authentication code"
+"two_factor.invalid_code": "The code is invalid."
+"two_factor.verify": "Verify"
+"two_factor.enable": "Enable two-factor authentication"
+"policy.token_help": "Seconds until the next online check (60 to 31536000)."
+"policy.grace_help": "Additional seconds without server contact. 0 stops use when the token lifetime ends."
+"entities.App\\Entity\\Product.properties.tokenLifetimeSeconds": "Token lifetime (seconds)"
+"entities.App\\Entity\\Product.properties.gracePeriodSeconds": "Grace period (seconds)"
+"license_action.renew": "Extend"
+"license_action.pause": "Pause"
+"license_action.revoke": "Revoke"
+"license_action.reactivate": "Reactivate"
+"license_action.history": "License history"
+"license_action.reason": "Reason"
+"license_action.actor": "Performed by"
+"license_action.time": "Time"
+"license_action.action": "Action"
+"license_action.change": "Change"
+"license_action.expires_at": "New expiry date"
+"license_action.confirm": "Perform action"
+"license_action.saved": "License action saved."
+"license_action.unlimited": "Unlimited"
+"license_action.empty": "No license actions yet."
+"license_action.invalid_reason": "The reason must contain 3 to 1000 characters."
+"license_action.invalid_expiry": "The new expiry must be in the future and later than the previous date."
+"license_action.invalid_transition": "This action is unavailable in the current state. Extend expired licenses first."
+"license_action.token_notice": "Existing online tokens expire by the end of their lifetime plus grace period. Offline tokens remain valid until expiry."
+"role.admin": "Administration"
+"role.support": "Support"
+"role.sales": "Sales"
+"role.viewer": "Read only"
+license_status.active: 'Active'
+license_status.suspended: 'Paused'
+license_status.revoked: 'Revoked'

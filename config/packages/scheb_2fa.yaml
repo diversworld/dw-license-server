@@ -1,5 +1,7 @@
-# See the configuration reference at https://symfony.com/bundles/SchebTwoFactorBundle/6.x/configuration.html
+# TOTP and single-use recovery codes for the administrative firewall.
 scheb_two_factor:
+    code_reuse_cache: cache.app
+    code_reuse_default_handler: scheb_two_factor.security.listener.throw_exception_on_two_factor_code_reuse
     security_tokens:
         - Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken
         - Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken

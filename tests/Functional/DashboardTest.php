@@ -40,7 +40,8 @@ class DashboardTest extends WebTestCase
         $provider->method('refreshUser')->willReturn($user);
         $provider->method('supportsClass')->willReturn(true);
         $container->set('security.user.provider.concrete.app_user_provider', $provider);
-        $client->loginUser($user);
+        $user->enableTwoFactor('JBSWY3DPEHPK3PXP', []);
+        $client->loginUser($user, 'main', ['2fa_complete' => true]);
 
         $crawler = $client->request('GET', '/admin/de');
 

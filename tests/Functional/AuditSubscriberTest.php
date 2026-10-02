@@ -48,8 +48,9 @@ class AuditSubscriberTest extends WebTestCase
             (new LogEntry())->setAction('test'),
             (new UpdateRelease())->setProduct($product)->setChangelog('Test')->setPackageUrl('https://example.org/package'),
             new ResetPasswordRequest($user, new \DateTimeImmutable('+1 hour'), 'selector', 'secret-reset-token'),
+            new \App\Entity\LicenseAction($license, 'pause', 'Test reason', $user, 'active', 'suspended', null, null),
         ];
-        $changes = ['city', 'name', 'notes', 'firstname', 'domain', 'name', 'action', 'version', 'expiresAt'];
+        $changes = ['city', 'name', 'notes', 'firstname', 'domain', 'name', 'action', 'version', 'expiresAt', 'reason'];
         foreach ($entities as $entity) {
             $this->em->persist($entity);
         }
@@ -175,7 +176,9 @@ class AuditSubscriberTest extends WebTestCase
         self::assertSame(['ROLE_ADMIN'], $userChanges['roles']['old']);
         self::assertSame(['ROLE_ADMIN', 'ROLE_TEST'], $userChanges['roles']['new']);
 
-        $this->client->loginUser($user);
+        $user->enableTwoFactor('JBSWY3DPEHPK3PXP', []);
+        $this->em->flush();
+        $this->client->loginUser($user, 'main', ['2fa_complete' => true]);
         $router = static::getContainer()->get('router');
         $crawler = $this->client->request('GET', $router->generate('admin_audit_log_index', ['_locale' => 'de']));
         self::assertResponseIsSuccessful();
@@ -218,9 +221,10 @@ class AuditSubscriberTest extends WebTestCase
     {
         $user = (new User())->setEmail('audit-admin@example.org')->setFirstname('Test')->setLastname('Admin')
             ->setPassword('test')->setRoles(['ROLE_ADMIN']);
+        $user->enableTwoFactor('JBSWY3DPEHPK3PXP', []);
         $this->em->persist($user);
         $this->em->flush();
-        $this->client->loginUser($user);
+        $this->client->loginUser($user, 'main', ['2fa_complete' => true]);
         $router = static::getContainer()->get('router');
 
         $this->client->request('GET', $router->generate('admin_audit_log_index', ['_locale' => 'de']));
