@@ -1,6 +1,6 @@
 # Diversworld Lizenzserver
 
-Symfony 8.1 / PHP >= 8.4, Doctrine ORM und MariaDB unter DDEV. Die Verwaltung läuft unter `/admin` und ist auf `ROLE_ADMIN` beschränkt. Konsolenbefehle immer innerhalb von DDEV ausführen.
+Symfony ^7 / PHP >= 8.4. Die Verwaltung läuft unter `/admin` und ist auf `ROLE_ADMIN` beschränkt.
 
 ## Einrichtung
 
