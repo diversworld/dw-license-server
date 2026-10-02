@@ -13,6 +13,21 @@ entities:
             zipCode: 'ZIP Code'
             publishedAt: 'Creation Date'
             isPublished: 'Active?'
+            id: 'ID'
+            company: 'Company'
+            firstname: 'First Name'
+            lastname: 'Last Name'
+            logoImage: 'Company Logo'
+            street: 'Street'
+            zip: 'Postal Code'
+            country: 'Country'
+            mobile: 'Mobile Phone'
+            vatId: 'VAT ID'
+            active: 'Active'
+            createdAt: 'Creation Date'
+            updatedAt: 'Update Date'
+            licenses: 'Licenses'
+            logoImageUrl: 'Company Logo'
 
     App\Entity\User:
         singular: 'User'
@@ -29,6 +44,17 @@ entities:
             password: 'Password'
             updatedAt: 'Update Date'
             isPublished: 'Active?'
+            id: 'ID'
+            firstname: 'First Name'
+            lastname: 'Last Name'
+            roles: 'Roles'
+            street: 'Street'
+            postalCode: 'Postal Code'
+            mobile: 'Mobile Phone'
+            profileImage: 'Profile Image'
+            active: 'Active'
+            fullname: 'Full Name'
+            profileImageUrl: 'Profile Image'
 
     App\Entity\Product:
         singular: 'Product'
@@ -45,22 +71,35 @@ entities:
             createdAt: 'Creation Date'
             updatedAt: 'Update Date'
             isPublished: 'Active?'
+            id: 'ID'
+            slug: 'Module Identifier'
+            currentVersion: 'Current Version'
+            downloadUrl: 'Download URL'
+            active: 'Active'
+            licenses: 'Licenses'
+            releases: 'Releases'
 
     App\Entity\License:
         singular: 'License'
         plural: 'Licenses'
         properties:
-            key: 'License Key'
-            email: 'Email Address'
-            phone: 'Phone Number'
-            address: 'Address'
-            city: 'City'
-            state: 'State'
-            zipCode: 'ZIP Code'
+            licenseKey: 'License Key'
             createdAt: 'Creation Date'
             updatedAt: 'Update Date'
+            customer: 'Customer'
+            product: 'Product'
+            status: 'Status'
+            maxDomains: 'Max Domains'
+            notes: 'Notes'
+            expirationDate: 'Expiration Date'
+            expiresAt: 'Expires At'
+            lastValidationAt: 'Last Validation At'
+            features: 'Features'
+            type: 'Type'
             isPublished: 'Active?'
-
+            id: 'ID'
+            mode: 'Mode'
+            activations: 'Installations'
 
     App\Entity\Activation:
         singular: 'Installation'
@@ -75,6 +114,15 @@ entities:
             createdAt: 'Creation Date'
             updatedAt: 'Update Date'
             isPublished: 'Active?'
+            id: 'ID'
+            domain: 'Domain'
+            ipAdress: 'IP Address'
+            contaoVersion: 'Contao Version'
+            moduleVersion: 'Module Version'
+            active: 'Active'
+            activatedAt: 'Activation Date'
+            tenant: 'Tenant'
+            license: 'License'
 
     App\Entity\AuditLog:
         singular: 'Audit Log Entry'
@@ -92,6 +140,53 @@ entities:
             entryHash: 'Entry Hash'
             createdAt: 'Creation Date'
             context: 'Changes'
+            userAgent: 'User Agent'
+
+    App\Entity\ApiToken:
+        singular: 'API Token'
+        plural: 'API Tokens'
+        properties:
+            id: 'ID'
+            token: 'Token'
+            name: 'Name'
+            active: 'Active'
+            ceratedAt: 'Creation Date'
+            updatedAt: 'Update Date'
+            expiresAt: 'Expires At'
+            customer: 'Customer'
+
+    App\Entity\LogEntry:
+        singular: 'Log Entry'
+        plural: 'Log Entries'
+        properties:
+            id: 'ID'
+            action: 'Action'
+            message: 'Description'
+            ipAdress: 'IP Address'
+            createdAt: 'Creation Date'
+
+    App\Entity\ResetPasswordRequest:
+        singular: 'Password Reset Request'
+        plural: 'Password Reset Requests'
+        properties:
+            id: 'ID'
+            selector: 'Token Identifier'
+            hashedToken: 'Token Hash'
+            requestedAt: 'Requested At'
+            expiresAt: 'Expires At'
+            user: 'User'
+
+    App\Entity\UpdateRelease:
+        singular: 'Release'
+        plural: 'Releases'
+        properties:
+            id: 'ID'
+            version: 'Version'
+            changelog: 'Changelog'
+            packageUrl: 'Package URL'
+            releaseDate: 'Release Date'
+            stable: 'Stable Release'
+            product: 'Product'
 
 audit:
     changes:
@@ -99,7 +194,7 @@ audit:
         old: 'Before'
         new: 'After'
         redacted: 'Protected'
-        yes: 'Yes'
-        no: 'No'
+        'yes': 'Yes'
+        'no': 'No'
         legacy: 'Previous and new values were not saved for this older entry.'
         empty: 'No change details available.'

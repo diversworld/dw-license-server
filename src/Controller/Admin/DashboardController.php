@@ -2,7 +2,6 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\User;
 use App\Form\ChangePasswordType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
@@ -27,6 +26,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use App\Controller\Admin\LicenseCrudController;
 use App\Controller\Admin\AuditLogCrudController;
 use App\Repository\AuditLogRepository;
+use App\Entity\Customer;
+use App\Entity\Product;
+use App\Entity\License;
+use App\Entity\AuditLog;
+use App\Entity\User;
+use App\Entity\Activation;
 
 
 #[AdminDashboard(routePath: '/admin/{_locale}', routeName: 'admin', routeOptions: ['requirements' => ['_locale' => 'de|en|fr'], 'defaults' => ['_locale' => 'de'],'methods' => ['GET'],],)]
@@ -125,51 +130,48 @@ class DashboardController extends AbstractDashboardController
 		
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToDashboard(
-            'Übersicht',
+        yield MenuItem::linkToDashboard( 
+            'Dashboard',
             'fa fa-home'
         );
 
-        yield MenuItem::section('Kunden');
+         yield MenuItem::section('entities.'.Customer::class.'.plural');
 
         yield MenuItem::linkTo(
             CustomerCrudController::class,
-            //'Kunden',
             icon: 'fa fa-users'
         );
 
-        yield MenuItem::section('Produkte');
+        yield MenuItem::section('entities.'.Product::class.'.plural');
 
         yield MenuItem::linkTo(
             ProductCrudController::class,
-            //'Module',
             icon: 'fa fa-cubes'
         );
 
-        yield MenuItem::section('Lizenzen');
+        yield MenuItem::section('entities.'.License::class.'.plural');
         yield MenuItem::linkTo(
             LicenseCrudController::class,
-            //'Lizenzen',
             icon: 'fa fa-key'
         );
 
+        yield MenuItem::section('entities.'.Activation::class.'.plural');
+
         yield MenuItem::linkTo(
             ActivationCrudController::class,
-            //'Installationen',
             icon: 'fa fa-globe'
         );
 
-        yield MenuItem::section('Audit');
+        yield MenuItem::section('entities.'.AuditLog::class.'.plural');
 
         yield MenuItem::linkTo(
             AuditLogCrudController::class,
             icon: 'fa fa-history'
         );
 
-        yield MenuItem::section('Benutzer');
+        yield MenuItem::section('entities.'.User::class.'.plural');
         yield MenuItem::linkTo(
             UserCrudController::class,
-            //'Administratoren',
             icon: 'fa fa-user-shield'
         );
 

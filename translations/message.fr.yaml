@@ -1,0 +1,202 @@
+# translations/messages.fr.yaml
+# French translations for the application
+
+entities:
+    App\Entity\Customer:
+        singular: 'Client'
+        plural: 'Clients'
+        properties:
+            title: 'Nom'
+            email: 'Adresse e-mail'
+            phone: 'Numéro de téléphone'
+            address: 'Adresse'
+            city: 'Ville'
+            state: 'État'
+            zipCode: 'Code postal'
+            publishedAt: 'Date de création'
+            updatedAt: 'Date de mise à jour'
+            isPublished: 'Actif ?'
+            id: 'ID'
+            company: 'Entreprise'
+            firstname: 'Prénom'
+            lastname: 'Nom de famille'
+            logoImage: "Logo de l'entreprise"
+            street: 'Rue'
+            zip: 'Code postal'
+            country: 'Pays'
+            mobile: 'Téléphone portable'
+            vatId: 'Numéro de TVA'
+            active: 'Actif'
+            createdAt: 'Date de création'
+            licenses: 'Licences'
+            logoImageUrl: "Logo de l'entreprise"
+
+    App\Entity\User:
+        singular: 'Utilisateur'
+        plural: 'Utilisateurs'
+        properties:
+            email: "Adresse e-mail"
+            phone: "Numéro de téléphone"
+            address: "Adresse"
+            city: "Ville"
+            state: "État"
+            zipCode: "Code postal"
+            createdAt: "Date d'inscription"
+            fullName: "Nom complet"
+            password: "Mot de passe"
+            updatedAt: "Date de mise à jour"
+            isPublished: "Actif ?"
+            id: "ID"
+            firstname: "Prénom"
+            lastname: "Nom de famille"
+            roles: "Rôles"
+            street: "Rue"
+            postalCode: "Code postal"
+            mobile: "Téléphone portable"
+            profileImage: "Photo de profil"
+            active: "Actif"
+            fullname: "Nom complet"
+            profileImageUrl: "Photo de profil"
+
+    App\Entity\Product:
+        singular: 'Produit'
+        plural: 'Produits'
+        properties:
+            name: 'Nom'
+            createdAt: 'Date de création'
+            updatedAt: 'Date de mise à jour'
+            isPublished: 'Actif ?'
+            id: 'ID'
+            slug: 'Identifiant du module'
+            description: 'Description'
+            currentVersion: 'Version actuelle'
+            downloadUrl: 'URL de téléchargement'
+            price: 'Prix'
+            active: 'Actif'
+            licenses: 'Licences'
+            releases: 'Versions'
+            stock: 'Stock'
+            category: 'Catégorie'
+            image: 'Image'
+            sku: 'Référence'
+            barcode: 'Code-barres'
+
+    App\Entity\License:
+        singular: 'Licence'
+        plural: 'Licences'
+        properties:
+            licenseKey: 'Clé de licence'
+            createdAt: 'Date de création'
+            updatedAt: 'Date de mise à jour'
+            customer: 'Client'
+            product: 'Produit'
+            status: 'Statut'
+            maxDomains: 'Domaines maximum'
+            notes: 'Remarques'
+            expirationDate: "Date d'expiration"
+            expiresAt: 'Expire à'
+            lastValidationAt: 'Dernière validation'
+            features: 'Fonctionnalités'
+            type: 'Type'
+            isPublished: 'Actif ?'
+            id: 'ID'
+            mode: 'Mode'
+            activations: 'Installations'
+
+    App\Entity\Activation:
+        singular: 'Installation'
+        plural: 'Installations'
+        properties:
+            email: 'Adresse e-mail'
+            createdAt: 'Date de création'
+            updatedAt: 'Date de mise à jour'
+            isPublished: 'Actif ?'
+            id: 'ID'
+            domain: 'Domaine'
+            ipAdress: 'Adresse IP'
+            contaoVersion: 'Version de Contao'
+            moduleVersion: 'Version du module'
+            active: 'Actif'
+            activatedAt: "Date d'activation"
+            tenant: 'Mandant'
+            license: 'Licence'
+            phone: 'Numéro de téléphone'
+            address: 'Adresse'
+            city: 'Ville'
+            state: 'État'
+            zipCode: 'Code postal'
+
+    App\Entity\AuditLog:
+        singular: "Journal d'audit"
+        plural: "Journaux d'audit"
+        properties:
+            id: 'ID'
+            eventType: "Type d'événement"
+            entityType: "Type d'entité"
+            entityIdentifier: "Identifiant de l'entité"
+            entityId: "ID de l'entité"
+            message: "Description"
+            performedBy: "Effectué par"
+            ipAddress: "Adresse IP"
+            previousHash: "Hash précédent"
+            entryHash: "Hash de l'entrée"
+            createdAt: "Date de création"
+            context: "Modifications"
+            userAgent: "Agent utilisateur"
+
+    App\Entity\ApiToken:
+        singular: 'Jeton API'
+        plural: 'Jetons API'
+        properties:
+            id: 'ID'
+            token: "Token"
+            name: "Nom"
+            active: "Actif"
+            createdAt: "Date de création"
+            updatedAt: "Date de mise à jour"
+            expiresAt: "Valable jusqu'à"
+            customer: "Client"
+
+    App\Entity\LogEntry:
+        singular: "Entrée de journal"
+        plural: "Entrées de journal"
+        properties:
+            id: "ID"
+            action: "Action"
+            message: "Description"
+            ipAdress: "Adresse IP"
+            createdAt: "Date de création"
+
+    App\Entity\ResetPasswordRequest:
+        singular: "Demande de réinitialisation de mot de passe"
+        plural: "Demandes de réinitialisation de mot de passe"
+        properties:
+            id: "ID"
+            selector: "Sélecteur"
+            hashedToken: "Token haché"
+            requestedAt: "Demandé le"
+            expiresAt: "Valable jusqu'à"
+            user: 'Utilisateur'
+
+    App\Entity\UpdateRelease:
+        singular: "Publication"
+        plural: "Publications"
+        properties:
+            id: "ID"
+            version: "Version"
+            changelog: "Journal des modifications"
+            packageUrl: "URL du package"
+            releaseDate: "Date de publication"
+            stable: "Version stable"
+            product: "Produit"
+
+audit:
+    changes:
+        field: "Champ"
+        old: "Ancien"
+        new: "Nouveau"
+        redacted: "Masqué"
+        'yes': "Oui"
+        'no': "Non"
+        legacy: "Les valeurs précédentes et nouvelles n'ont pas été enregistrées pour cette ancienne entrée."
+        empty: "Aucun détail de modification disponible."

@@ -1,4 +1,4 @@
-# translations/messages.en.yaml
+# translations/messages.de.yaml
 entities:
     App\Entity\Customer:
         singular: 'Kunde'
@@ -14,12 +14,26 @@ entities:
             publishedAt: 'Erstellungsdatum'
             updatedAt: 'Aktualisierungsdatum'
             isPublished: 'Aktiv?'
+            id: 'ID'
+            company: 'Firma'
+            firstname: 'Vorname'
+            lastname: 'Nachname'
+            logoImage: 'Firmenlogo'
+            street: 'Straße'
+            zip: 'Postleitzahl'
+            country: 'Land'
+            mobile: 'Mobiltelefon'
+            vatId: 'Umsatzsteuer-ID'
+            active: 'Aktiv'
+            createdAt: 'Erstellungsdatum'
+            licenses: 'Lizenzen'
+            logoImageUrl: 'Firmenlogo'
 
     App\Entity\User:
         singular: 'Benutzer'
         plural: 'Benutzer'
         properties:
-            email: '-Mail-Adresse'
+            email: 'E-Mail-Adresse'
             phone: 'Telefonnummer'
             address: 'Adresse'
             city: 'Stadt'
@@ -30,6 +44,17 @@ entities:
             password: 'Kennwort'
             updatedAt: 'Aktualisierungsdatum'
             isPublished: 'Aktiv?'
+            id: 'ID'
+            firstname: 'Vorname'
+            lastname: 'Nachname'
+            roles: 'Rollen'
+            street: 'Straße'
+            postalCode: 'Postleitzahl'
+            mobile: 'Mobiltelefon'
+            profileImage: 'Profilbild'
+            active: 'Aktiv'
+            fullname: 'Vollständiger Name'
+            profileImageUrl: 'Profilbild'
 
     App\Entity\Product:
         singular: 'Produkt'
@@ -39,16 +64,42 @@ entities:
             createdAt: 'Erstellungsdatum'
             updatedAt: 'Aktualisierungsdatum'
             isPublished: 'Aktiv?'
+            id: 'ID'
+            slug: 'Modulkennung'
+            description: 'Beschreibung'
+            currentVersion: 'Aktuelle Version'
+            downloadUrl: 'Download-Adresse'
+            price: 'Preis'
+            active: 'Aktiv'
+            licenses: 'Lizenzen'
+            releases: 'Veröffentlichungen'
+            stock: 'Bestand'
+            category: 'Kategorie'
+            image: 'Bild'
+            sku: 'Artikelnummer'
+            barcode: 'Barcode'
 
     App\Entity\License:
         singular: 'Lizenz'
         plural: 'Lizenzen'
         properties:
-            key: 'Lizenzschlüssel'
+            licenseKey: 'Lizenzschlüssel'
             createdAt: 'Erstellungsdatum'
             updatedAt: 'Aktualisierungsdatum'
+            customer: 'Kunde'
+            product: 'Produkt'
+            status: 'Status'
+            maxDomains: 'Maximale Domains'
+            notes: 'Notizen'
+            expirationDate: 'Ablaufdatum'
+            expiresAt: 'Ablaufzeit'
+            lastValidationAt: 'Letzte Validierung'
+            features: 'Funktionen'
+            type: 'Typ'
             isPublished: 'Aktiv?'
-
+            id: 'ID'
+            mode: 'Modus'
+            activations: 'Installationen'
 
     App\Entity\Activation:
         singular: 'Installation'
@@ -58,6 +109,20 @@ entities:
             createdAt: 'Erstellungsdatum'
             updatedAt: 'Aktualisierungsdatum'
             isPublished: 'Aktiv?'
+            id: 'ID'
+            domain: 'Domain'
+            ipAdress: 'IP-Adresse'
+            contaoVersion: 'Contao-Version'
+            moduleVersion: 'Modulversion'
+            active: 'Aktiv'
+            activatedAt: 'Aktivierungsdatum'
+            tenant: 'Mandant'
+            license: 'Lizenz'
+            phone: 'Telefonnummer'
+            address: 'Adresse'
+            city: 'Stadt'
+            state: 'Bundesland'
+            zipCode: 'Postleitzahl'
 
     App\Entity\AuditLog:
         singular: 'Audit-Eintrag'
@@ -75,6 +140,53 @@ entities:
             entryHash: 'Eintrags-Hash'
             createdAt: 'Erstellungsdatum'
             context: 'Änderungen'
+            userAgent: 'Browserkennung'
+
+    App\Entity\ApiToken:
+        singular: 'API-Token'
+        plural: 'API-Tokens'
+        properties:
+            id: 'ID'
+            token: 'Token'
+            name: 'Name'
+            active: 'Aktiv'
+            ceratedAt: 'Erstellungsdatum'
+            updatedAt: 'Aktualisierungsdatum'
+            expiresAt: 'Gültig bis'
+            customer: 'Kunde'
+
+    App\Entity\LogEntry:
+        singular: 'Protokolleintrag'
+        plural: 'Protokolleinträge'
+        properties:
+            id: 'ID'
+            action: 'Aktion'
+            message: 'Beschreibung'
+            ipAdress: 'IP-Adresse'
+            createdAt: 'Erstellungsdatum'
+
+    App\Entity\ResetPasswordRequest:
+        singular: 'Kennwort-Zurücksetzungsanfrage'
+        plural: 'Kennwort-Zurücksetzungsanfragen'
+        properties:
+            id: 'ID'
+            selector: 'Token-Kennung'
+            hashedToken: 'Token-Hash'
+            requestedAt: 'Angefordert am'
+            expiresAt: 'Gültig bis'
+            user: 'Benutzer'
+
+    App\Entity\UpdateRelease:
+        singular: 'Veröffentlichung'
+        plural: 'Veröffentlichungen'
+        properties:
+            id: 'ID'
+            version: 'Version'
+            changelog: 'Änderungsprotokoll'
+            packageUrl: 'Paketadresse'
+            releaseDate: 'Veröffentlichungsdatum'
+            stable: 'Stabile Version'
+            product: 'Produkt'
 
 audit:
     changes:
@@ -82,7 +194,7 @@ audit:
         old: 'Vorher'
         new: 'Nachher'
         redacted: 'Geschützt'
-        yes: 'Ja'
-        no: 'Nein'
+        'yes': 'Ja'
+        'no': 'Nein'
         legacy: 'Vorherige und neue Werte wurden für diesen älteren Eintrag nicht gespeichert.'
         empty: 'Keine Änderungsdetails vorhanden.'
