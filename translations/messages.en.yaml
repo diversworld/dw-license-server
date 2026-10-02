@@ -91,3 +91,15 @@ entities:
             previousHash: 'Previous Hash'
             entryHash: 'Entry Hash'
             createdAt: 'Creation Date'
+            context: 'Changes'
+
+audit:
+    changes:
+        field: 'Field'
+        old: 'Before'
+        new: 'After'
+        redacted: 'Protected'
+        yes: 'Yes'
+        no: 'No'
+        legacy: 'Previous and new values were not saved for this older entry.'
+        empty: 'No change details available.'

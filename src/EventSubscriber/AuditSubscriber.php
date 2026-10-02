@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\EventSubscriber;
 
 use App\Audit\AuditableEntityInterface;
+use App\Audit\AuditChanges;
 use App\Entity\AuditLog;
 use App\Entity\User;
 use App\Service\AuditService;
@@ -23,12 +24,13 @@ use Symfony\Bundle\SecurityBundle\Security;
 #[AsDoctrineListener(event: Events::postRemove)]
 final class AuditSubscriber
 {
-    /** @var \WeakMap<object, array{type: string, identifier: string, id: ?string, table: string}> */
+    /** @var \WeakMap<object, array{type: string, identifier: string, id: ?string, table: string, changes: array}> */
     private \WeakMap $removedEntities;
 
     public function __construct(
         private readonly AuditService $auditService,
         private readonly Security $security,
+        private readonly AuditChanges $auditChanges,
     ) {
         $this->removedEntities = new \WeakMap();
     }
@@ -48,7 +50,9 @@ final class AuditSubscriber
         $entity = $args->getObject();
         if (!$entity instanceof AuditLog) {
             // Doctrine clears generated identifiers before postRemove is dispatched.
-            $this->removedEntities[$entity] = $this->describe($entity, $args->getObjectManager());
+            $this->removedEntities[$entity] = $this->describe($entity, $args->getObjectManager()) + [
+                'changes' => $this->auditChanges->capture($entity, $args->getObjectManager(), deleted: true),
+            ];
         }
     }
 
@@ -67,6 +71,7 @@ final class AuditSubscriber
         $description = $action === 'deleted' && isset($this->removedEntities[$entity])
             ? $this->removedEntities[$entity]
             : $this->describe($entity, $em);
+        $changes = $description['changes'] ?? $this->auditChanges->capture($entity, $em);
         $user = $this->security->getUser();
         if (!$user instanceof User || !$em->contains($user) || $em->getUnitOfWork()->isScheduledForDelete($user) || ($user === $entity && $action === 'deleted')) {
             $user = null;
@@ -81,7 +86,9 @@ final class AuditSubscriber
             $user,
             [
                 'table' => $description['table'],
-                'changedFields' => array_keys($em->getUnitOfWork()->getEntityChangeSet($entity)),
+                'entityClass' => $em->getClassMetadata($entity::class)->name,
+                'changedFields' => array_keys($changes),
+                'changes' => $changes,
             ],
         );
     }

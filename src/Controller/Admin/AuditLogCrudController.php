@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\AuditLog;
+use App\Admin\Field\AuditChangesField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -42,6 +43,8 @@ final class AuditLogCrudController extends AbstractCrudController
         yield TextField::new('entityId');
 
         yield TextareaField::new('message');
+
+        yield AuditChangesField::new();
 
         yield AssociationField::new('performedBy');
 

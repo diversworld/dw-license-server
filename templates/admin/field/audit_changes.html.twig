@@ -1,0 +1,44 @@
+{% macro value(value) %}
+    {% if value is null %}
+        <span class="text-muted">—</span>
+    {% elseif value is same as('[redacted]') %}
+        <span class="text-muted">{{ 'audit.changes.redacted'|trans }}</span>
+    {% elseif value is same as(true) %}
+        {{ 'audit.changes.yes'|trans }}
+    {% elseif value is same as(false) %}
+        {{ 'audit.changes.no'|trans }}
+    {% elseif value is iterable %}
+        {{ value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}
+    {% else %}
+        {{ value }}
+    {% endif %}
+{% endmacro %}
+
+{% set changes = field.value.changes|default({}) %}
+{% if changes is not empty %}
+    <table class="table table-sm mb-0 audit-changes">
+        <thead>
+            <tr>
+                <th>{{ 'audit.changes.field'|trans }}</th>
+                <th>{{ 'audit.changes.old'|trans }}</th>
+                <th>{{ 'audit.changes.new'|trans }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for property, change in changes %}
+                {% set labelKey = 'entities.' ~ field.value.entityClass|default('') ~ '.properties.' ~ property %}
+                {% set label = labelKey|trans %}
+                <tr>
+                    <td>{{ label == labelKey ? property : label }}</td>
+                    <td class="text-break" style="white-space: pre-wrap">{{ _self.value(change.old) }}</td>
+                    <td class="text-break" style="white-space: pre-wrap">{{ _self.value(change.new) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% elseif field.value.changedFields|default([]) is not empty %}
+    {{ field.value.changedFields|join(', ') }}
+    <div class="text-muted small">{{ 'audit.changes.legacy'|trans }}</div>
+{% else %}
+    <span class="text-muted">{{ 'audit.changes.empty'|trans }}</span>
+{% endif %}

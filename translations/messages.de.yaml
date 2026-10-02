@@ -74,3 +74,15 @@ entities:
             previousHash: 'Vorheriger Hash'
             entryHash: 'Eintrags-Hash'
             createdAt: 'Erstellungsdatum'
+            context: 'Änderungen'
+
+audit:
+    changes:
+        field: 'Feld'
+        old: 'Vorher'
+        new: 'Nachher'
+        redacted: 'Geschützt'
+        yes: 'Ja'
+        no: 'Nein'
+        legacy: 'Vorherige und neue Werte wurden für diesen älteren Eintrag nicht gespeichert.'
+        empty: 'Keine Änderungsdetails vorhanden.'
