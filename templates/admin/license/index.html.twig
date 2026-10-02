@@ -1,0 +1,68 @@
+{% extends '@EasyAdmin/crud/index.html.twig' %}
+
+{% block main %}    
+
+    {% set licenseView = app.request.query.get('licenseView') %}
+
+    {% if licenseView %}
+        {% set viewConfig = {
+            'active': {
+                'label': 'Aktive Lizenzen',
+                'description': 'Es werden nur aktive Lizenzen und noch nicht abgelaufene Lizenzen angezeigt',
+                'icon': 'fa fa-check-circle'
+            },
+            'expiring': {
+                'label': 'Läuft innerhalb von 30 Tagen ab',
+                'description': 'Es werden nur aktive Lizenzen angezeigt, die innerhalb der nächsten 30 Tagen ablaufen',
+                'icon': 'fa fa-hourglass-half'
+            },
+            'expired': {
+                'label': 'Abgelaufene Lizenzen',
+                'description': 'Es werden nur Lizenzen angezeigt, die bereits abgelaufen sind',
+                'icon': 'fa fa-times-circle'
+            },
+            'suspended': {
+                'label': 'Gesperrte Lizenzen',
+                'description': 'Es werden nur Lizenzen angezeigt, die gesperrt wurden',
+                'icon': 'fa fa-ban'
+            },
+            'revoked': {
+                'label': 'Widerrufene Lizenzen',
+                'description': 'Es werden nur Lizenzen angezeigt, die widerrufen wurden',
+                'icon': 'fa fa-recycle'
+            }
+        } %}
+
+        {% if viewConfig[licenseView] is defined %}
+            {# Render the view based on the selected licenseView #}
+            {% set currentView = viewConfig[licenseView] %}
+            <div 
+                class="d-flex 
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center">
+                <div>
+                    <div class="fw-bold mb-1">
+                    <i class="fa {{ currentView.icon }} me-2"></i>
+                        Lizenzen
+                        <i class="fa fa-angle-right me-2"></i>
+                        {{ currentView.label }}
+                    </div>
+                    <div class="small">
+                        {{ currentView.description }}
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="{{ea_url().setController('App\\Controller\\Admin\\LicenseCrudController')
+                            .setAction('index')
+                            .unset('licenseView')}}">
+                            <i class="fa fa-filter-circle-xmark me-1"></i>
+                            Filter Zurücksetzen
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+    {{ parent() }}
+{% endblock %}

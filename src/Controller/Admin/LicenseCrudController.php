@@ -41,6 +41,9 @@ class LicenseCrudController extends AbstractCrudController
 	{
 		return $crud
 			->setEntityLabelInSingular('Lizenz')
-			->setEntityLabelInPlural('Lizenzen');
+			->setEntityLabelInPlural('Lizenzen')
+            ->overrideTemplates([
+                'crud/index' => 'admin/license/index.html.twig',
+            ]);
 	}
 }
