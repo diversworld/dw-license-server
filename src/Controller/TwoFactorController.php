@@ -40,7 +40,7 @@ class TwoFactorController extends AbstractController
     #[Route('/security/2fa/setup', name: 'two_factor_setup', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_VIEWER')]
     #[RateLimit('two_factor')]
-    public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens, \Symfony\Contracts\Translation\TranslatorInterface $translator, TwoFactorQrCode $qrCode, \App\Security\TwoFactorPolicy $policy): Response
+    public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens, \Symfony\Contracts\Translation\TranslatorInterface $translator, TwoFactorQrCode $qrCode, \App\Security\TwoFactorPolicy $policy, \App\Security\PendingTotpEnrollment $enrollment): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -50,8 +50,7 @@ class TwoFactorController extends AbstractController
             return $this->redirectToRoute('two_factor_manage');
         }
         $session = $request->getSession();
-        $secret = $session->get('two_factor_setup_secret') ?? $totp->generateSecret();
-        $session->set('two_factor_setup_secret', $secret);
+        $secret = $enrollment->secret($user, $session, 'two_factor_setup_secret');
         $pending = clone $user;
         $pending->enableTwoFactor($secret, []);
         $form = $this->createFormBuilder(null, ['action' => $this->generateUrl('two_factor_setup')])

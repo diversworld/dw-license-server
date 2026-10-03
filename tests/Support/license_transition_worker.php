@@ -1,7 +1,7 @@
 <?php
 // A subprocess using its own production container and database connection; only isolated tests invoke it.
 require dirname(__DIR__, 2).'/vendor/autoload.php';
-$kernel = new \App\Kernel('test', false);
+$kernel = new \App\Kernel('test', true);
 $kernel->boot();
 $container = $kernel->getContainer()->get('test.service_container');
 if (!\Doctrine\DBAL\Types\Type::hasType('uuid')) { \Doctrine\DBAL\Types\Type::addType('uuid', \Symfony\Bridge\Doctrine\Types\UuidType::class); }

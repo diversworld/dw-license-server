@@ -17,16 +17,24 @@ final class TotpSecretCipher
         private readonly LockFactory $locks,
         #[Autowire('%env(resolve:TOTP_ENCRYPTION_KEY_FILE)%')] private readonly string $keyFile,
         #[Autowire('%env(bool:TOTP_KEY_AUTO_CREATE)%')] private readonly bool $autoCreate,
-    ) {}
+        #[Autowire('%kernel.project_dir%')] ?string $projectDir = null,
+    ) {
+        $root = $projectDir ?? dirname(__DIR__, 2);
+        $path = realpath($keyFile) ?: \Symfony\Component\Filesystem\Path::canonicalize($keyFile);
+        if (!\Symfony\Component\Filesystem\Path::isAbsolute($path)
+            || str_starts_with($path, $root.'/public/') || str_starts_with($path, $root.'/config/license/')) {
+            throw new \InvalidArgumentException('Authenticator key must be an absolute private path, separate from public files and license signing keys.');
+        }
+    }
 
-    public function encrypt(string $secret): string
+    public function encrypt(#[\SensitiveParameter] string $secret): string
     {
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
         return self::PREFIX.base64_encode($nonce.sodium_crypto_secretbox($secret, $nonce, $this->key($this->autoCreate)));
     }
 
-    public function decrypt(string $stored): string
+    public function decrypt(#[\SensitiveParameter] string $stored): string
     {
         // Legacy plaintext is read without changing historical audit records. Explicit conversion
         // and subsequent user changes seal it; the migration itself never invents a production key.
@@ -56,6 +64,8 @@ final class TotpSecretCipher
                 }
             } finally { $lock->release(); }
         }
+        clearstatcache(true, $this->keyFile);
+        if ((fileperms($this->keyFile) & 0077) !== 0) { throw new \RuntimeException('Authenticator encryption key permissions must be 0600 or stricter.'); }
         $key = base64_decode(trim(file_get_contents($this->keyFile)), true);
         if ($key === false || strlen($key) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) { throw new \RuntimeException('Invalid authenticator encryption key file.'); }
 

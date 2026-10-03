@@ -23,7 +23,7 @@ final class TwoFactorManagement
         private readonly AuditService $audit,
     ) {}
 
-    public function rotate(User $user, string $password, string $proof, string $secret, string $newCode): array
+    public function rotate(User $user, #[\SensitiveParameter] string $password, #[\SensitiveParameter] string $proof, #[\SensitiveParameter] string $secret, #[\SensitiveParameter] string $newCode): array
     {
         return $this->change($user, $password, $proof, function () use ($user, $secret, $newCode): array {
             $pending = clone $user; $pending->enableTwoFactor($secret, []);
@@ -34,7 +34,7 @@ final class TwoFactorManagement
         }, 'security.two_factor_rotated');
     }
 
-    public function regenerateCodes(User $user, string $password, string $proof): array
+    public function regenerateCodes(User $user, #[\SensitiveParameter] string $password, #[\SensitiveParameter] string $proof): array
     {
         return $this->change($user, $password, $proof, function () use ($user): array {
             $codes = $this->newCodes(); $user->regenerateBackupCodes($codes);
@@ -43,7 +43,7 @@ final class TwoFactorManagement
         }, 'security.recovery_codes_regenerated');
     }
 
-    public function recover(User $user, string $password, string $backupCode): void
+    public function recover(User $user, #[\SensitiveParameter] string $password, #[\SensitiveParameter] string $backupCode): void
     {
         $this->change($user, $password, $backupCode, function () use ($user): array {
             $user->disableTwoFactorForRecovery();
@@ -52,7 +52,7 @@ final class TwoFactorManagement
         }, 'security.two_factor_recovered', backupOnly: true);
     }
 
-    private function change(User $user, string $password, string $proof, callable $change, string $event, bool $backupOnly = false): array
+    private function change(User $user, #[\SensitiveParameter] string $password, #[\SensitiveParameter] string $proof, callable $change, string $event, bool $backupOnly = false): array
     {
         $actor = $this->security->getUser();
         if (!$actor instanceof User || (string) $actor->getId() !== (string) $user->getId()) { throw new AccessDeniedException(); }

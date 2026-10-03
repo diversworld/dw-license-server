@@ -221,6 +221,31 @@ class MigrationInstallationTest extends KernelTestCase
         });
     }
 
+    public function testLegacyAuthenticatorUpgradeAndExplicitEncryptionWithIndependentKey(): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment): void {
+            $this->console(['doctrine:migrations:migrate', 'DoctrineMigrations\\Version20261003090353', '--no-interaction'], $environment);
+            $id = \Symfony\Component\Uid\Uuid::v7()->toBinary();
+            $connection->insert('user', ['id' => $id, 'email' => 'legacy-totp@example.test', 'firstname' => 'Test', 'lastname' => 'User', 'password' => 'unused-hash', 'roles' => '["ROLE_ADMIN"]', 'active' => 1, 'created_at' => '2026-10-03 12:00:00', 'totp_secret' => 'JBSWY3DPEHPK3PXP', 'backup_code_hashes' => '[]']);
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            self::assertSame('JBSWY3DPEHPK3PXP', $connection->fetchOne('SELECT totp_secret FROM user'));
+            self::assertSame(0, (int) $connection->fetchOne('SELECT security_version FROM user'));
+            $this->console(['app:security:totp-key:init'], $environment);
+            self::assertFileExists($environment['TOTP_ENCRYPTION_KEY_FILE']);
+            $key = file_get_contents($environment['TOTP_ENCRYPTION_KEY_FILE']);
+            $this->console(['app:security:encrypt-totp'], $environment);
+            self::assertStringStartsWith('enc:v1:', $connection->fetchOne('SELECT totp_secret FROM user'));
+            self::assertStringContainsString('Encrypted 0', $this->console(['app:security:encrypt-totp'], $environment));
+            $this->console(['app:security:totp-key:init'], $environment);
+            self::assertSame($key, file_get_contents($environment['TOTP_ENCRYPTION_KEY_FILE']));
+            $this->console(['doctrine:schema:validate', '-v'], $environment);
+            self::assertStringContainsString('Verified', $this->console(['app:audit:verify'], $environment));
+            unlink($environment['TOTP_ENCRYPTION_KEY_FILE']);
+            self::assertStringContainsString('Restore', $this->console(['app:security:totp-key:init'], $environment, true));
+            self::assertFileDoesNotExist($environment['TOTP_ENCRYPTION_KEY_FILE']);
+        });
+    }
+
     public function testFreshInstallationAndRepeatedMigrationRun(): void
     {
         $this->withDatabase(function (Connection $connection, array $environment): void {
@@ -316,7 +341,7 @@ class MigrationInstallationTest extends KernelTestCase
             self::assertIsString($url);
             $url .= (str_contains($url, '?') ? '&' : '?').'serverVersion='.rawurlencode($parameters['serverVersion']).'&charset=utf8mb4';
             // Dotenv variables inherited from PHPUnit must not override the explicitly isolated DSN.
-            $environment = ['DATABASE_URL' => $url, 'APP_ENV' => 'prod', 'APP_DEBUG' => '0', 'SYMFONY_DOTENV_VARS' => false];
+            $environment = ['DATABASE_URL' => $url, 'APP_ENV' => 'prod', 'APP_DEBUG' => '0', 'SYMFONY_DOTENV_VARS' => false, 'TOTP_KEY_AUTO_CREATE' => '0', 'TOTP_ENCRYPTION_KEY_FILE' => sys_get_temp_dir().'/'.$database.'/totp.key'];
             // Production containers intentionally do not detect added services without a rebuild.
             if (!self::$containerRebuilt) { $this->console(['cache:clear'], $environment); self::$containerRebuilt = true; }
             self::assertStringContainsString($database, $this->console(['dbal:run-sql', 'SELECT DATABASE()'], $environment));
@@ -326,6 +351,7 @@ class MigrationInstallationTest extends KernelTestCase
             $connection?->close();
             // Only the random database created by this test is ever removed.
             $schema->dropDatabase($database);
+            (new \Symfony\Component\Filesystem\Filesystem())->remove(sys_get_temp_dir().'/'.$database);
             $admin->close();
         }
     }

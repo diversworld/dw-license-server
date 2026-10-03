@@ -1,7 +1,7 @@
 <?php
 // Separate processes and connections exercise actual database locks, never an in-memory substitute.
 require dirname(__DIR__, 2).'/vendor/autoload.php';
-$kernel = new \App\Kernel('test', false);
+$kernel = new \App\Kernel('test', true);
 $kernel->boot();
 $container = $kernel->getContainer()->get('test.service_container');
 if (!\Doctrine\DBAL\Types\Type::hasType('uuid')) { \Doctrine\DBAL\Types\Type::addType('uuid', \Symfony\Bridge\Doctrine\Types\UuidType::class); }

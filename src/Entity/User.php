@@ -254,7 +254,7 @@ class User implements \Symfony\Component\Security\Core\User\EquatableInterface, 
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(#[\SensitiveParameter] string $password): static
     {
         if ($this->password !== null && $this->password !== $password) { $this->revokeSessions(); }
         $this->password = $password;
@@ -355,7 +355,7 @@ class User implements \Symfony\Component\Security\Core\User\EquatableInterface, 
         return $this->totpSecret === null ? null : new \Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration($this->decryptedTotpSecret ?? $this->totpSecret, 'sha1', 30, 6);
     }
 
-    public function enableTwoFactor(string $secret, array $codes): void
+    public function enableTwoFactor(#[\SensitiveParameter] string $secret, #[\SensitiveParameter] array $codes): void
     {
         $this->twoFactorDeclined = false;
         $this->totpSecret = $this->decryptedTotpSecret = $secret;

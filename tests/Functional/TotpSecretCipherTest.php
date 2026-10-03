@@ -53,5 +53,17 @@ final class TotpSecretCipherTest extends KernelTestCase
         self::assertFileDoesNotExist($this->directory.'/totp.key');
     }
 
+    public function testAWorldReadableKeyIsRejected(): void
+    {
+        $cipher = $this->cipher(); $cipher->initializeKey(); chmod($this->directory.'/totp.key', 0644);
+        $this->expectException(\RuntimeException::class); $cipher->encrypt('JBSWY3DPEHPK3PXP');
+    }
+
+    public function testLicensePublicKeyCannotBeReusedAsAnAuthenticatorEncryptionKey(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new TotpSecretCipher(new Filesystem(), new LockFactory(new InMemoryStore()), dirname(__DIR__, 2).'/config/license/public.key', false);
+    }
+
     private function cipher(): TotpSecretCipher { return new TotpSecretCipher(new Filesystem(), new LockFactory(new InMemoryStore()), $this->directory.'/totp.key', false); }
 }

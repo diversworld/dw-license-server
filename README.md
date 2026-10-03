@@ -263,3 +263,5 @@ Die Datei `public/.htaccess` wird über das Symfony-Apache-Pack bereitgestellt u
 Der aktuelle Umsetzungsstand, geprüfte Anforderungen und sichere Upgrade-Schritte stehen in [PLATFORM_HARDENING.md](docs/PLATFORM_HARDENING.md). Profilbilder benötigen GD und werden serverseitig geprüft und neu kodiert. Die dort beschriebenen Apache-/Nginx-Regeln müssen auf dem Zielserver aktiv sein.
 
 Die transaktionale, versionierte Audit-Hashkette und externe Prüfpunkte sind in [Audit integrity](docs/SECURITY_AUDIT.md) beschrieben.
+
+Konfigurierbare 2FA-Pflichten, sicherer Authenticator-Wechsel, Wiederherstellung und getrennte TOTP-Verschlüsselung: [Two-factor security](docs/TWO_FACTOR_SECURITY.md).

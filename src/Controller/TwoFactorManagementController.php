@@ -21,6 +21,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class TwoFactorManagementController extends AbstractController
 {
+    public function __construct(private readonly \App\Security\PendingTotpEnrollment $enrollment) {}
     #[Route('/security/2fa/manage', name: 'two_factor_manage', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function index(): Response
@@ -51,8 +52,7 @@ final class TwoFactorManagementController extends AbstractController
         if (!$user instanceof User || !$user->isTotpAuthenticationEnabled()) { throw $this->createAccessDeniedException(); }
         $secret = $qrCode = null;
         if ($operation === 'rotate') {
-            $secret = $request->getSession()->get('two_factor_replacement_secret') ?? $totp->generateSecret();
-            $request->getSession()->set('two_factor_replacement_secret', $secret);
+            $secret = $this->enrollment->secret($user, $request->getSession(), 'two_factor_replacement_secret');
             $pending = clone $user; $pending->enableTwoFactor($secret, []);
             $qrCode = $qr->dataUri($totp->getQRContent($pending));
         }

@@ -157,6 +157,40 @@ final class TwoFactorSecurityTest extends IsolatedWebTestCase
         self::assertSame($version, $fresh->getSecurityVersion()); self::assertTrue($fresh->isBackupCode(self::BACKUP));
     }
 
+    public function testPendingSetupSecretIsEncryptedExpiresAndIsBoundToItsOwner(): void
+    {
+        $user = $this->account(false); $this->client->loginUser($user);
+        $this->client->request('GET', '/security/2fa/setup');
+        $plain = $this->client->getCrawler()->filter('main > code')->text();
+        $session = $this->client->getRequest()->getSession();
+        $pending = $session->get('two_factor_setup_secret');
+        self::assertSame((string) $user->getId(), $pending['owner']);
+        self::assertGreaterThan(time(), $pending['expiresAt']);
+        self::assertStringStartsWith(TotpSecretCipher::PREFIX, $pending['secret']);
+        self::assertStringNotContainsString($plain, serialize($pending));
+        $pending['expiresAt'] = 0; $session->set('two_factor_setup_secret', $pending); $session->save();
+        $this->client->request('GET', '/security/2fa/setup');
+        self::assertNotSame($plain, $this->client->getCrawler()->filter('main > code')->text());
+    }
+
+    public function testExplicitLegacyConversionPreservesAuthenticatorAndSessionVersion(): void
+    {
+        $user = $this->account();
+        $version = $user->getSecurityVersion();
+        $this->em->getConnection()->executeStatement('UPDATE user SET totp_secret = ?', [self::SECRET]);
+        $this->em->clear();
+        $command = new \Symfony\Component\Console\Tester\CommandTester(new \App\Command\EncryptLegacyTotpCommand($this->em, static::getContainer()->get(TotpSecretCipher::class)));
+        self::assertSame(0, $command->execute([]));
+        self::assertStringContainsString('Encrypted 1', $command->getDisplay());
+        self::assertStringNotContainsString(self::SECRET, $command->getDisplay());
+        self::assertStringStartsWith(TotpSecretCipher::PREFIX, $this->em->getConnection()->fetchOne('SELECT totp_secret FROM user'));
+        $this->em->clear(); $fresh = $this->em->find(User::class, $user->getId());
+        self::assertSame(self::SECRET, $fresh->getTotpAuthenticationConfiguration()->getSecret());
+        self::assertSame($version, $fresh->getSecurityVersion());
+        self::assertSame(0, $command->execute([]));
+        self::assertStringContainsString('Encrypted 0', $command->getDisplay());
+    }
+
     public function testManagementRequestsAreRateLimited(): void
     {
         $user = $this->account(); $this->client->loginUser($user, 'main', ['2fa_complete' => true]);
@@ -174,6 +208,15 @@ final class TwoFactorSecurityTest extends IsolatedWebTestCase
         self::assertSame(1, $command->execute([]));
         self::assertFileDoesNotExist($keyFile);
         self::assertStringContainsString('Restore', $command->getDisplay());
+    }
+
+    public function testConfigurationRejectsUnknownRolesAndActions(): void
+    {
+        $hierarchy = static::getContainer()->get(RoleHierarchyInterface::class);
+        foreach ([[['ROLE_UNKNOWN'], []], [[], ['UNKNOWN_ACTION']]] as [$roles, $actions]) {
+            try { new TwoFactorPolicy($hierarchy, $roles, $actions); self::fail('Invalid security configuration must fail.'); }
+            catch (\InvalidArgumentException $error) { self::assertStringContainsString('unknown', $error->getMessage()); }
+        }
     }
 
     private function account(bool $enabled = true): User

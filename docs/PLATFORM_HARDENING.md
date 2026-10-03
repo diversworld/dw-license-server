@@ -10,7 +10,7 @@ The requirements are implemented and checked in this order. Each completed secti
 3. Explicit withdrawal of revocation and centrally defined license transitions — completed: HTTP/service role/state/expiry tests plus a real two-process MariaDB row-lock test (1 test / 11 assertions).
 4. Concurrent, versioned audit chain; verifier and external checkpoints — completed: 21 audit tests / 192 assertions; complete MariaDB migration suite 15 tests / 205 assertions, including three independent append workers and four interrupted audit-DDL stages; container lint passed.
 5. CI, isolated installation/upgrade checks and pinned real Contao client integration — completed: local full suite 98 tests / 877 assertions; final real-client/vector suite 8 tests / 80 assertions; Python deployment suite 13 tests; strict Composer validation and audit passed; YAML 30 files, Twig 15 templates and PHP 111 files passed. The remote workflow, full PHP 8.5 suite and MySQL matrix are not claimed as executed.
-6. Role/action 2FA policy, recovery, session invalidation and encryption — pending.
+6. Role/action 2FA policy, recovery, session invalidation and encryption — completed: full suite 119 tests / 987 assertions, including actual HTTP recovery, optional/required policy, CSRF/rate limits, independent-key protection, legacy upgrade/conversion and separate database connections.
 7. Signing-key lifecycle, emergency revocation, rollout and history — pending.
 8. Customer assignments, global/scoped permissions and object-level isolation — pending.
 9. Health, bounded metrics, request IDs, backup and recovery test — pending.
@@ -52,3 +52,7 @@ See [Audit integrity](SECURITY_AUDIT.md) for hash versions, transactional sequen
 ## CI and client integration
 
 See [Pinned real Contao client tests](CLIENT_INTEGRATION.md). CI pins original client source and Actions commits. MariaDB 11.8 / PHP 8.4.24 was exercised locally. Host PHP 8.5.4 is available for the Python Dotenv test but lacks GD and PDO-SQLite, so its complete functional suite was not run. Local MySQL and the remote Actions execution were not exercised. The advanced real client Git commit was tested locally; a published release containing it was not verified.
+
+## Two-factor security
+
+See [Two-factor security](TWO_FACTOR_SECURITY.md). Default enrollment remains voluntary; required rules are configured per role/permission. Migration `Version20261003093351` preserves legacy secrets and adds revocable sessions. Production requires a separately initialized/restored TOTP encryption key and explicit legacy conversion. Production commands were not run. A concurrent workspace commit (`5ad7d07`) captured the initial implementation; follow-up changes finish protected pending enrollment and verification.
