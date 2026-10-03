@@ -134,6 +134,23 @@ class ArchiveTest extends WebTestCase
         self::assertSelectorExists('option[value="ROLE_SUPER_ADMIN"]');
     }
 
+    public function testRestoringARevokedLicensePreservesItsStatus(): void
+    {
+        $this->license->setStatus('revoked');
+        $this->em->flush();
+        $this->login('ROLE_ADMIN');
+        foreach (['archive', 'restore'] as $action) {
+            $this->client->request('GET', '/admin/de/records/license/'.$this->license->getId().'/'.$action);
+            $this->client->submitForm('Aktion ausführen', ['form[reason]' => 'Preserve existing revocation']);
+            self::assertResponseRedirects();
+        }
+        $license = $this->em->find(License::class, $this->license->getId());
+        self::assertFalse($license->isArchived());
+        self::assertSame('revoked', $license->getStatus());
+        $this->client->jsonRequest('POST', '/api/v1/licenses/activate', $this->activation());
+        self::assertResponseStatusCodeSame(403);
+    }
+
     private function login(string $role): User
     {
         $user = (new User())->setEmail(bin2hex(random_bytes(6)).'@example.org')->setFirstname('Test')->setLastname('User')->setPassword('test')->setRoles([$role]);

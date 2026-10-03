@@ -97,6 +97,26 @@ class MigrationInstallationTest extends KernelTestCase
         });
     }
 
+    public function testInterruptedArchiveMigrationPreservesAnExistingArchiveDate(): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment): void {
+            $this->console(['doctrine:migrations:migrate', self::PREVIOUS, '--no-interaction'], $environment);
+            require_once dirname(__DIR__, 2).'/migrations/Version20261003083348.php';
+            $migration = new \DoctrineMigrations\Version20261003083348($connection, new NullLogger());
+            $migration->up($connection->createSchemaManager()->introspectSchema());
+            self::assertCount(3, $migration->getSql());
+            $query = $migration->getSql()[0];
+            $connection->executeStatement($query->getStatement(), $query->getParameters(), $query->getTypes());
+            $id = random_bytes(16);
+            $connection->insert('customer', ['id' => $id, 'company' => 'Test', 'firstname' => 'Test',
+                'lastname' => 'Customer', 'email' => 'archived@example.test', 'street' => 'Test 1',
+                'zip' => '12345', 'city' => 'Test', 'created_at' => '2026-10-02 12:00:00', 'deleted_at' => '2026-10-03 12:00:00']);
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            $this->console(['doctrine:schema:validate', '-v'], $environment);
+            self::assertSame('2026-10-03 12:00:00', $connection->fetchOne('SELECT deleted_at FROM customer WHERE id = ?', [$id]));
+        });
+    }
+
     public function testFreshInstallationAndRepeatedMigrationRun(): void
     {
         $this->withDatabase(function (Connection $connection, array $environment): void {

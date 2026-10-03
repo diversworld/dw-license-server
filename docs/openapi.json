@@ -1,0 +1,341 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Diversworld License API",
+        "description": "Version 1 of the license activation and renewal API. Use HTTPS.\nCredentials are sent in JSON request bodies, never in URLs.\nLicense tokens use Ed25519 and are not JWTs.\nRequests are limited to 60 per minute per client IP, method and path.\n",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Current license server"
+        }
+    ],
+    "paths": {
+        "/api/v1/licenses/activate": {
+            "post": {
+                "tags": [
+                    "Licenses"
+                ],
+                "summary": "Activate an installation",
+                "description": "Repeated activation for the same tenant and domain returns a fresh token without allocating another slot. Offline licenses require an expiry date.",
+                "operationId": "activateInstallation",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ActivationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Signed license token",
+                        "headers": {
+                            "Cache-Control": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "no-store"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "409": {
+                        "$ref": "#/components/responses/Conflict"
+                    },
+                    "410": {
+                        "$ref": "#/components/responses/Gone"
+                    },
+                    "415": {
+                        "$ref": "#/components/responses/UnsupportedMediaType"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/UnprocessableEntity"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/TooManyRequests"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/ServiceUnavailable"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/v1/licenses/validate": {
+            "post": {
+                "tags": [
+                    "Licenses"
+                ],
+                "summary": "Renew an online license token",
+                "description": "Expired online tokens may be renewed when their signature and installation binding remain valid and the license is usable. Offline tokens cannot be renewed.",
+                "operationId": "renewLicenseToken",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Signed license token",
+                        "headers": {
+                            "Cache-Control": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "no-store"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden"
+                    },
+                    "410": {
+                        "$ref": "#/components/responses/Gone"
+                    },
+                    "415": {
+                        "$ref": "#/components/responses/UnsupportedMediaType"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/UnprocessableEntity"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/TooManyRequests"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/ServiceUnavailable"
+                    }
+                },
+                "security": []
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TokenResponse": {
+                "required": [
+                    "token"
+                ],
+                "properties": {
+                    "token": {
+                        "description": "base64url(JSON claims).base64url(Ed25519 signature); contains a signing key identifier",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "Problem": {
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "integer"
+                    },
+                    "detail": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ActivationRequest": {
+                "required": [
+                    "licenseKey",
+                    "product",
+                    "tenant",
+                    "domain"
+                ],
+                "properties": {
+                    "licenseKey": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 64,
+                        "minLength": 64
+                    },
+                    "product": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 255
+                    },
+                    "tenant": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 180
+                    },
+                    "domain": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 253
+                    }
+                },
+                "type": "object"
+            },
+            "RefreshRequest": {
+                "required": [
+                    "token",
+                    "tenant",
+                    "domain"
+                ],
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 16384
+                    },
+                    "tenant": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 180
+                    },
+                    "domain": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 253
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "responses": {
+            "BadRequest": {
+                "description": "Malformed JSON or request structure",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "Invalid token structure or signature",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            },
+            "Forbidden": {
+                "description": "Unknown, disabled or archived license, customer, product or installation; invalid binding",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            },
+            "Conflict": {
+                "description": "Installation limit reached",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            },
+            "Gone": {
+                "description": "License expired",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            },
+            "UnsupportedMediaType": {
+                "description": "Request must use application/json",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            },
+            "UnprocessableEntity": {
+                "description": "Input validation failed, required feature missing or offline expiry missing",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            },
+            "TooManyRequests": {
+                "description": "Rate limit exceeded; retry later",
+                "headers": {
+                    "Retry-After": {
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            },
+            "ServiceUnavailable": {
+                "description": "Concurrent license operation; retry later",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Problem"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Licenses",
+            "description": "Installation activation and online token renewal"
+        }
+    ]
+}
