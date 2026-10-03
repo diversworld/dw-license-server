@@ -92,11 +92,13 @@ class PriorityFeaturesTest extends WebTestCase
         $old = $this->signer->sign($claims);
         $oldId = $this->signer->keyId();
         $rotation = new SigningKeyRotation($this->signer, new Filesystem(), new LockFactory(new InMemoryStore()), $this->directory);
-        $newId = $rotation->prepare();
+        $newId = $rotation->prepare('test-operator', 'Scheduled rotation');
         self::assertSame($oldId, $this->signer->keyId(), 'Preparing a key must not activate it.');
+        self::assertCount(1, $this->signer->publicKeys());
+        $rotation->transition('publish', $newId, 'test-operator', 'Distribute new verification key', $rotation->fingerprint());
         self::assertCount(2, $this->signer->publicKeys());
         self::assertSame(0600, fileperms($this->directory.'/keys/'.$newId.'.key') & 0777);
-        $rotation->activate($newId);
+        $rotation->activate($newId, 'test-operator', 'Distribution verified', $rotation->fingerprint(), true);
         $new = $this->signer->sign($claims);
         self::assertSame($newId, $this->signer->verify($new)['kid']);
         self::assertSame($oldId, $this->signer->verify($old)['kid']);

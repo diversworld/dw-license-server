@@ -80,13 +80,16 @@ ddev exec php vendor/bin/contao-console issue:license:validate --online
 Rotation ersetzt niemals den bisherigen Schlüssel. Neue Tokens tragen eine signierte Schlüsselkennung `kid`; Tokens ohne Kennung werden weiterhin mit dem ursprünglichen Schlüssel geprüft.
 
 ```bash
-php bin/console app:license:rotate prepare
+php bin/console app:license:rotate prepare --actor=BETREIBER --reason="Reguläre Rotation"
 php bin/console app:license:rotate public-keys
 # Zuerst den aktualisierten Client und die ausgegebene öffentliche JSON-Liste verteilen.
-php bin/console app:license:rotate activate SCHLUESSELKENNUNG
+php bin/console app:license:rotate status
+# Fingerprint übernehmen; zunächst publish, danach verteilen und erneut status prüfen.
+php bin/console app:license:rotate publish SCHLUESSELKENNUNG --actor=BETREIBER --reason="Prüfschlüssel verteilen" --expected=FINGERPRINT
+php bin/console app:license:rotate activate SCHLUESSELKENNUNG --actor=BETREIBER --reason="Verteilung bestätigt" --expected=NEUER_FINGERPRINT --rollout-confirmed
 ```
 
-Die vollständige öffentliche JSON-Liste als String in `contao_issue_service.license_public_key` konfigurieren. `public.key` bleibt der ursprüngliche Prüfschlüssel; nach Rotation die Liste aus `public-keys` verwenden. Bei nicht aktualisierten Clients die Aktivierung verschieben. Die Signierdateien und `keyring.json` bleiben privat und git-ignoriert. Auch eine Rückkehr zu einer früheren Schlüsselkennung ist über `activate` möglich; alte öffentliche Schlüssel bleiben erhalten.
+Nur bereits vertrauenswürdig geprüfte Schlüssel verteilen; eine öffentliche Liste allein ist kein Vertrauensanker. Ablauf, Notfallwiderruf und signierte Verteilungsmanifeste: [Schlüsselbetrieb](docs/SIGNING_KEYS.md). Die vollständige öffentliche JSON-Liste als String in `contao_issue_service.license_public_key` konfigurieren. `public.key` bleibt der ursprüngliche Prüfschlüssel; nach Rotation die Liste aus `public-keys` verwenden. Bei nicht aktualisierten Clients die Aktivierung verschieben. Die Signierdateien und `keyring.json` bleiben privat und git-ignoriert. Auch eine Rückkehr zu einer früheren Schlüsselkennung ist über `activate` möglich; alte öffentliche Schlüssel bleiben erhalten.
 
 ## Zwei-Faktor-Anmeldung und Rollen
 

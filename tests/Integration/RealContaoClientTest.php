@@ -90,7 +90,7 @@ final class RealContaoClientTest extends IsolatedWebTestCase
         $payload = $encode(json_encode($claims, JSON_THROW_ON_ERROR));
         $legacy = $payload.'.'.$encode(sodium_crypto_sign_detached($payload, base64_decode(file_get_contents($this->directory.'/private.key'), true)));
         $rotation = new SigningKeyRotation($this->signer, new Filesystem(), new LockFactory(new InMemoryStore()), $this->directory);
-        $id = $rotation->prepare(); $rotation->activate($id);
+        $id = $rotation->prepare('test-operator', 'Scheduled rotation'); $rotation->transition('publish', $id, 'test-operator', 'Distribute verification key', $rotation->fingerprint()); $rotation->activate($id, 'test-operator', 'Distribution verified', $rotation->fingerprint(), true);
         $new = $this->signer->sign($claims);
         $keys = json_encode($this->signer->publicKeys(), JSON_THROW_ON_ERROR);
         foreach ([$legacy, $old, $new] as $token) { self::assertTrue($this->validate('advanced', $token, $keys, 1710000000)['enabled']); }
