@@ -7,6 +7,10 @@ namespace App\Tests\Functional;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Tools\DsnParser;
+use DoctrineMigrations\Version20261002153158;
+use DoctrineMigrations\Version20261002154946;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Process\Process;
 
@@ -15,6 +19,83 @@ class MigrationInstallationTest extends KernelTestCase
 {
     private const string CLEANUP = 'DoctrineMigrations\\Version20261003080525';
     private const string PREVIOUS = 'DoctrineMigrations\\Version20261002154946';
+
+    public static function interruptedMigrationStages(): iterable
+    {
+        yield 'only the action table exists' => [1];
+        yield 'foreign keys and one product policy exist' => [4];
+        yield 'nullable recovery codes exist' => [7];
+        yield 'all schema changes exist but are unrecorded' => [9];
+    }
+
+    #[DataProvider('interruptedMigrationStages')]
+    public function testInterruptedSchemaChangesCanBeResumed(int $executedStatements): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment) use ($executedStatements): void {
+            $this->console(['doctrine:migrations:migrate', 'DoctrineMigrations\\Version20261002130822', '--no-interaction'], $environment);
+            $userId = random_bytes(16);
+            $connection->insert('user', ['id' => $userId, 'email' => 'interrupted@example.test',
+                'firstname' => 'Existing', 'lastname' => 'User', 'roles' => '["ROLE_ADMIN"]',
+                'password' => 'unused-test-password', 'active' => 1, 'created_at' => '2026-10-02 12:00:00']);
+
+            // Simulate committed DDL followed by a crash before Doctrine records the version.
+            require_once dirname(__DIR__, 2).'/migrations/Version20261002153158.php';
+            require_once dirname(__DIR__, 2).'/migrations/Version20261002154946.php';
+            $migration = new Version20261002153158($connection, new NullLogger());
+            $migration->up($connection->createSchemaManager()->introspectSchema());
+            self::assertCount(9, $migration->getSql());
+            foreach (array_slice($migration->getSql(), 0, $executedStatements) as $query) {
+                $connection->executeStatement($query->getStatement(), $query->getParameters(), $query->getTypes());
+            }
+
+            $productId = random_bytes(16);
+            $customerId = random_bytes(16);
+            $licenseId = random_bytes(16);
+            $actionId = random_bytes(16);
+            $connection->insert('product', ['id' => $productId, 'slug' => 'migration-test', 'created_at' => '2026-10-02 12:00:00']);
+            $connection->insert('customer', ['id' => $customerId, 'company' => 'Test', 'firstname' => 'Test',
+                'lastname' => 'Customer', 'email' => 'customer@example.test', 'street' => 'Test 1',
+                'zip' => '12345', 'city' => 'Test', 'created_at' => '2026-10-02 12:00:00']);
+            $connection->insert('license', ['id' => $licenseId, 'license_key' => 'migration-license',
+                'type' => 'subscription', 'status' => 'active', 'max_domains' => 1, 'features' => '[]',
+                'created_at' => '2026-10-02 12:00:00', 'customer_id' => $customerId, 'product_id' => $productId]);
+            $connection->insert('license_action', ['id' => $actionId, 'created_at' => '2026-10-02 12:00:00',
+                'action' => 'renew', 'reason' => 'Existing history', 'from_status' => 'active',
+                'to_status' => 'active', 'license_id' => $licenseId, 'performed_by_id' => $userId]);
+            $productTable = $connection->createSchemaManager()->introspectTable('product');
+            if ($productTable->hasColumn('token_lifetime_seconds')) {
+                $connection->update('product', ['token_lifetime_seconds' => 7200], ['id' => $productId]);
+            }
+
+            $userTable = $connection->createSchemaManager()->introspectTable('user');
+            if ($userTable->hasColumn('totp_secret')) {
+                $connection->update('user', ['totp_secret' => 'EXISTINGSECRET'], ['id' => $userId]);
+            }
+            if ($executedStatements === 9) {
+                $connection->update('user', ['backup_code_hashes' => '["existing-code-hash"]'], ['id' => $userId]);
+                $decision = new Version20261002154946($connection, new NullLogger());
+                $decision->up($connection->createSchemaManager()->introspectSchema());
+                foreach ($decision->getSql() as $query) {
+                    $connection->executeStatement($query->getStatement(), $query->getParameters(), $query->getTypes());
+                }
+                $connection->update('user', ['two_factor_declined' => 1], ['id' => $userId]);
+            }
+
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            $this->console(['doctrine:schema:validate', '-v'], $environment);
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            self::assertSame($executedStatements === 9 ? '["existing-code-hash"]' : '[]', $connection->fetchOne('SELECT backup_code_hashes FROM user WHERE id = ?', [$userId]));
+            self::assertSame('Existing history', $connection->fetchOne('SELECT reason FROM license_action WHERE id = ?', [$actionId]));
+            self::assertSame($productTable->hasColumn('token_lifetime_seconds') ? 7200 : 86400, (int) $connection->fetchOne('SELECT token_lifetime_seconds FROM product WHERE id = ?', [$productId]));
+            if ($userTable->hasColumn('totp_secret')) {
+                self::assertSame('EXISTINGSECRET', $connection->fetchOne('SELECT totp_secret FROM user WHERE id = ?', [$userId]));
+            }
+            if ($executedStatements === 9) {
+                self::assertSame(1, (int) $connection->fetchOne('SELECT two_factor_declined FROM user WHERE id = ?', [$userId]));
+            }
+            self::assertSame(1, (int) $connection->fetchOne('SELECT COUNT(*) FROM doctrine_migration_versions WHERE version = ?', ['DoctrineMigrations\\Version20261002153158']));
+        });
+    }
 
     public function testFreshInstallationAndRepeatedMigrationRun(): void
     {

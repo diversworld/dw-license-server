@@ -155,6 +155,8 @@ ddev exec env MIGRATION_TEST_DATABASE_URL=mysql://root:root@db:3306/db php vendo
 
 Die Bereinigungsmigration übernimmt Einträge aus der früheren Tabelle `license_audit_log` nach `audit_log`, bevor sie die alte Tabelle entfernt. Bei gleichen IDs mit unterschiedlichen Inhalten bricht sie ab, damit keine Protokolle verloren gehen. Wiederherstellungscodes werden für vorhandene Benutzer mit einem leeren JSON-Array initialisiert; ein literaler JSON-Standardwert wird vermieden, weil [MySQL dafür einen Ausdruck verlangt](https://dev.mysql.com/doc/refman/8.4/en/data-type-defaults.html).
 
+Nach einem abgebrochenen MySQL-/MariaDB-Migrationslauf können Tabellen und Spalten bereits existieren, obwohl die Version noch nicht in `doctrine_migration_versions` eingetragen ist. `Version20261002153158` ergänzt bei erneuter Ausführung nur die fehlenden Schemaänderungen und erhält bestehende Lizenzaktionen, Produktlaufzeiten sowie 2FA-Daten. Die Installationstests prüfen vier solche Abbruchzustände. Nach dem Hochladen der korrigierten Migrationsdateien kann `php bin/console doctrine:migrations:migrate --env=prod --no-debug --no-interaction` erneut ausgeführt werden; anschließend `php bin/console doctrine:schema:validate --env=prod --no-debug`.
+
 ## Installation in eine vorhandene Symfony-Umgebung
 
 Das Skript `scripts/deploy.py` läuft **auf dem Webserver**. Voraussetzung: Python 3.9+, PHP >= 8.4 mit PDO-MySQL und Sodium, Composer 2 sowie eine konfigurierte, erreichbare MySQL-/MariaDB-Datenbank. Es benötigt zwei getrennte Projektordner. Der Zielordner ist das Symfony-Projektverzeichnis **oberhalb von `public/`**, nicht der DocumentRoot.

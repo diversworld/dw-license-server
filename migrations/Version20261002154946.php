@@ -19,8 +19,9 @@ final class Version20261002154946 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE user ADD two_factor_declined TINYINT DEFAULT 0 NOT NULL');
+        if (!$schema->getTable('user')->hasColumn('two_factor_declined')) {
+            $this->addSql('ALTER TABLE user ADD two_factor_declined TINYINT DEFAULT 0 NOT NULL');
+        }
     }
 
     public function down(Schema $schema): void
