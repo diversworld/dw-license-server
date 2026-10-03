@@ -16,7 +16,7 @@
 
 {% set changes = field.value.changes|default({}) %}
 {% if changes is not empty %}
-    <table class="table table-sm mb-0 audit-changes">
+    <div class="table-responsive"><table class="table table-sm mb-0 audit-changes">
         <thead>
             <tr>
                 <th>{{ 'audit.changes.field'|trans }}</th>
@@ -30,12 +30,12 @@
                 {% set label = labelKey|trans %}
                 <tr>
                     <td>{{ label == labelKey ? property : label }}</td>
-                    <td class="text-break" style="white-space: pre-wrap">{{ _self.value(change.old) }}</td>
-                    <td class="text-break" style="white-space: pre-wrap">{{ _self.value(change.new) }}</td>
+                    <td class="text-break" >{{ _self.value(change.old) }}</td>
+                    <td class="text-break" >{{ _self.value(change.new) }}</td>
                 </tr>
             {% endfor %}
         </tbody>
-    </table>
+    </table></div>
 {% elseif field.value.changedFields|default([]) is not empty %}
     {{ field.value.changedFields|join(', ') }}
     <div class="text-muted small">{{ 'audit.changes.legacy'|trans }}</div>

@@ -24,6 +24,21 @@ final class TwoFactorSecurityTest extends IsolatedWebTestCase
         static::getContainer()->get('cache.rate_limiter')->clear();
     }
 
+    public function testPasswordAndActualTotpCodeCompleteEncryptedAccountLogin(): void
+    {
+        $user = $this->account();
+        $email = $user->getEmail();
+        $this->em->clear();
+        $this->client->request('GET', '/login');
+        $this->client->submitForm('Anmelden', ['_username' => $email, '_password' => self::PASSWORD]);
+        self::assertResponseRedirects();
+        $this->client->request('GET', '/admin/de'); self::assertResponseRedirects('/2fa');
+        $this->client->followRedirect(); self::assertResponseIsSuccessful();
+        $this->client->submitForm('Bestätigen', ['_auth_code' => \OTPHP\TOTP::createFromSecret(self::SECRET)->now()]);
+        self::assertResponseRedirects();
+        $this->client->request('GET', '/admin/de'); self::assertResponseIsSuccessful();
+    }
+
     public function testRequiredRoleCannotSkipOrDeclineEvenWithValidCsrf(): void
     {
         $this->policy(['ROLE_ADMIN']);
@@ -161,7 +176,7 @@ final class TwoFactorSecurityTest extends IsolatedWebTestCase
     {
         $user = $this->account(false); $this->client->loginUser($user);
         $this->client->request('GET', '/security/2fa/setup');
-        $plain = $this->client->getCrawler()->filter('main > code')->text();
+        $plain = $this->client->getCrawler()->filter('#two-factor-secret')->text();
         $session = $this->client->getRequest()->getSession();
         $pending = $session->get('two_factor_setup_secret');
         self::assertSame((string) $user->getId(), $pending['owner']);
@@ -170,7 +185,7 @@ final class TwoFactorSecurityTest extends IsolatedWebTestCase
         self::assertStringNotContainsString($plain, serialize($pending));
         $pending['expiresAt'] = 0; $session->set('two_factor_setup_secret', $pending); $session->save();
         $this->client->request('GET', '/security/2fa/setup');
-        self::assertNotSame($plain, $this->client->getCrawler()->filter('main > code')->text());
+        self::assertNotSame($plain, $this->client->getCrawler()->filter('#two-factor-secret')->text());
     }
 
     public function testExplicitLegacyConversionPreservesAuthenticatorAndSessionVersion(): void
@@ -208,6 +223,7 @@ final class TwoFactorSecurityTest extends IsolatedWebTestCase
         self::assertSame(1, $command->execute([]));
         self::assertFileDoesNotExist($keyFile);
         self::assertStringContainsString('Restore', $command->getDisplay());
+        self::assertStringContainsString('Authenticator encryption key is missing.', $command->getDisplay());
     }
 
     public function testConfigurationRejectsUnknownRolesAndActions(): void

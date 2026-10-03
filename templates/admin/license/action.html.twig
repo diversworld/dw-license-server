@@ -1,11 +1,11 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/application.html.twig' %}
 {% block title %}{{ 'license_action.history'|trans }}{% endblock %}
-{% block body %}
-<main class="container py-4">
+{% block page_content %}
+
     <h1>{{ (action ? 'license_action.' ~ action : 'license_action.history')|trans }}</h1>
     <p>{{ license.product }} · {{ license.customer }} · {{ license.id }}</p>
     <p>{{ ('license_status.' ~ license.status)|trans }} · {{ license.expiresAt ? license.expiresAt|date('Y-m-d H:i') : 'license_action.unlimited'|trans }}</p>
-    {% for message in app.flashes('success') %}<p role="status">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('success') %}<p role="status" class="alert alert-success">{{ message }}</p>{% endfor %}
     {% if form %}
         {{ form_start(form) }}{{ form_widget(form) }}
         <button type="submit" class="btn btn-primary">{{ 'license_action.confirm'|trans }}</button>
@@ -13,13 +13,13 @@
         <p>{{ 'license_action.token_notice'|trans }}</p>
     {% endif %}
     <h2>{{ 'license_action.history'|trans }}</h2>
-    <table class="table"><thead><tr>
+    <div class="table-responsive"><table class="table table-hover align-middle"><thead><tr>
         <th>{{ 'license_action.time'|trans }}</th><th>{{ 'license_action.action'|trans }}</th><th>{{ 'license_action.actor'|trans }}</th><th>{{ 'license_action.reason'|trans }}</th><th>{{ 'license_action.change'|trans }}</th>
     </tr></thead><tbody>
     {% for entry in history %}
         <tr><td>{{ entry.createdAt|date('Y-m-d H:i:s') }}</td><td>{{ ('license_action.' ~ entry.action)|trans }}</td><td>{{ entry.performedBy ?? '—' }}</td><td>{{ entry.reason }}</td><td>{{ ('license_status.' ~ entry.fromStatus)|trans }} → {{ ('license_status.' ~ entry.toStatus)|trans }}; {{ entry.fromExpiresAt ? entry.fromExpiresAt|date('Y-m-d H:i') : 'license_action.unlimited'|trans }} → {{ entry.toExpiresAt ? entry.toExpiresAt|date('Y-m-d H:i') : 'license_action.unlimited'|trans }}</td></tr>
     {% else %}<tr><td colspan="5">{{ 'license_action.empty'|trans }}</td></tr>{% endfor %}
-    </tbody></table>
+    </tbody></table></div>
     <a href="{{ path('admin', {_locale: app.request.locale}) }}">{{ 'dashboard.overview'|trans }}</a>
-</main>
+
 {% endblock %}

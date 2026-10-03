@@ -1,6 +1,6 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/application.html.twig' %}
 {% block title %}{{ 'portal.title'|trans }}{% endblock %}
-{% block body %}<main class="container py-4"><h1>{{ 'portal.title'|trans }}</h1>
-<nav><a href="{{ path('two_factor_manage') }}">{{ 'two_factor.manage'|trans }}</a></nav>
-<table class="table"><thead><tr><th>{{ 'portal.product'|trans }}</th><th>{{ 'portal.expiry'|trans }}</th><th>{{ 'portal.features'|trans }}</th></tr></thead><tbody>
-{% for license in licenses %}<tr><td><a href="{{ path('portal_license', {id: license.id, _locale: app.request.locale}) }}">{{ license.product.name }}</a></td><td>{{ license.expiresAt ? license.expiresAt|date('Y-m-d') : 'portal.unlimited'|trans }}</td><td>{{ license.features|join(', ') }}</td></tr>{% else %}<tr><td colspan="3">{{ 'portal.empty'|trans }}</td></tr>{% endfor %}</tbody></table></main>{% endblock %}
+{% block page_content %}<h1>{{ 'portal.title'|trans }}</h1>
+<nav class="mb-4"><a class="btn btn-outline-primary" href="{{ path('two_factor_manage') }}">{{ 'two_factor.manage'|trans }}</a></nav>
+<div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>{{ 'portal.product'|trans }}</th><th>{{ 'portal.expiry'|trans }}</th><th>{{ 'portal.features'|trans }}</th></tr></thead><tbody>
+{% for license in licenses %}<tr><td><a href="{{ path('portal_license', {id: license.id, _locale: app.request.locale}) }}">{{ license.product.name }}</a></td><td>{{ license.expiresAt ? license.expiresAt|date('Y-m-d') : 'portal.unlimited'|trans }}</td><td>{{ license.features|join(', ') }}</td></tr>{% else %}<tr><td colspan="3">{{ 'portal.empty'|trans }}</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

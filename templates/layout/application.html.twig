@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    <header class="dw-topbar">
+        <nav class="container-fluid px-3 px-lg-5 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3" aria-label="Diversworld">
+            <a class="text-white text-decoration-none d-flex align-items-center gap-3" href="{{ path(is_granted('ROLE_CUSTOMER') ? 'portal_index' : 'admin', {_locale: app.request.locale}) }}">
+                <img src="{{ asset('images/Diversworld-ws.png') }}" alt="Diversworld" class="dw-nav-logo">
+                <span class="fw-semibold">{{ (is_granted('ROLE_CUSTOMER') ? 'portal.title' : 'dashboard.overview')|trans }}</span>
+            </a>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                {% if app.user %}<span class="text-white-50 small text-break">{{ app.user.userIdentifier }}</span>{% endif %}
+                <a class="btn btn-outline-light btn-sm" href="{{ path('app_logout') }}">{{ 'dashboard.logoff'|trans }}</a>
+            </div>
+        </nav>
+    </header>
+    <main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
+        {% include 'layout/flashes.html.twig' %}
+        <div class="card dw-page-card"><div class="card-body p-3 p-md-4 p-xl-5">
+            {% block page_content %}{% endblock %}
+        </div></div>
+    </main>
+    <footer class="text-center text-secondary small pb-4">&copy; {{ 'now'|date('Y') }} Diversworld</footer>
+{% endblock %}

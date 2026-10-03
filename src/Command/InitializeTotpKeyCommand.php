@@ -24,7 +24,12 @@ final class InitializeTotpKeyCommand extends Command
             try {
                 $secret = $this->em->getConnection()->fetchOne("SELECT totp_secret FROM user WHERE totp_secret LIKE 'enc:v1:%' LIMIT 1");
                 $this->cipher->decrypt($secret ?: $webhookSecret);
-            } catch (\RuntimeException) { $output->writeln('<error>Encrypted authenticators exist. Restore their original encryption key; no new key was generated.</error>'); return Command::FAILURE; }
+            } catch (\RuntimeException $error) {
+                $output->writeln('<error>'.$error->getMessage().'</error>');
+                $output->writeln('<error>Encrypted authenticators exist. Check access to their original encryption key and restore it if missing or replaced; no new key was generated.</error>');
+
+                return Command::FAILURE;
+            }
         }
         $this->cipher->initializeKey();
         $output->writeln('Authenticator encryption key is ready. Back it up separately and distribute the same key to every server instance.');

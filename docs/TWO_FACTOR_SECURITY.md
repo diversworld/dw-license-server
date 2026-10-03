@@ -28,6 +28,14 @@ Session serialization excludes both stored and decrypted authenticator secrets. 
 
 Back up this key together with the database and required configuration, under separately controlled access. Every application instance must receive the same key before it accesses encrypted accounts. Key initialization uses the configured Symfony lock store; multiple instances need a common store and coordinated distribution. Losing the key can make encrypted authenticators unusable. A compromised database alone does not reveal the encryption key, but compromise of both the application host/key and database defeats this protection. Rotating this encryption key is a separate controlled re-encryption operation, not license signing-key rotation.
 
+## Login failures after an update
+
+The deployment script excludes `config/security/` from application-file copying. It preserves the target's authenticator encryption key and its permissions and never installs a development authenticator key. An earlier deployment-script version could overwrite this file. If that happened, restore the original production key from the deployment's file backup, retaining mode 0600 and access for the PHP process. Creating a new key cannot decrypt existing authenticators. For a configured key path outside this directory, preserve that original file as well.
+
+An invalid-code message alone does not establish a key problem: encrypted-secret loading normally fails explicitly when the key is missing, replaced or has inappropriate permissions. The key initializer reports the specific failure and refuses to replace a missing/mismatched key when encrypted records exist. Run it only against the intended production configuration; on a new installation without encrypted records it initializes a key.
+
+For an invalid-code message, compare `date -u` on the server with a phone using automatic date and time. TOTP uses Unix time, a 30-second period and zero configured leeway; changing the displayed timezone does not fix clock drift. Correct time synchronization, then try a freshly generated code for the correct account. If an authenticator was replaced, use the current app entry or the password plus an unused recovery code through the recovery form. For multiple application instances, check time synchronization, the database and the encryption key on each instance. Do not send authenticator secrets, encryption keys or recovery codes in diagnostic reports.
+
 ## User operations
 
 The account's two-factor menu opens `/security/2fa/manage` once enrolled. Authenticator replacement requires the current password, a current app code or unused recovery code, and a valid code from the replacement authenticator. Recovery-code regeneration requires the current password and an existing factor. All previous recovery codes become invalid; new codes are shown once and stored only as hashes.

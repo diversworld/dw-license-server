@@ -124,7 +124,7 @@ class PriorityFeaturesTest extends WebTestCase
         self::assertResponseRedirects('/security/2fa/setup');
         $crawler = $this->client->followRedirect();
         self::assertResponseIsSuccessful();
-        $secret = $crawler->filter('main > code')->text();
+        $secret = $crawler->filter('#two-factor-secret')->text();
         $qrData = $crawler->filter('img.two-factor-qr')->attr('src');
         self::assertStringStartsWith('data:image/svg+xml;base64,', $qrData);
         $svg = base64_decode(substr($qrData, strlen('data:image/svg+xml;base64,')), true);
@@ -205,7 +205,7 @@ class PriorityFeaturesTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
         $crawler = $this->client->click($setupLink);
         self::assertResponseIsSuccessful();
-        $secret = $crawler->filter('main > code')->text();
+        $secret = $crawler->filter('#two-factor-secret')->text();
         $this->client->submitForm('Zwei-Faktor-Anmeldung aktivieren', ['form[password]' => 'test-password-1234', 'form[code]' => \OTPHP\TOTP::createFromSecret($secret)->now()]);
         self::assertResponseIsSuccessful();
         $user = $this->em->find(User::class, $user->getId());

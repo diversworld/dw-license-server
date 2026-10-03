@@ -27,7 +27,7 @@ def files_to_copy(source):
             continue
         for path in ([root] if root.is_file() else sorted(root.rglob('*'))):
             relative = path.relative_to(source)
-            if relative.parts[:2] in [('config', 'license'), ('config', 'jwt'), ('config', 'secrets'), ('public', 'bundles')]:
+            if relative.parts[:2] in [('config', 'license'), ('config', 'jwt'), ('config', 'secrets'), ('config', 'security'), ('public', 'bundles')]:
                 continue
             if path.is_symlink():
                 fail(f'Symlink in Anwendungsdateien nicht unterstützt: {relative}')

@@ -1,30 +1,30 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/authentication.html.twig' %}
 {% block title %}{{ 'two_factor.setup'|trans }}{% endblock %}
-{% block body %}
-<main class="container" style="max-width: 40rem; margin: 3rem auto">
-    <h1>{{ 'two_factor.setup'|trans }}</h1>
+{% block auth_content %}
+
+
     {% if codes is not empty %}
         <p>{{ 'two_factor.recovery_help'|trans }}</p>
-        <ul>{% for code in codes %}<li><code>{{ code }}</code></li>{% endfor %}</ul>
+        <ul class="list-group mb-4">{% for code in codes %}<li class="list-group-item font-monospace"><code>{{ code }}</code></li>{% endfor %}</ul>
         <a href="{{ path(is_granted('ROLE_CUSTOMER') ? 'portal_index' : 'admin') }}">{{ 'dashboard.overview'|trans }}</a>
     {% else %}
         <p>{{ 'two_factor.setup_help'|trans }}</p>
-        <img class="two-factor-qr" src="{{ qrCode }}" alt="{{ 'two_factor.qr_alt'|trans }}" width="256" height="256">
+        <img class="two-factor-qr img-fluid rounded border p-2 bg-white d-block mx-auto mb-3" src="{{ qrCode }}" alt="{{ 'two_factor.qr_alt'|trans }}" width="256" height="256">
         <p>{{ 'two_factor.qr_help'|trans }}</p>
         <p>{{ app.user.userIdentifier }} — Diversworld — TOTP, SHA1, 6 digits, 30 seconds</p>
-        <code>{{ secret }}</code>
-        {{ form_start(form) }}{{ form_widget(form) }}<button type="submit">{{ 'two_factor.enable'|trans }}</button>{{ form_end(form) }}
+        <code id="two-factor-secret" class="d-block text-break rounded bg-light p-3 mb-3">{{ secret }}</code>
+        {{ form_start(form) }}{{ form_widget(form) }}<button type="submit" class="btn btn-primary w-100">{{ 'two_factor.enable'|trans }}</button>{{ form_end(form) }}
         {% if required %}<p>{{ 'two_factor.required_help'|trans }}</p>{% else %}
         <p>{{ 'two_factor.optional_help'|trans }}</p>
         <form action="{{ path('two_factor_decision', {decision: 'skip'}) }}" method="post">
             <input type="hidden" name="_token" value="{{ csrf_token('two_factor_decision') }}">
-            <button type="submit">{{ 'two_factor.skip'|trans }}</button>
+            <button type="submit" class="btn btn-outline-primary w-100">{{ 'two_factor.skip'|trans }}</button>
         </form>
         <form action="{{ path('two_factor_decision', {decision: 'decline'}) }}" method="post">
             <input type="hidden" name="_token" value="{{ csrf_token('two_factor_decision') }}">
-            <button type="submit">{{ 'two_factor.decline'|trans }}</button>
+            <button type="submit" class="btn btn-outline-secondary w-100 mt-2">{{ 'two_factor.decline'|trans }}</button>
         </form>
         {% endif %}
     {% endif %}
-</main>
+
 {% endblock %}

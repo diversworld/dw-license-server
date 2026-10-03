@@ -27,8 +27,8 @@ final class ApiIntegrationAdminTest extends IsolatedWebTestCase
         $url = '/admin/de/customers/'.$own->getCustomer()->getId().'/webhooks'; $crawler = $this->client->request('GET', $url); self::assertResponseIsSuccessful();
         $form = $crawler->selectButton('Erstellen')->form(); $this->client->submit($form, ['form[url]' => 'https://hooks.example.org/events', 'form[events]' => ['license.created']]); self::assertResponseIsSuccessful();
         $endpoint = $this->em->getRepository(WebhookEndpoint::class)->findOneBy([]); self::assertStringStartsWith('enc:v1:', $endpoint->getSecretCiphertext());
-        preg_match('/<code>([a-f0-9]{64})<\/code>/', $this->client->getResponse()->getContent(), $match); self::assertCount(2, $match); self::assertStringNotContainsString($match[1], $endpoint->getSecretCiphertext());
-        $this->client->request('GET', $url); self::assertStringNotContainsString($match[1], $this->client->getResponse()->getContent());
+        $secret = $this->client->getCrawler()->filter('#integration-secret')->text(); self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/D', $secret); self::assertStringNotContainsString($secret, $endpoint->getSecretCiphertext());
+        $this->client->request('GET', $url); self::assertStringNotContainsString($secret, $this->client->getResponse()->getContent());
         $this->client->request('POST', '/admin/de/webhooks/'.$endpoint->getId().'/disable', ['_token' => 'forged']); self::assertResponseStatusCodeSame(403);
     }
 }

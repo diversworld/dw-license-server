@@ -1,11 +1,11 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/authentication.html.twig' %}
 
 {% block title %}{{ 'two_factor.title'|trans }}{% endblock %}
 
-{% block body %}
-<main class="container" style="max-width: 32rem; margin: 3rem auto">
+{% block auth_content %}
+
     <div class="two-factor-container">
-        <h1>{{ 'two_factor.title'|trans }}</h1>
+
         <div class="two-factor-description">
             <p>{{ 'two_factor.challenge_help'|trans }}</p>
         </div>
@@ -17,22 +17,22 @@
                 </div>
             </div>
         {% endif %}
-         <div class="card login-card">
-            <div class="card-body">
+         <div class="border-0">
+            <div class="p-0">
                 <div class="mb-4">
                     <form action="{{ path('2fa_login_check') }}" method="post">
                         <div class="mb-3">
-                            <label for="auth-code">{{ 'two_factor.code'|trans }}</label>    
+                            <label for="auth-code" class="form-label">{{ 'two_factor.code'|trans }}</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="bi bi-envelope"></i>
                                     </span>
-                                    <input id="auth-code" name="{{ authCodeParameterName }}" autocomplete="one-time-code" required autofocus>
+                                    <input class="form-control" id="auth-code" name="{{ authCodeParameterName }}" autocomplete="one-time-code" required autofocus>
                                 </div>
                             </div>
                         <div class="mb-3">
                             <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
-                            <button type="submit">{{ 'two_factor.verify'|trans }}</button>
+                            <button type="submit" class="btn btn-primary w-100">{{ 'two_factor.verify'|trans }}</button>
                         </div>
                     </form>
                     <p><a href="{{ path('two_factor_recover') }}">{{ 'two_factor.recover'|trans }}</a></p>
@@ -41,5 +41,5 @@
             </div>
         </div>
     </div>
-</main>
+
 {% endblock %}

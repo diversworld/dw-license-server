@@ -60,6 +60,27 @@ if os.environ.get('DEPLOY_TEST_FAIL') and 'doctrine:migrations:migrate' in sys.a
             env['DEPLOY_TEST_FAIL'] = '1'
         return subprocess.run([sys.executable, str(SCRIPT), str(self.source), str(target or self.target), '--php', str(self.runner), '--composer', str(self.runner), *options], capture_output=True, text=True, env=env)
 
+    def test_deployment_preserves_existing_authenticator_key_and_permissions(self):
+        source_key = self.source / 'config/security/totp.key'
+        source_key.parent.mkdir(parents=True)
+        source_key.write_text('development-key-must-not-be-deployed')
+        target_key = self.target / 'config/security/totp.key'
+        target_key.parent.mkdir(parents=True)
+        target_key.write_text('original-production-authenticator-key')
+        target_key.chmod(0o600)
+        result = self.execute()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual('original-production-authenticator-key', target_key.read_text())
+        self.assertEqual(0o600, target_key.stat().st_mode & 0o777)
+
+    def test_deployment_never_installs_local_authenticator_key_into_new_target(self):
+        source_key = self.source / 'config/security/totp.key'
+        source_key.parent.mkdir(parents=True)
+        source_key.write_text('development-key-must-not-be-deployed')
+        result = self.execute()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertFalse((self.target / 'config/security/totp.key').exists())
+
     def test_full_deployment_preserves_secrets_and_orders_commands(self):
         result = self.execute()
         self.assertEqual(0, result.returncode, result.stderr)

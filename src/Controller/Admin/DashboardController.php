@@ -101,8 +101,8 @@ class DashboardController extends AbstractDashboardController
                 // elements is computed automatically based on this color.
                 // The optional 'dark' argument sets a different primary color for
                 // the dark color scheme (if not set, the same color is used in both)
-                ->primaryColor('#004d99') //, dark: 'oklch(0.6 0.2 150)')
-                ->radius('0.5rem')
+                ->primaryColor('#003366') //, dark: 'oklch(0.6 0.2 150)')
+                ->radius('1rem')
                 ->spacing('md'))
                 // the gray scale used by all neutral surfaces, borders and text
                 // colors: 'neutral', 'stone' (warmer), 'zinc', 'gray' or 'slate'
@@ -127,7 +127,8 @@ class DashboardController extends AbstractDashboardController
     public function configureAssets(): Assets
 	{
 		return parent::configureAssets()
-			->addCssFile('css/admin.css?v=20261002-es');
+			->addCssFile('css/application.css?v=20261003')
+            ->addCssFile('css/admin.css?v=20261003-design');
 	}
 		
     public function configureMenuItems(): iterable

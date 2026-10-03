@@ -1,74 +1,10 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}
-    E-Mail versendet | Diversworld
-{% endblock %}
-
-{% block body %}
-
-<div
-    class="
-        login-area
-        min-vh-100
-        d-flex
-        align-items-center
-        justify-content-center
-        p-4
-    "
->
-
-    <div class="login-wrapper">
-
-        <div class="card login-card">
-
-            <div class="card-body text-center">
-
-                <div class="mb-4">
-
-                    <i
-                        class="
-                            bi
-                            bi-envelope-check
-                            text-primary
-                            display-4
-                        "
-                    ></i>
-
-                </div>
-
-                <h2 class="fw-bold mb-3">
-                    E-Mail prüfen
-                </h2>
-
-                <p class="text-secondary">
-                    Falls für die angegebene E-Mail-Adresse
-                    ein Benutzerkonto existiert, wurde eine
-                    Nachricht mit einem Link zum Zurücksetzen
-                    des Kennworts versendet.
-                </p>
-
-                {% if resetToken %}
-
-                    <p class="text-secondary small">
-                        Der Link ist nur für eine begrenzte
-                        Zeit gültig.
-                    </p>
-
-                {% endif %}
-
-                <a
-                    href="{{ path('app_login') }}"
-                    class="btn btn-outline-primary mt-3"
-                >
-                    Zur Anmeldung
-                </a>
-
-            </div>
-
-        </div>
-
+{% extends 'layout/authentication.html.twig' %}
+{% block title %}E-Mail prüfen{% endblock %}
+{% block auth_content %}
+    <div class="text-center">
+        <i class="bi bi-envelope-check text-primary display-4 d-block mb-4" aria-hidden="true"></i>
+        <p class="text-secondary">Falls für die angegebene E-Mail-Adresse ein Benutzerkonto existiert, wurde eine Nachricht mit einem Link zum Zurücksetzen des Kennworts versendet.</p>
+        {% if resetToken %}<p class="text-secondary small">Der Link ist nur für eine begrenzte Zeit gültig.</p>{% endif %}
+        <a href="{{ path('app_login') }}" class="btn btn-outline-primary mt-3">Zur Anmeldung</a>
     </div>
-
-</div>
-
 {% endblock %}
