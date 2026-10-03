@@ -45,6 +45,8 @@ class AdministrativeActionVoter extends Voter
         if (!$user instanceof User || !$user->isActive()) {
             return false;
         }
+        if (!$user->hasGlobalAccess() && in_array($attribute, ['USER_MANAGE', 'PRODUCT_MANAGE'], true)) { return false; }
+        if (is_object($subject) && !CustomerAccess::allows($user, $subject)) { return false; }
         if (!$this->twoFactorPolicy->permits($user, $attribute, $token)) { return false; }
         if ($user->isTotpAuthenticationEnabled() && (!$token->hasAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE)
             || !$token->getAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE))) {

@@ -101,6 +101,7 @@ final class AuditSubscriber
             $message,
             $user,
             [
+                'customerId' => $description['customerId'] ?? null,
                 'table' => $description['table'],
                 'entityClass' => $em->getClassMetadata($entity::class)->name,
                 'changedFields' => array_keys($changes),
@@ -118,6 +119,7 @@ final class AuditSubscriber
         $type = $entity instanceof AuditableEntityInterface ? $entity->getAuditType() : $metadata->getTableName();
 
         return [
+            'customerId' => ($customer = \App\Security\CustomerAccess::customerOf($entity)) === null ? null : (string) $customer->getId(),
             'type' => $type,
             'identifier' => $entity instanceof AuditableEntityInterface ? $entity->getAuditIdentifier() : $type.':'.($id ?? 'new'),
             'id' => $id,

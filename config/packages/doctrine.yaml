@@ -8,6 +8,10 @@ doctrine:
 
         profiling_collect_backtrace: '%kernel.debug%'
     orm:
+        filters:
+            customer_scope:
+                class: App\Doctrine\CustomerScopeFilter
+                enabled: false
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore
         identity_generation_preferences:

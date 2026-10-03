@@ -74,6 +74,9 @@ class UserCrudController extends AbstractCrudController
         yield ChoiceField::new('roles', 'Rollen')->setChoices($roles)->allowMultipleChoices()
             ->setColumns(6);
 
+        yield BooleanField::new('globalAccess', 'customer_scope.global')->renderAsSwitch(false);
+        yield \EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField::new('customers', 'customer_scope.assignments')->setFormTypeOption('by_reference', false);
+
         yield BooleanField::new('active', 'Aktiv')
             ->renderAsSwitch(false)
             ->setColumns(6);

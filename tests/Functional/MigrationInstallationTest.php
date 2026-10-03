@@ -256,6 +256,8 @@ class MigrationInstallationTest extends KernelTestCase
             $this->console(['doctrine:migrations:migrate', '--no-interaction', '--allow-no-migration'], $environment);
             self::assertSame(1, (int) $connection->fetchOne('SELECT COUNT(*) FROM product'));
             self::assertSame(1, (int) $connection->fetchOne('SELECT COUNT(*) FROM audit_log'));
+            self::assertTrue($connection->createSchemaManager()->tablesExist(['user_customer']));
+            self::assertSame('1', (string) $connection->createSchemaManager()->introspectTable('user')->getColumn('global_access')->getDefault());
             self::assertSame(86400, (int) $connection->fetchOne('SELECT token_lifetime_seconds FROM product'));
             self::assertSame(2592000, (int) $connection->fetchOne('SELECT grace_period_seconds FROM product'));
             self::assertSame(count(glob(dirname(__DIR__, 2).'/migrations/Version*.php')), (int) $connection->fetchOne('SELECT COUNT(*) FROM doctrine_migration_versions'));

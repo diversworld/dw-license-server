@@ -289,3 +289,7 @@ two_factor.login_again: "Se reconnecter"
 two_factor.reauthentication_failed: "Le mot de passe ou le code de vérification est invalide."
 two_factor.invalid_new_code: "Le code du nouvel authentificateur est invalide."
 entities.App\Entity\User.properties.securityVersion: "Version de session"
+
+customer_scope:
+    global: "Accès à l’administration globale"
+    assignments: "Clients affectés"

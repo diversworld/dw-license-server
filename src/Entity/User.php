@@ -64,8 +64,37 @@ class User implements \Symfony\Component\Security\Core\User\EquatableInterface, 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $globalAccess = true;
+
+    /** @var \Doctrine\Common\Collections\Collection<int, Customer> */
+    #[ORM\ManyToMany(targetEntity: Customer::class)]
+    #[ORM\JoinTable(name: 'user_customer')]
+    private \Doctrine\Common\Collections\Collection $customers;
+
+    public function hasGlobalAccess(): bool { return $this->globalAccess; }
+    public function isGlobalAccess(): bool { return $this->globalAccess; }
+    public function setGlobalAccess(bool $value): static
+    {
+        if ($value !== $this->globalAccess) { $this->revokeSessions(); }
+        $this->globalAccess = $value;
+        return $this;
+    }
+    public function getCustomers(): \Doctrine\Common\Collections\Collection { return $this->customers; }
+    public function addCustomer(Customer $customer): static
+    {
+        if (!$this->customers->contains($customer)) { $this->customers->add($customer); $this->revokeSessions(); }
+        return $this;
+    }
+    public function removeCustomer(Customer $customer): static
+    {
+        if ($this->customers->removeElement($customer)) { $this->revokeSessions(); }
+        return $this;
+    }
+
     public function __construct()
     {
+        $this->customers = new \Doctrine\Common\Collections\ArrayCollection();
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -397,6 +426,7 @@ class User implements \Symfony\Component\Security\Core\User\EquatableInterface, 
         $data["\0" . self::class . "\0backupCodeHashes"] = [];
         $data["\0" . self::class . "\0decryptedTotpSecret"] = null;
 
+        $data["\0" . self::class . "\0customers"] = new \Doctrine\Common\Collections\ArrayCollection();
         return $data;
     }
 }

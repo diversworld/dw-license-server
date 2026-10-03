@@ -287,3 +287,7 @@ two_factor.login_again: "Sign in again"
 two_factor.reauthentication_failed: "The password or verification code is invalid."
 two_factor.invalid_new_code: "The code from the new authenticator is invalid."
 entities.App\Entity\User.properties.securityVersion: "Session version"
+
+customer_scope:
+    global: "Global administration access"
+    assignments: "Assigned customers"

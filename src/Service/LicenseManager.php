@@ -23,6 +23,7 @@ class LicenseManager
         private readonly ActivationRepository $activations,
         private readonly LicenseSigner $signer,
         private readonly LockFactory $lockFactory,
+        private readonly ?\Symfony\Bundle\SecurityBundle\Security $security = null,
     ) {
     }
 
@@ -113,6 +114,8 @@ class LicenseManager
 
     private function assertUsable(License $license): void
     {
+        $actor = $this->security?->getUser();
+        if ($actor instanceof \App\Entity\User && !\App\Security\CustomerAccess::allows($actor, $license)) { throw new HttpException(403, 'Invalid license.'); }
         if ($license->isExpired()) {
             throw new HttpException(410, 'License expired.');
         }

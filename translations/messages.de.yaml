@@ -287,3 +287,7 @@ two_factor.login_again: "Erneut anmelden"
 two_factor.reauthentication_failed: "Passwort oder Bestätigungscode ist ungültig."
 two_factor.invalid_new_code: "Der Code aus dem neuen Authenticator ist ungültig."
 entities.App\Entity\User.properties.securityVersion: "Sitzungsversion"
+
+customer_scope:
+    global: "Globaler Verwaltungszugriff"
+    assignments: "Zugewiesene Kunden"

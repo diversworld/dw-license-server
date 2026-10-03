@@ -289,3 +289,7 @@ two_factor.login_again: "Volver a iniciar sesión"
 two_factor.reauthentication_failed: "La contraseña o el código de verificación no es válido."
 two_factor.invalid_new_code: "El código del nuevo autenticador no es válido."
 entities.App\Entity\User.properties.securityVersion: "Versión de sesión"
+
+customer_scope:
+    global: "Acceso a la administración global"
+    assignments: "Clientes asignados"
