@@ -36,6 +36,7 @@ when@prod:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: info
+                formatter: monolog.formatter.json
                 channels: ["!event"]
 
             deprecation:

@@ -20,8 +20,8 @@ class RequireTwoFactorEnrollment
     #[AsEventListener(event: 'kernel.request', priority: -16)]
     public function onRequest(RequestEvent $event): void
     {
-        if (!$event->isMainRequest() || !str_starts_with($event->getRequest()->getPathInfo(), '/admin')
-            || !$this->security->isGranted('IS_AUTHENTICATED_FULLY') || !$this->security->isGranted('ROLE_VIEWER')) {
+        if (!$event->isMainRequest() || !preg_match('~^/(admin|portal|operations)(?:/|$)~', $event->getRequest()->getPathInfo())
+            || !$this->security->isGranted('IS_AUTHENTICATED_FULLY')) {
             return;
         }
         $user = $this->security->getUser();

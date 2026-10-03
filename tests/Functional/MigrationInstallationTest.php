@@ -324,6 +324,65 @@ class MigrationInstallationTest extends KernelTestCase
         });
     }
 
+    public function testRecoverySnapshotRestoresDatabaseKeyringAndIndependentAuthenticatorKey(): void
+    {
+        $this->withDatabase(function (Connection $source, array $sourceEnvironment): void {
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $sourceEnvironment);
+            $this->console(['app:license:init'], $sourceEnvironment);
+            $source->insert('user', ['id' => \Symfony\Component\Uid\Uuid::v7()->toBinary(), 'email' => 'restore@example.test', 'firstname' => 'Restore', 'lastname' => 'Fixture', 'password' => 'unused-hash', 'roles' => '["ROLE_ADMIN"]', 'active' => 1, 'created_at' => '2026-10-03 12:00:00', 'totp_secret' => 'JBSWY3DPEHPK3PXP', 'backup_code_hashes' => '[]']);
+            $customerId = \Symfony\Component\Uid\Uuid::v7()->toBinary();
+            $licenseId = \Symfony\Component\Uid\Uuid::v7();
+            $source->insert('customer', ['id' => $customerId, 'company' => 'Recovery Customer', 'firstname' => 'Test', 'lastname' => 'Customer', 'email' => 'customer@example.test', 'street' => 'Test 1', 'zip' => '12345', 'city' => 'Berlin', 'created_at' => '2026-10-03 12:00:00']);
+            $source->insert('license', ['id' => $licenseId->toBinary(), 'license_key' => str_repeat('a', 64), 'type' => 'single', 'status' => 'active', 'max_domains' => 2, 'features' => '["sla"]', 'mode' => 'offline', 'expires_at' => gmdate('Y-m-d H:i:s', time() + 7200), 'created_at' => '2026-10-03 12:00:00', 'customer_id' => $customerId, 'product_id' => $source->fetchOne('SELECT id FROM product')]);
+            $source->insert('activation', ['domain' => 'restore.example.test', 'tenant' => 'recovery-installation', 'active' => 1, 'created_at' => '2026-10-03 12:00:00', 'license_id' => $licenseId->toBinary()]);
+            $this->console(['app:security:totp-key:init'], $sourceEnvironment);
+            $this->console(['app:security:encrypt-totp'], $sourceEnvironment);
+            $root = sys_get_temp_dir().'/license-recovery-'.bin2hex(random_bytes(8));
+            $fs = new \Symfony\Component\Filesystem\Filesystem();
+            $fs->mkdir([$root.'/source/config/license', $root.'/source/config/packages', $root.'/target'], 0700);
+            $fs->dumpFile($root.'/source/.env.local', 'APP_SECRET=test-only-recovery-configuration');
+            $fs->dumpFile($root.'/source/config/packages/framework.yaml', "framework: { secret: '%env(APP_SECRET)%' }");
+            $fs->dumpFile($root.'/source/config/license/private.key', base64_encode(sodium_crypto_sign_secretkey(sodium_crypto_sign_keypair())));
+            $locks = new \Symfony\Component\Lock\LockFactory(new \Symfony\Component\Lock\Store\FlockStore());
+            $signer = new \App\Service\LicenseSigner($root.'/source/config/license/private.key', $locks);
+            $rotation = new \App\Service\SigningKeyRotation($signer, $fs, $locks, $root.'/source/config/license');
+            $old = $signer->sign(['expires_at' => time() + 3600]);
+            $id = $rotation->prepare('test-operator', 'Recovery fixture');
+            $rotation->transition('publish', $id, 'test-operator', 'Recovery fixture', $rotation->fingerprint());
+            $rotation->activate($id, 'test-operator', 'Recovery fixture', $rotation->fingerprint(), true);
+            $new = $signer->sign(['expires_at' => time() + 7200]);
+            try {
+                $snapshot = new \App\Service\RecoverySnapshot($source, $fs, $locks, $root.'/source', $root.'/source/config/license', $sourceEnvironment['TOTP_ENCRYPTION_KEY_FILE']);
+                $snapshot->backup($root.'/snapshot', true);
+                self::assertSame(0600, fileperms($root.'/snapshot/database.sql') & 0777);
+                $this->withDatabase(function (Connection $target, array $targetEnvironment) use ($root, $fs, $locks, $old, $new): void {
+                    $targetKey = $root.'/target/config/security/totp.key';
+                    $restorer = new \App\Service\RecoverySnapshot($target, $fs, $locks, $root.'/target', $root.'/target/config/license', $targetKey);
+                    $original = file_get_contents($root.'/snapshot/database.sql');
+                    file_put_contents($root.'/snapshot/database.sql', $original."\n-- tampered");
+                    try { $restorer->restore($root.'/snapshot'); self::fail('Modified backup accepted.'); } catch (\DomainException $error) { self::assertStringContainsString('integrity', $error->getMessage()); }
+                    self::assertSame([], $target->createSchemaManager()->listTableNames());
+                    file_put_contents($root.'/snapshot/database.sql', $original);
+                    $restorer->restore($root.'/snapshot');
+                    self::assertSame('restore@example.test', $target->fetchOne('SELECT email FROM user'));
+                    self::assertSame(1, (int) $target->fetchOne('SELECT COUNT(*) FROM product'));
+                    self::assertSame('Recovery Customer', $target->fetchOne('SELECT company FROM customer'));
+                    self::assertSame(['sla'], json_decode($target->fetchOne('SELECT features FROM license'), true));
+                    self::assertSame('recovery-installation', $target->fetchOne('SELECT tenant FROM activation'));
+                    $restoredSigner = new \App\Service\LicenseSigner($root.'/target/config/license/private.key', $locks);
+                    self::assertGreaterThan(time(), $restoredSigner->verify($old)['expires_at']);
+                    self::assertSame($id = $restoredSigner->keyId(), $restoredSigner->verify($new)['kid']);
+                    $cipher = new \App\Security\TotpSecretCipher($fs, $locks, $targetKey, false, $root.'/target');
+                    self::assertSame('JBSWY3DPEHPK3PXP', $cipher->decrypt($target->fetchOne('SELECT totp_secret FROM user')));
+                    self::assertFileExists($root.'/target/recovered-configuration/.env.local');
+                    $this->console(['doctrine:schema:validate'], $targetEnvironment);
+                    self::assertStringContainsString('Verified', $this->console(['app:audit:verify'], $targetEnvironment));
+                    try { $restorer->restore($root.'/snapshot'); self::fail('Nonempty target accepted.'); } catch (\DomainException $error) { self::assertStringContainsString('empty', $error->getMessage()); }
+                });
+            } finally { $fs->remove($root); }
+        });
+    }
+
     private function withDatabase(callable $test): void
     {
         $dsn = getenv('MIGRATION_TEST_DATABASE_URL');

@@ -13,7 +13,7 @@ The requirements are implemented and checked in this order. Each completed secti
 6. Role/action 2FA policy, recovery, session invalidation and encryption — completed: full suite 119 tests / 987 assertions, including actual HTTP recovery, optional/required policy, CSRF/rate limits, independent-key protection, legacy upgrade/conversion and separate database connections.
 7. Signing-key lifecycle, emergency revocation, rollout and history — completed: 22 service/HTTP/real-client tests / 230 assertions; prepared keys remain untrusted, stale activation and invalid private keys are rejected, lease bounds block early retirement, signed manifests and emergency revocation are exercised.
 8. Customer assignments, global/scoped permissions and object-level isolation — completed: 4 HTTP tests / 24 assertions for both customers, forged associations and API tenant misuse; full suite 127 cases / 812 assertions with 16 initially skipped database cases then separately executed successfully (16 / 229); container lint passed.
-9. Health, bounded metrics, request IDs, backup and recovery test — pending.
+9. Health, bounded metrics, request IDs, backup and recovery test — completed: operations/policy/isolation suite 21 tests / 114 assertions; real two-database MariaDB recovery 1 test / 29 assertions, including customer/license/installation, old/new signing keys, TOTP decryption, schema and audit verification. Container lint passed.
 10. Persistent, asynchronous expiry reminders and simulated deliveries — pending.
 11. Customer portal, protected license downloads and domain-change history — pending.
 12. Scoped hashed API credentials, idempotency and signed safe webhooks — pending.
@@ -64,3 +64,7 @@ See [Signing-key operations](SIGNING_KEYS.md). Operator-only lifecycle commands 
 ## Customer access
 
 See [Customer authorization](CUSTOMER_ACCESS.md). Migration `Version20261003101128` preserves existing global access and supports interrupted DDL. A concurrent user commit (`215b508`) captured the implementation; reverse-customer tests and completed verification follow separately.
+
+## Operations
+
+See [Monitoring and recovery](OPERATIONS.md). Snapshots require acknowledged maintenance and private off-application storage; restore targets must be empty. Tests used temporary databases and fake application key/config trees only. Metrics use a bounded shared-cache representation without domain/credential labels. Production alarms, off-host encryption/storage and remote probes were not configured or executed.

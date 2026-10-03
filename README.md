@@ -268,3 +268,5 @@ Der aktuelle Umsetzungsstand, geprüfte Anforderungen und sichere Upgrade-Schrit
 Die transaktionale, versionierte Audit-Hashkette und externe Prüfpunkte sind in [Audit integrity](docs/SECURITY_AUDIT.md) beschrieben.
 
 Konfigurierbare 2FA-Pflichten, sicherer Authenticator-Wechsel, Wiederherstellung und getrennte TOTP-Verschlüsselung: [Two-factor security](docs/TWO_FACTOR_SECURITY.md).
+
+Betriebsprüfungen, Metriken und isolierte Wiederherstellung: [Betrieb und Recovery](docs/OPERATIONS.md).
