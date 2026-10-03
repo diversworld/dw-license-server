@@ -151,6 +151,8 @@ class DashboardController extends AbstractDashboardController
             icon: 'fa fa-cubes'
         );
 
+        yield MenuItem::linkTo(LicensePlanCrudController::class, label: 'entitlements.plans', icon: 'fa fa-list')->setPermission('PRODUCT_MANAGE');
+        yield MenuItem::linkToRoute('entitlements.issue', 'fa fa-plus', 'admin_license_from_plan', ['_locale' => $this->container->get('request_stack')->getCurrentRequest()?->getLocale() ?? 'de'])->setPermission('LICENSE_CREATE');
         yield MenuItem::section('entities.'.License::class.'.plural');
         yield MenuItem::linkTo(
             LicenseCrudController::class,

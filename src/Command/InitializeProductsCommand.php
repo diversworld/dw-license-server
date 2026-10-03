@@ -22,7 +22,7 @@ class InitializeProductsCommand extends Command
     {
         $slug = 'contao-issue-service-bundle';
         if (!$this->products->findOneBy(['slug' => $slug])) {
-            $this->em->persist((new Product())->setSlug($slug)->setName('Contao Issue Service Bundle')->setDescription('diversworld/contao-issue-service-bundle; Premium-Feature: sla')->setActive(true));
+            $this->em->persist((new Product())->setAllowedFeatures(['sla'])->setRequiredFeatures(['sla'])->setSlug($slug)->setName('Contao Issue Service Bundle')->setDescription('diversworld/contao-issue-service-bundle; Premium-Feature: sla')->setActive(true));
             $this->em->flush();
         }
         $output->writeln('Contao Issue Service Bundle ist registriert.');

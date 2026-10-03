@@ -40,6 +40,7 @@ final class RealContaoClientTest extends IsolatedWebTestCase
     {
         $this->requireProfile($profile);
         $license = $this->license();
+        $license->getProduct()->setAllowedFeatures(['sla']);
         $license->setFeatures(['sla']);
         $license->getCustomer()->setActive(true);
         $license->getProduct()->setActive(true)->setTokenLifetimeSeconds(300)->setGracePeriodSeconds(600);

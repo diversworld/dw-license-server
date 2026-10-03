@@ -241,6 +241,34 @@ class License implements \App\Archive\ArchivableInterface
         return $this;
     }
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $entitlementSnapshot = null;
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $quotas = [];
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $planSnapshot = null;
+    #[ORM\Column(nullable: true)]
+    private ?bool $updatesAllowed = null;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatesUntil = null;
+    public function getEntitlementSnapshot(): ?array { return $this->entitlementSnapshot; }
+    public function setEntitlementSnapshot(array $rules): static { $this->entitlementSnapshot = $rules; return $this; }
+    public function getQuotas(): array { return $this->quotas ?? []; }
+    public function setQuotas(array $quotas): static { $this->quotas = $quotas; return $this; }
+    public function getPlanSnapshot(): ?array { return $this->planSnapshot; }
+    public function setPlanSnapshot(?array $plan): static { $this->planSnapshot = $plan; return $this; }
+    public function getUpdatesAllowed(): ?bool { return $this->updatesAllowed; }
+    public function setUpdatesAllowed(?bool $allowed): static { $this->updatesAllowed = $allowed; return $this; }
+    public function getUpdatesUntil(): ?\DateTimeImmutable { return $this->updatesUntil; }
+    public function setUpdatesUntil(?\DateTimeImmutable $until): static { $this->updatesUntil = $until; return $this; }
+    #[Assert\Callback]
+    public function validateEntitlements(\Symfony\Component\Validator\Context\ExecutionContextInterface $context): void
+    {
+        if (!$this->product) { return; }
+        try { (new \App\Service\ProductEntitlements())->assertLicense($this); }
+        catch (\DomainException $error) { $context->buildViolation($error->getMessage())->atPath('features')->addViolation(); }
+    }
+
     public function __toString(): string
     {
         return (string) $this->id;

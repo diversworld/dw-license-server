@@ -122,9 +122,7 @@ class LicenseManager
         if (!$license->isActive() || !$license->getCustomer()?->isActive() || !$license->getProduct()?->isActive()) {
             throw new HttpException(403, 'License disabled.');
         }
-        if ('contao-issue-service-bundle' === $license->getProduct()?->getSlug() && !$license->hasFeature('sla')) {
-            throw new HttpException(422, 'Für das Contao Issue Service Bundle muss die Lizenz das Feature sla enthalten. Bitte die Lizenz bearbeiten und sla hinzufügen.');
-        }
+        try { (new ProductEntitlements())->assertLicense($license); } catch (\DomainException) { throw new HttpException(422, 'License rights violate the product rules.'); }
         if ('offline' === $license->getMode() && null === $license->getExpiresAt()) {
             throw new HttpException(422, 'Offline licenses require an expiry date.');
         }
@@ -153,6 +151,8 @@ class LicenseManager
             'status' => 'valid',
             'features' => $license->getFeatures(),
         ];
+        if ($license->getQuotas() !== []) { $claims['quotas'] = $license->getQuotas(); }
+        if ($license->getUpdatesAllowed() !== null) { $claims['updates_allowed'] = $license->getUpdatesAllowed(); $claims['updates_until'] = $license->getUpdatesUntil()?->getTimestamp(); }
         $token = $this->signer->sign($claims);
         $license->setLastValidationAt($now);
         $activation->setUpdatedAt($now);

@@ -14,9 +14,25 @@ final class ApiLicenseManagement
     {
         return $this->operation($actor, 'licenses:create', $key, ['create', (array) $request], function (ApiToken $credential, Customer $customer) use ($request): array {
             $product = $this->em->getRepository(Product::class)->findOneBy(['slug' => $request->product]);
-            $expiry = new \DateTimeImmutable($request->expiresAt);
-            if (!$product || !$product->isActive() || $expiry <= new \DateTimeImmutable()) { throw new HttpException(422, 'Invalid product or expiry.'); }
-            $license = (new License())->setCustomer($customer)->setProduct($product)->setMode($request->mode)->setFeatures($request->features)->setMaxDomains($request->maxDomains)->setExpiresAt($expiry)->setNotes($request->reason);
+            if (!$product || !$product->isActive()) { throw new HttpException(422, 'Invalid product.'); }
+            $this->em->refresh($product, LockMode::PESSIMISTIC_WRITE);
+            if (!$product->isActive()) { throw new HttpException(422, 'Product unavailable.'); }
+            $license = (new License())->setCustomer($customer)->setProduct($product)->setMode($request->mode)->setNotes($request->reason);
+            $rights = new ProductEntitlements();
+            try {
+                if ($request->plan !== null) {
+                    if ($request->features !== [] || $request->quotas !== [] || $request->maxDomains !== 1 || $request->expiresAt !== '') { throw new HttpException(422, 'Plan rights must not be overridden.'); }
+                    $plan = $this->em->find(\App\Entity\LicensePlan::class, \Symfony\Component\Uid\Uuid::fromString($request->plan));
+                    if (!$plan) { throw new HttpException(422, 'Unknown plan.'); }
+                    $this->em->refresh($plan, LockMode::PESSIMISTIC_WRITE); $rights->applyPlan($license, $plan);
+                } else {
+                    if ($request->expiresAt === '') { throw new HttpException(422, 'An expiry or plan is required.'); }
+                    $expiry = new \DateTimeImmutable($request->expiresAt);
+                    if ($expiry <= new \DateTimeImmutable()) { throw new HttpException(422, 'Invalid expiry.'); }
+                    $license->setFeatures($request->features)->setMaxDomains($request->maxDomains)->setQuotas($request->quotas)->setExpiresAt($expiry); $rights->capture($license);
+                }
+            } catch (\DomainException) { throw new HttpException(422, 'Invalid product entitlements.'); }
+            $expiry = $license->getExpiresAt();
             $this->em->persist($license); $this->em->flush();
             return ['license' => $license, 'event' => 'license.created', 'response' => ['licenseId' => (string) $license->getId(), 'licenseKey' => $license->getLicenseKey(), 'expiresAt' => $expiry->format(DATE_ATOM)]];
         });

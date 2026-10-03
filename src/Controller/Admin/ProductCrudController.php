@@ -33,6 +33,10 @@ class ProductCrudController extends AbstractCrudController
             TextareaField::new('description', 'Beschreibung'),
             TextField::new('currentVersion', 'Version'),
             BooleanField::new('active', 'Aktiv'),
+            ArrayField::new('allowedFeatures', 'entitlements.allowed'),
+            ArrayField::new('requiredFeatures', 'entitlements.required'),
+            ArrayField::new('featureQuotas', 'entitlements.quotas')->setFormType(\App\Form\QuotaCollectionType::class),
+            IntegerField::new('maxInstallations', 'entitlements.installations'),
             IntegerField::new('tokenLifetimeSeconds')->setHelp('policy.token_help'),
             IntegerField::new('gracePeriodSeconds')->setHelp('policy.grace_help'),
         ];

@@ -31,7 +31,7 @@ Die Rollen gelten für den gesamten Lizenzserver. Die `tenant`-Kennung einer Ins
 | `ROLE_SUPPORT` | Installationen verwalten; Lizenzen ausstellen, pausieren und reaktivieren |
 | `ROLE_VIEWER` | Nur lesen, einschließlich Audit- und Lizenzhistorie |
 
-Benutzer lassen sich mit `app:admin:create --role=super_admin|admin|sales|support|viewer` anlegen. Rollen werden in der Benutzerverwaltung zugewiesen. Reguläre Administratoren können Super-Admin-Konten weder bearbeiten noch diese Rolle vergeben. Aktivierte TOTP-Anmeldung muss vor schreibenden Vorgängen abgeschlossen sein; die Einrichtung bleibt freiwillig.
+Benutzer lassen sich mit `app:admin:create --role=super_admin|admin|sales|support|viewer` anlegen. Rollen werden in der Benutzerverwaltung zugewiesen. Reguläre Administratoren können Super-Admin-Konten weder bearbeiten noch diese Rolle vergeben. Aktivierte TOTP-Anmeldung muss vor schreibenden Vorgängen abgeschlossen sein; die Einrichtung bleibt standardmäßig freiwillig; konfigurierte Rollen- und Aktionsrichtlinien können sie verpflichtend machen.
 
 Kunden, Produkte und Lizenzen besitzen `deletedAt`. **Archivieren** und **Wiederherstellen** sind eigene Aktionen in den Listen, mit Begründung und CSRF-Schutz. Der Archivstatus und das Datum sind sichtbar und filterbar. Archivierte Datensätze bleiben lesbar; Bearbeitung und Lizenzaktionen erfordern zuerst die Wiederherstellung. ORM-Löschversuche für diese drei Entitäten werden abgewiesen. Verknüpfungen, Lizenzschlüssel, Status, Ablaufdatum und bisherige Aktiv-Einstellungen bleiben erhalten. Das Dashboard zählt archivierte Datensätze nicht mit.
 
@@ -278,3 +278,11 @@ Eigene Kundenkonten, Lizenzdownloads und begrenzte Domainwechsel: [Kundenportal]
 ## API-Zugänge und Webhooks
 
 Kundengebundene, gehashte API-Zugänge unterstützen explizite Scopes, Ablauf, Widerruf und persistente Idempotenz. Signierte Webhooks laufen über die bestehende asynchrone Queue. Einrichtung, Upgrade bestehender Zugänge, SSRF-Schutz und replay-sichere Empfänger sind in [API integrations](docs/API_INTEGRATIONS.md) beschrieben.
+
+## Produktregeln und Lizenzpläne
+
+Zulässige und verpflichtende Features, Kontingente und Installationsgrenzen werden je Produkt gepflegt. Lizenzpläne enthalten Laufzeit und optionale Updateberechtigung. Bereits erteilte Rechte bleiben bei Planänderungen erhalten. Formulare, API-Verwendung, Datenmigration und notwendige Clientprüfungen beschreibt [Product entitlements](docs/PRODUCT_ENTITLEMENTS.md).
+
+## Änderungen und sicheres Upgrade
+
+Die vollständige Umsetzung, Testergebnisse, noch nicht ausgeführte Prüfungen und die Reihenfolge für Migration, Schlüssel, Worker und Clientverteilung stehen in [Release und Upgrade](docs/PLATFORM_RELEASE.md). Die Arbeiten sind auf `feature/license-platform-hardening` in nachvollziehbare Abschnitte aufgeteilt.

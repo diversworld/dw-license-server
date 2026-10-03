@@ -221,6 +221,34 @@ class Product implements \App\Archive\ArchivableInterface
         return $this;
     }
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $allowedFeatures = [];
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $requiredFeatures = [];
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $featureQuotas = [];
+
+    #[ORM\Column(options: ['default' => 10000])]
+    #[Assert\Range(min: 1, max: 1000000)]
+    private int $maxInstallations = 10000;
+
+    public function getAllowedFeatures(): array { return $this->allowedFeatures ?? []; }
+    public function setAllowedFeatures(array $features): static { $this->allowedFeatures = array_values(array_unique($features)); return $this; }
+    public function getRequiredFeatures(): array { return $this->requiredFeatures ?? []; }
+    public function setRequiredFeatures(array $features): static { $this->requiredFeatures = array_values(array_unique($features)); return $this; }
+    public function getFeatureQuotas(): array { return $this->featureQuotas ?? []; }
+    public function setFeatureQuotas(array $quotas): static { $this->featureQuotas = $quotas; return $this; }
+    public function getMaxInstallations(): int { return $this->maxInstallations; }
+    public function setMaxInstallations(int $limit): static { if ($limit < 1 || $limit > 1000000) { throw new \InvalidArgumentException('Invalid installation cap.'); } $this->maxInstallations = $limit; return $this; }
+    #[Assert\Callback]
+    public function validateEntitlements(\Symfony\Component\Validator\Context\ExecutionContextInterface $context): void
+    {
+        try { \App\Service\ProductEntitlements::validateDefinition($this); }
+        catch (\DomainException $error) { $context->buildViolation($error->getMessage())->atPath('allowedFeatures')->addViolation(); }
+    }
+
     public function __toString(): string
     {
         return $this->name ?? $this->slug ?? "";

@@ -77,6 +77,6 @@ final class CustomerScopeSubscriber
         if (!$user instanceof User || $user->hasGlobalAccess()) { return; }
         if ($entity instanceof \App\Entity\AuditLog || $entity instanceof \App\Entity\AuditChainHead) { return; }
         if ($entity instanceof User && (string) $entity->getId() === (string) $user->getId()) { return; }
-        if ($entity instanceof User || $entity instanceof \App\Entity\Product || !CustomerAccess::allows($user, $entity)) { throw new AccessDeniedException(); }
+        if ($entity instanceof User || $entity instanceof \App\Entity\Product || $entity instanceof \App\Entity\LicensePlan || !CustomerAccess::allows($user, $entity)) { throw new AccessDeniedException(); }
     }
 }

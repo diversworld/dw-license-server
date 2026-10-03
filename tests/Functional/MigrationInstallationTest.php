@@ -421,6 +421,27 @@ class MigrationInstallationTest extends KernelTestCase
         });
     }
 
+    public function testProductRulesMigrationPreservesExistingLicenseRights(): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment): void {
+            $this->console(['doctrine:migrations:migrate', 'DoctrineMigrations\\Version20261003105033', '--no-interaction'], $environment);
+            $product = random_bytes(16); $customer = random_bytes(16); $id = random_bytes(16);
+            $connection->insert('product', ['id' => $product, 'slug' => 'contao-issue-service-bundle', 'name' => 'Existing module', 'active' => 1, 'created_at' => '2026-10-03 12:00:00']);
+            $connection->insert('customer', ['id' => $customer, 'company' => 'Test', 'firstname' => 'Test', 'lastname' => 'Customer', 'email' => 'rights@example.test', 'street' => 'Test 1', 'zip' => '12345', 'city' => 'Berlin', 'active' => 1, 'created_at' => '2026-10-03 12:00:00']);
+            $connection->insert('license', ['id' => $id, 'product_id' => $product, 'customer_id' => $customer, 'license_key' => 'rights-preserved-test', 'type' => 'subscription', 'status' => 'suspended', 'mode' => 'offline', 'features' => '["sla","legacy-custom"]', 'max_domains' => 12, 'expires_at' => '2029-10-03 12:00:00', 'created_at' => '2026-10-03 12:00:00']);
+            $before = $connection->fetchAssociative('SELECT * FROM license WHERE id = ?', [$id]);
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            $after = $connection->fetchAssociative('SELECT * FROM license WHERE id = ?', [$id]);
+            foreach ($before as $field => $value) { self::assertSame($value, $after[$field], 'Changed existing field '.$field); }
+            $snapshot = json_decode($after['entitlement_snapshot'], true, flags: JSON_THROW_ON_ERROR);
+            self::assertSame(['sla', 'legacy-custom'], $snapshot['allowedFeatures']); self::assertSame(['sla'], $snapshot['requiredFeatures']); self::assertSame(12, $snapshot['maxInstallations']); self::assertNull($after['updates_allowed']); self::assertNull($after['updates_until']); self::assertNull($after['plan_snapshot']);
+            self::assertSame(['sla', 'legacy-custom'], json_decode($connection->fetchOne('SELECT allowed_features FROM product WHERE id = ?', [$product]), true));
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            self::assertSame($after['entitlement_snapshot'], $connection->fetchOne('SELECT entitlement_snapshot FROM license WHERE id = ?', [$id]));
+            $this->console(['doctrine:schema:validate'], $environment);
+        });
+    }
+
     private function withDatabase(callable $test): void
     {
         $dsn = getenv('MIGRATION_TEST_DATABASE_URL');

@@ -34,7 +34,7 @@ class LicenseFlowTest extends \App\Tests\Support\IsolatedWebTestCase
         $id = bin2hex(random_bytes(8));
         $this->email = $id.'@example.org';
         $customer = (new Customer())->setCompany('Test')->setFirstname('Test')->setLastname('Customer')->setEmail($this->email)->setStreet('Test 1')->setZip('12345')->setCity('Berlin')->setActive(true);
-        $product = (new Product())->setSlug('test-'.$id)->setName('Issue Service')->setActive(true);
+        $product = (new Product())->setAllowedFeatures(['sla'])->setSlug('test-'.$id)->setName('Issue Service')->setActive(true);
         $this->license = (new License())->setCustomer($customer)->setProduct($product)->setFeatures(['sla']);
         $user = (new User())->setEmail($this->email)->setFirstname('Test')->setLastname('Admin')->setRoles(['ROLE_ADMIN']);
         $user->enableTwoFactor('JBSWY3DPEHPK3PXP', []);
@@ -175,15 +175,17 @@ class LicenseFlowTest extends \App\Tests\Support\IsolatedWebTestCase
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $product = $em->getRepository(Product::class)->findOneBy(['slug' => 'contao-issue-service-bundle']);
         if (!$product) {
-            $product = (new Product())->setSlug('contao-issue-service-bundle')->setName('Issue Service')->setActive(true);
+            $product = (new Product())->setAllowedFeatures(['sla'])->setRequiredFeatures(['sla'])->setSlug('contao-issue-service-bundle')->setName('Issue Service')->setActive(true);
             $em->persist($product);
         }
-        $this->license->setProduct($product)->setFeatures([]);
+        $this->license->setProduct($product)->setFeatures(['sla']);
         $em->flush();
+        $em->getConnection()->update('license', ['features' => '[]'], ['id' => $this->license->getId()->toBinary()]);
+        $em->refresh($this->license);
         $this->post('/activate');
         self::assertResponseStatusCodeSame(422);
         $body = json_decode($this->client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
-        self::assertStringContainsString('Feature sla', $body['detail']);
+        self::assertStringContainsString('product rules', $body['detail']);
         self::assertArrayNotHasKey('token', $body);
     }
 

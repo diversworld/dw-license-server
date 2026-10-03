@@ -45,6 +45,7 @@ class AuditSubscriberTest extends WebTestCase
         $endpoint = new \App\Entity\WebhookEndpoint($customer, 'https://webhook.example.org/', 'encrypted-secret-fixture', ['license.created']);
         $entities = [
             $customer, $product, $license, $user,
+            (new \App\Entity\LicensePlan())->setProduct($product)->setName('Default plan'),
             (new Activation())->setLicense($license)->setDomain('example.org'),
             $credential,
             (new LogEntry())->setAction('test'),
@@ -56,7 +57,7 @@ class AuditSubscriberTest extends WebTestCase
             new \App\Entity\WebhookDelivery($endpoint, \Symfony\Component\Uid\Uuid::v7(), ['version' => 1]),
             new \App\Entity\ApiOperation($credential, 'idempotency-fixture', str_repeat('a', 64), ['licenseId' => (string) $license->getId()]),
         ];
-        $changes = ['city', 'name', 'notes', 'firstname', 'domain', 'name', 'action', 'version', 'expiresAt', 'reason', 'status', 'url', 'status', 'bodyHash'];
+        $changes = ['city', 'name', 'notes', 'firstname', 'name', 'domain', 'name', 'action', 'version', 'expiresAt', 'reason', 'status', 'url', 'status', 'bodyHash'];
         foreach ($entities as $entity) {
             $this->em->persist($entity);
         }

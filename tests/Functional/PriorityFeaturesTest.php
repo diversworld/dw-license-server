@@ -42,7 +42,7 @@ class PriorityFeaturesTest extends WebTestCase
         $this->signer = new LicenseSigner($this->directory.'/private.key');
         static::getContainer()->set(LicenseSigner::class, $this->signer);
         $customer = (new Customer())->setCompany('Test')->setFirstname('Test')->setLastname('Customer')->setEmail('customer@example.org')->setStreet('Test 1')->setZip('12345')->setCity('Berlin')->setActive(true);
-        $product = (new Product())->setName('Test')->setSlug('test-policy')->setActive(true)->setTokenLifetimeSeconds(300)->setGracePeriodSeconds(600);
+        $product = (new Product())->setAllowedFeatures(['sla'])->setName('Test')->setSlug('test-policy')->setActive(true)->setTokenLifetimeSeconds(300)->setGracePeriodSeconds(600);
         $this->license = (new License())->setCustomer($customer)->setProduct($product)->setFeatures(['sla']);
         foreach ([$customer, $product, $this->license] as $entity) {
             $this->em->persist($entity);

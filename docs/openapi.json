@@ -141,6 +141,189 @@
                 },
                 "security": []
             }
+        },
+        "/api/v1/management/licenses": {
+            "post": {
+                "tags": [
+                    "Management"
+                ],
+                "summary": "Create a license in the credential customer scope",
+                "operationId": "createCustomerLicense",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 128
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ManagementCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "License identifier, secret licenseKey and expiry; repeated identical keys return the same response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "licenseId",
+                                        "licenseKey",
+                                        "expiresAt"
+                                    ],
+                                    "properties": {
+                                        "licenseId": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "licenseKey": {
+                                            "type": "string"
+                                        },
+                                        "expiresAt": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid idempotency key"
+                    },
+                    "415": {
+                        "description": "JSON content type required"
+                    },
+                    "429": {
+                        "description": "API rate limit reached"
+                    },
+                    "401": {
+                        "description": "Invalid/expired/revoked credential"
+                    },
+                    "403": {
+                        "description": "Missing licenses:create scope"
+                    },
+                    "409": {
+                        "description": "Conflicting idempotency payload"
+                    },
+                    "422": {
+                        "description": "Invalid license data"
+                    }
+                },
+                "security": [
+                    {
+                        "apiBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/management/licenses/{id}/renew": {
+            "post": {
+                "tags": [
+                    "Management"
+                ],
+                "summary": "Extend a license without changing suspension or revocation",
+                "operationId": "extendCustomerLicense",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 128
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ManagementRenewRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "License identifier, new expiry and unchanged status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "licenseId",
+                                        "expiresAt",
+                                        "status"
+                                    ],
+                                    "properties": {
+                                        "licenseId": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "expiresAt": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid idempotency key"
+                    },
+                    "415": {
+                        "description": "JSON content type required"
+                    },
+                    "429": {
+                        "description": "API rate limit reached"
+                    },
+                    "401": {
+                        "description": "Invalid/expired/revoked credential"
+                    },
+                    "403": {
+                        "description": "Scope or customer ownership denied"
+                    },
+                    "404": {
+                        "description": "Unknown or foreign license"
+                    },
+                    "409": {
+                        "description": "Conflicting idempotency payload"
+                    },
+                    "422": {
+                        "description": "Invalid extension"
+                    }
+                },
+                "security": [
+                    {
+                        "apiBearer": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -227,6 +410,115 @@
                         "type": "string",
                         "default": "",
                         "maxLength": 253
+                    }
+                },
+                "type": "object"
+            },
+            "ManagementCreateRequest": {
+                "required": [
+                    "product",
+                    "reason"
+                ],
+                "properties": {
+                    "product": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 255
+                    },
+                    "expiresAt": {
+                        "description": "Future expiry for custom issuance; omit when selecting a plan.",
+                        "type": "string",
+                        "format": "date-time",
+                        "default": ""
+                    },
+                    "mode": {
+                        "type": "string",
+                        "default": "online",
+                        "enum": [
+                            "online",
+                            "offline"
+                        ]
+                    },
+                    "features": {
+                        "oneOf": [
+                            {
+                                "type": "array",
+                                "items": {
+                                    "nullable": true
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "nullable": true
+                                }
+                            }
+                        ],
+                        "default": []
+                    },
+                    "maxDomains": {
+                        "type": "integer",
+                        "default": 1,
+                        "maximum": 10000,
+                        "minimum": 0,
+                        "exclusiveMinimum": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 1000,
+                        "minLength": 3
+                    },
+                    "plan": {
+                        "description": "Optional active plan UUID; its duration and grants replace custom expiry/features/quotas/installations.",
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "quotas": {
+                        "oneOf": [
+                            {
+                                "type": "array",
+                                "items": {
+                                    "nullable": true
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "nullable": true
+                                }
+                            }
+                        ],
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "oneOf": [
+                    {
+                        "required": [
+                            "expiresAt"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "plan"
+                        ]
+                    }
+                ]
+            },
+            "ManagementRenewRequest": {
+                "properties": {
+                    "expiresAt": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 1000,
+                        "minLength": 3
                     }
                 },
                 "type": "object"
@@ -330,12 +622,23 @@
                     }
                 }
             }
+        },
+        "securitySchemes": {
+            "apiBearer": {
+                "type": "http",
+                "description": "Customer-scoped API credential with explicit create/renew scopes",
+                "scheme": "bearer"
+            }
         }
     },
     "tags": [
         {
             "name": "Licenses",
             "description": "Installation activation and online token renewal"
+        },
+        {
+            "name": "Management",
+            "description": "Management"
         }
     ]
 }

@@ -21,6 +21,11 @@ class ApiDocumentationTest extends WebTestCase
         self::assertSame('bearer', $document['components']['securitySchemes']['apiBearer']['scheme']);
         self::assertArrayHasKey('/api/v1/management/licenses', $document['paths']);
         self::assertArrayHasKey('/api/v1/management/licenses/{id}/renew', $document['paths']);
+        $management = $document['paths']['/api/v1/management/licenses']['post'];
+        $model = $document['components']['schemas'][basename($management['requestBody']['content']['application/json']['schema']['$ref'])];
+        self::assertArrayHasKey('plan', $model['properties']); self::assertArrayHasKey('quotas', $model['properties']);
+        self::assertNotContains('expiresAt', $model['required']);
+        self::assertSame(['licenseId', 'licenseKey', 'expiresAt'], $management['responses'][200]['content']['application/json']['schema']['required']);
         foreach (['activate' => ['licenseKey', 'product', 'tenant', 'domain'], 'validate' => ['token', 'tenant', 'domain']] as $action => $required) {
             $operation = $document['paths']['/api/v1/licenses/'.$action]['post'];
             self::assertNotEmpty($operation['operationId']);

@@ -17,7 +17,7 @@ The requirements are implemented and checked in this order. Each completed secti
 10. Persistent, asynchronous expiry reminders and simulated deliveries — completed: reminder/audit suite 9 tests / 188 assertions; isolated real Doctrine queue and Null transport 1 / 20; fresh/repeated installation 1 / 18; full suite 136 cases / 874 assertions with 18 explicit database skips. Container lint and all 17 Twig templates passed.
 11. Customer portal, protected license downloads and domain-change history — completed: final portal HTTP suite 5 tests / 30 assertions; shared portal/2FA/role suite 23 / 123; isolated fresh/repeated installation 1 / 18; container and all 20 Twig templates passed.
 12. Scoped hashed API credentials, idempotency and signed safe webhooks — completed: 15 HTTP/service tests / 289 assertions; legacy API credential upgrade on disposable MariaDB 1 / 15, fresh installation and container lint passed. Mock transports exercised signatures, duplicate dispatch and private-IP rejection without external recipients.
-13. Product entitlements, plans, declarative rules and preservation of existing rights — pending.
+13. Product entitlements, plans, declarative rules and preservation of existing rights — completed: plan/license/audit/real-client suite 26 / 359, final structured form/initializer/OpenAPI suite 8 / 81 and disposable MariaDB existing-rights migration 1 / 32 passed. Full final platform suite 155 / 1361 passed without skips; Python 13 tests, strict Composer validation/audit and Symfony/PHP checks passed.
 
 ## Profile images
 
@@ -80,3 +80,7 @@ See [Customer portal](CUSTOMER_PORTAL.md). `ROLE_CUSTOMER` inherits no administr
 ## API integrations
 
 See [Customer-scoped API and webhooks](API_INTEGRATIONS.md). Migration `Version20261003105033` hashes legacy credentials without granting scopes and adds persistent idempotency/outbox history. Encrypted webhook secrets use the independent security key; backup and key initialization cover both TOTP and webhooks. Receivers must commit event-ID deduplication with their side effects.
+
+## Product entitlements and final release
+
+See [Product entitlements](PRODUCT_ENTITLEMENTS.md) for frozen grants, quota/update-client requirements and legacy preservation in `Version20261003110323`. [Release and upgrade](PLATFORM_RELEASE.md) contains the complete six-part result, executed/unexecuted checks, production upgrade instructions, compatibility limits and a review-ready PR description.
