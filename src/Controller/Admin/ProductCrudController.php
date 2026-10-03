@@ -11,6 +11,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_VIEWER')]
 class ProductCrudController extends AbstractCrudController
 {
+    use ArchiveActions;
+
     public static function getEntityFqcn(): string
     {
         return Product::class;
@@ -18,12 +20,14 @@ class ProductCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        return $actions->disable(Action::DELETE)->setPermission(Action::NEW, 'PRODUCT_MANAGE')->setPermission(Action::EDIT, 'PRODUCT_MANAGE');
+        return $this->archiveActions($actions->disable(Action::DELETE)->setPermission(Action::NEW, 'PRODUCT_MANAGE')->setPermission(Action::EDIT, 'PRODUCT_MANAGE'));
     }
 
     public function configureFields(string $pageName): iterable
     {
         return [
+            BooleanField::new('archived', 'archive.archived')->hideOnForm()->renderAsSwitch(false),
+            DateTimeField::new('deletedAt', 'archive.date')->hideOnForm(),
             TextField::new('slug', 'Modulkennung'),
             TextField::new('name', 'Name'),
             TextareaField::new('description', 'Beschreibung'),

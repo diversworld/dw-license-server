@@ -10,8 +10,10 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
-class Customer
+class Customer implements \App\Archive\ArchivableInterface
 {
+    use \App\Archive\Archivable;
+
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?Uuid $id = null;
@@ -240,7 +242,7 @@ class Customer
 
     public function isActive(): ?bool
     {
-        return $this->active;
+        return !$this->isArchived() && $this->active;
     }
 
     public function setActive(?bool $active): static

@@ -48,6 +48,9 @@ final class AuditSubscriber
     public function preRemove(PreRemoveEventArgs $args): void
     {
         $entity = $args->getObject();
+        if ($entity instanceof \App\Archive\ArchivableInterface) {
+            throw new \LogicException('Customers, products and licenses must be archived instead of deleted.');
+        }
         if (!$entity instanceof AuditLog) {
             // Doctrine clears generated identifiers before postRemove is dispatched.
             $this->removedEntities[$entity] = $this->describe($entity, $args->getObjectManager()) + [

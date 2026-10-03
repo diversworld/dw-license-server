@@ -11,8 +11,10 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LicenseRepository::class)]
-class License 
+class License implements \App\Archive\ArchivableInterface
 {
+    use \App\Archive\Archivable;
+
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?Uuid $id = null;
@@ -125,7 +127,7 @@ class License
 
     public function isActive(): bool
     {
-        return 'active' === $this->status && !$this->isExpired();
+        return !$this->isArchived() && 'active' === $this->status && !$this->isExpired();
     }
 
     public function hasFeature(string $feature): bool

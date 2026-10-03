@@ -20,6 +20,7 @@ class CustomerRepository extends ServiceEntityRepository
     public function getDashboardStatistics(): array
     {
         $result = $this->createQueryBuilder('c')
+            ->andWhere('c.deletedAt IS NULL')
             ->select('COUNT(c.id) AS total')
             ->addSelect("
                 SUM(

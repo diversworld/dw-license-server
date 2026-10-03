@@ -11,6 +11,8 @@ use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 class AdministrativeActionVoter extends Voter
 {
     private const array ROLES = [
+        'RECORD_ARCHIVE' => [],
+        'RECORD_RESTORE' => [],
         'PROFILE_SELF' => ['ROLE_VIEWER'],
         'CUSTOMER_MANAGE' => ['ROLE_CUSTOMER_MANAGE'],
         'PRODUCT_MANAGE' => ['ROLE_PRODUCT_MANAGE'],
@@ -46,6 +48,25 @@ class AdministrativeActionVoter extends Voter
         }
 
         if ($attribute === 'PROFILE_SELF' && (!$subject instanceof User || (string) $subject->getId() !== (string) $user->getId())) {
+            return false;
+        }
+
+        if (in_array($attribute, ['RECORD_ARCHIVE', 'RECORD_RESTORE'], true)) {
+            $role = match (true) {
+                $subject instanceof \App\Entity\Customer => 'ROLE_CUSTOMER_MANAGE',
+                $subject instanceof \App\Entity\Product => 'ROLE_PRODUCT_MANAGE',
+                $subject instanceof \App\Entity\License => 'ROLE_LICENSE_REVOKE',
+                default => null,
+            };
+
+            return $role !== null && in_array($role, $this->hierarchy->getReachableRoleNames($token->getRoleNames()), true);
+        }
+        if ($attribute === 'USER_MANAGE' && $subject instanceof User
+            && in_array('ROLE_SUPER_ADMIN', $subject->getRoles(), true)
+            && !in_array('ROLE_SUPER_ADMIN', $this->hierarchy->getReachableRoleNames($token->getRoleNames()), true)) {
+            return false;
+        }
+        if ($subject instanceof \App\Archive\ArchivableInterface && $subject->isArchived()) {
             return false;
         }
 

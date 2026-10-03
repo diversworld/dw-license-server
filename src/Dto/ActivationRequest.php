@@ -4,6 +4,7 @@ namespace App\Dto;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
+#[\OpenApi\Attributes\Schema(required: ['licenseKey', 'product', 'tenant', 'domain'])]
 final readonly class ActivationRequest
 {
     public function __construct(

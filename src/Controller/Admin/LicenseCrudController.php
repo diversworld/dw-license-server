@@ -11,6 +11,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_VIEWER')]
 class LicenseCrudController extends AbstractCrudController
 {
+    use ArchiveActions;
+
     public static function getEntityFqcn(): string
     {
         return License::class;
@@ -30,12 +32,14 @@ class LicenseCrudController extends AbstractCrudController
             $actions->add(Crud::PAGE_INDEX, $action)->setPermission($name, 'LICENSE_'.strtoupper($name));
         }
 
-        return $actions;
+        return $this->archiveActions($actions);
     }
 
     public function configureFields(string $pageName): iterable
     {
         return [
+            BooleanField::new('archived', 'archive.archived')->hideOnForm()->renderAsSwitch(false),
+            DateTimeField::new('deletedAt', 'archive.date')->hideOnForm(),
             AssociationField::new('customer', 'Kunde'),
             AssociationField::new('product', 'Modul'),
             TextField::new('licenseKey', 'Lizenzschlüssel')->hideOnIndex()->setFormTypeOption('disabled', true),

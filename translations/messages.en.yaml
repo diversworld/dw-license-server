@@ -242,8 +242,8 @@ dashboard:
 "license_action.token_notice": "Existing online tokens expire by the end of their lifetime plus grace period. Offline tokens remain valid until expiry."
 "role.admin": "Administration"
 "role.support": "Support"
-"role.sales": "Sales"
-"role.viewer": "Read only"
+"role.sales": "Sales manager"
+"role.viewer": "Read only auditor"
 license_status.active: 'Active'
 license_status.suspended: 'Paused'
 license_status.revoked: 'Revoked'
@@ -254,3 +254,15 @@ license_status.revoked: 'Revoked'
 "two_factor.optional_help": "Setup is optional. Skipping applies to this session; declining stops future prompts. You can set up 2FA later from the user menu."
 "two_factor.skip": "Skip for now"
 "two_factor.decline": "Decline 2FA"
+
+"role.super_admin": "Super administrator"
+"archive.archive": "Archive"
+"archive.restore": "Restore"
+"archive.archived": "Archived"
+"archive.date": "Archived at"
+"archive.current": "Current records"
+"archive.saved": "Change saved."
+"archive.notice": "Archived records are retained and can be restored. Issued tokens become invalid at expiry or the next server check."
+"archive.back": "Back to list"
+"archive.invalid_transition": "This operation does not match the current archive status."
+"archive.must_restore": "Restore the license first."

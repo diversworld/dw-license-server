@@ -22,6 +22,7 @@ class LicenseRepository extends ServiceEntityRepository
         $expiresSoon = $now->modify('+30 days');
     
         $result = $this->createQueryBuilder('l')
+            ->andWhere('l.deletedAt IS NULL')
             ->select('COUNT(l.id) AS total')
     
             ->addSelect("
@@ -95,11 +96,12 @@ class LicenseRepository extends ServiceEntityRepository
         $now = new \DateTimeImmutable();
  
         return $this->createQueryBuilder('l')
+            ->andWhere('l.deletedAt IS NULL')
             ->select('p.id AS productId')
             ->addSelect('p.name AS productName')
             ->addSelect('p.slug AS productSlug')
             ->addSelect('p.active AS productActive')
-            ->addSelect('(SELECT COUNT(a.id) FROM App\Entity\Activation a JOIN a.license activationLicense WHERE activationLicense.product = p AND a.active = true) AS activationCount')
+            ->addSelect('(SELECT COUNT(a.id) FROM App\Entity\Activation a JOIN a.license activationLicense WHERE activationLicense.product = p AND activationLicense.deletedAt IS NULL AND a.active = true) AS activationCount')
  
             ->addSelect('COUNT(l.id) AS total')
  
@@ -146,6 +148,7 @@ class LicenseRepository extends ServiceEntityRepository
             )
  
             ->innerJoin('l.product', 'p')
+            ->andWhere('p.deletedAt IS NULL')
             ->setParameter('now', $now)
             ->groupBy('p.id')
             ->addGroupBy('p.name')
@@ -164,6 +167,7 @@ class LicenseRepository extends ServiceEntityRepository
         $now = new \DateTimeImmutable();
  
         $result = $this->createQueryBuilder('l')
+            ->andWhere('l.deletedAt IS NULL')
             ->select('COUNT(l.id) AS total')
  
             ->addSelect(

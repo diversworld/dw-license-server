@@ -23,7 +23,7 @@ class CreateAdminCommand extends Command
 
     protected function configure(): void
     {
-        $this->addOption('role', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'admin, support, sales oder viewer', 'admin');
+        $this->addOption('role', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'super_admin, admin, support, sales oder viewer', 'admin');
         $this->addArgument('email', InputArgument::REQUIRED)->addArgument('firstname', InputArgument::OPTIONAL, '', 'Admin')->addArgument('lastname', InputArgument::OPTIONAL, '', '');
     }
 
@@ -31,7 +31,7 @@ class CreateAdminCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $role = strtoupper($input->getOption('role'));
-        if (!in_array($role, ['ADMIN', 'SUPPORT', 'SALES', 'VIEWER'], true)) {
+        if (!in_array($role, ['SUPER_ADMIN', 'ADMIN', 'SUPPORT', 'SALES', 'VIEWER'], true)) {
             $io->error('Unbekannte Rolle.');
             return Command::FAILURE;
         }
@@ -57,7 +57,7 @@ class CreateAdminCommand extends Command
         $user->setPassword($this->hasher->hashPassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();
-        $io->success('Benutzer angelegt; TOTP wird bei der ersten Anmeldung eingerichtet.');
+        $io->success('Benutzer angelegt; TOTP kann bei der Anmeldung freiwillig eingerichtet werden.');
 
         return Command::SUCCESS;
     }

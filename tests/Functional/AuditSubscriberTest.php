@@ -34,7 +34,7 @@ class AuditSubscriberTest extends WebTestCase
         (new SchemaTool($this->em))->createSchema($this->em->getMetadataFactory()->getAllMetadata());
     }
 
-    public function testEveryEntityTableIsAuditedForCreateUpdateAndDelete(): void
+    public function testEveryEntityTableIsAuditedForCreateUpdateAndArchiveOrDelete(): void
     {
         $customer = (new Customer())->setCompany('Test')->setFirstname('Test')->setLastname('Customer')
             ->setEmail('customer@example.org')->setStreet('Test 1')->setZip('12345')->setCity('Berlin');
@@ -90,11 +90,16 @@ class AuditSubscriberTest extends WebTestCase
         self::assertSame($before, $this->em->getConnection()->fetchOne('SELECT COUNT(*) FROM audit_log'), 'No changes must not generate audit entries.');
 
         foreach (array_reverse($entities) as $entity) {
-            $this->em->remove($entity);
+            if ($entity instanceof \App\Archive\ArchivableInterface) {
+                $entity->archive();
+            } else {
+                $this->em->remove($entity);
+            }
         }
         $this->em->flush();
         foreach ($tables as $table) {
-            $this->assertEntry($table, 'deleted', $ids[$table]);
+            $archived = in_array($table, ['customer', 'product', 'license'], true);
+            $this->assertEntry($table, $archived ? 'updated' : 'deleted', $ids[$table], $archived ? 2 : 1);
         }
 
         $entries = $this->em->getConnection()->fetchAllAssociative('SELECT * FROM audit_log ORDER BY id');
@@ -239,10 +244,10 @@ class AuditSubscriberTest extends WebTestCase
         self::assertSame(1, (int) $this->em->getConnection()->fetchOne('SELECT COUNT(*) FROM audit_log'));
     }
 
-    private function assertEntry(string $table, string $action, string $id): array
+    private function assertEntry(string $table, string $action, string $id, int $expectedCount = 1): array
     {
-        $entries = $this->em->getConnection()->fetchAllAssociative('SELECT * FROM audit_log WHERE event_type = ? AND entity_id = ?', [$table.'.'.$action, $id]);
-        self::assertCount(1, $entries, $table.'.'.$action);
+        $entries = $this->em->getConnection()->fetchAllAssociative('SELECT * FROM audit_log WHERE event_type = ? AND entity_id = ? ORDER BY id DESC', [$table.'.'.$action, $id]);
+        self::assertCount($expectedCount, $entries, $table.'.'.$action);
         self::assertSame($table, $entries[0]['entity_type']);
 
         return $entries[0];

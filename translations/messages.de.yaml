@@ -242,8 +242,8 @@ dashboard:
 "license_action.token_notice": "Bereits ausgestellte Online-Tokens laufen spätestens nach Tokenlaufzeit plus Kulanzzeit aus. Offline-Tokens gelten bis zu ihrem Ablaufdatum."
 "role.admin": "Administration"
 "role.support": "Support"
-"role.sales": "Vertrieb"
-"role.viewer": "Nur Lesen"
+"role.sales": "Vertriebsleitung"
+"role.viewer": "Auditor (nur Lesen)"
 license_status.active: 'Aktiv'
 license_status.suspended: 'Pausiert'
 license_status.revoked: 'Widerrufen'
@@ -254,3 +254,15 @@ license_status.revoked: 'Widerrufen'
 "two_factor.optional_help": "Die Einrichtung ist freiwillig. Überspringen gilt für diese Sitzung; bei Ablehnen wirst du nicht erneut gefragt. Du kannst 2FA später über das Benutzermenü einrichten."
 "two_factor.skip": "Für jetzt überspringen"
 "two_factor.decline": "2FA ablehnen"
+
+"role.super_admin": "Super Administrator"
+"archive.archive": "Archivieren"
+"archive.restore": "Wiederherstellen"
+"archive.archived": "Archiviert"
+"archive.date": "Archiviert am"
+"archive.current": "Aktuelle Datensätze"
+"archive.saved": "Änderung gespeichert."
+"archive.notice": "Archivierte Datensätze bleiben erhalten und können wiederhergestellt werden. Bereits ausgestellte Tokens werden spätestens bei Ablauf oder der nächsten Serverprüfung ungültig."
+"archive.back": "Zurück zur Liste"
+"archive.invalid_transition": "Dieser Vorgang passt nicht zum aktuellen Archivstatus."
+"archive.must_restore": "Bitte zuerst die Lizenz wiederherstellen."

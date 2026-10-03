@@ -32,7 +32,7 @@ class LicenseActionController extends AbstractController
     #[Route('/admin/licenses/{id}/actions/{action}', name: 'admin_license_action_legacy', requirements: ['action' => 'renew|pause|revoke|reactivate'], methods: ['GET', 'POST'])]
     public function perform(License $license, string $action, Request $request): Response
     {
-        $this->denyAccessUnlessGranted('LICENSE_'.strtoupper($action));
+        $this->denyAccessUnlessGranted('LICENSE_'.strtoupper($action), $license);
         $builder = $this->createFormBuilder()->add('reason', TextareaType::class, ['label' => 'license_action.reason', 'constraints' => [new Assert\NotBlank(), new Assert\Length(min: 3, max: 1000)]]);
         if ($action === 'renew') {
             $builder->add('expiresAt', DateTimeType::class, ['label' => 'license_action.expires_at', 'widget' => 'single_text', 'input' => 'datetime_immutable', 'constraints' => [new Assert\NotNull()]]);

@@ -4,6 +4,7 @@ namespace App\Dto;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
+#[\OpenApi\Attributes\Schema(required: ['token', 'tenant', 'domain'])]
 final readonly class RefreshRequest
 {
     public function __construct(

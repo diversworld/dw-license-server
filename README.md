@@ -1,6 +1,6 @@
 # Diversworld Lizenzserver
 
-Symfony ^7 / PHP >= 8.4. Die Verwaltung läuft unter `/admin` und ist auf `ROLE_ADMIN` beschränkt.
+Symfony 8.1 / PHP >= 8.4 (siehe `composer.json` und `composer.lock`). Symfony 8.1 ist eine [offizielle stabile Version](https://symfony.com/releases/8.1). Die Verwaltung läuft unter `/admin`; Lesezugriff erfordert `ROLE_VIEWER`, Schreibrechte werden über Rollen und Voter geprüft.
 
 ## Einrichtung
 
@@ -10,7 +10,7 @@ ddev composer install
 ddev exec php bin/console doctrine:migrations:migrate
 ddev exec php bin/console app:license:keys
 ddev exec php bin/console app:license:init
-ddev exec php bin/console app:admin:create admin@example.org
+ddev exec php bin/console app:admin:create admin@example.org --role=super_admin
 ```
 
 Der letzte Befehl fragt das Passwort verdeckt ab und überschreibt keine vorhandenen Benutzer. Es gibt keine voreingestellten Zugangsdaten.
@@ -18,6 +18,24 @@ Der letzte Befehl fragt das Passwort verdeckt ab und überschreibt keine vorhand
 `config/license/private.key` enthält den Base64-Ed25519-Secret-Key. Beide Schlüsseldateien sind git-ignoriert. Den privaten Schlüssel sichern und nur für den PHP-Prozess lesbar bereitstellen. Die Schlüsselgenerierung ersetzt keine vorhandenen Schlüssel. Bei einem Serverumzug das gesamte Verzeichnis `config/license/` einschließlich `keyring.json` und `keys/` sicher übernehmen. `config/license/public.key` wird in den Contao-Installationen hinterlegt. Nicht `config/jwt/public.pem` verwenden: Dieser RSA-Schlüssel kann die Ed25519-Lizenzen nicht prüfen. Die Lexik-JWT-Schlüssel sind davon unabhängig und werden für dieses Lizenzprotokoll nicht verwendet.
 
 Für mehrere Serverinstanzen benötigt `LOCK_DSN` einen gemeinsamen unterstützten Symfony-Lock-Store; zusätzlich serialisiert eine Datenbank-Zeilensperre konkurrierende Aktivierungen. Rate-Limiter und Sessions sollten dann ebenfalls einen gemeinsamen Store verwenden. Der Standard ist für einen einzelnen DDEV-/Serverprozess-Verbund eingerichtet.
+
+## Rollen und Archivierung
+
+Die Rollen gelten für den gesamten Lizenzserver. Die `tenant`-Kennung einer Installation bindet Tokens an den Mandanten, begrenzt jedoch nicht den Zugriff von Verwaltungsbenutzern auf einzelne Kunden. Eine kundenspezifische Benutzerzuweisung ist noch nicht eingerichtet.
+
+| Rolle | Berechtigungen |
+| --- | --- |
+| `ROLE_SUPER_ADMIN` | Alle Administrationsrechte; Super-Admin-Konten und deren Rollen verwalten |
+| `ROLE_ADMIN` | Kunden, Produkte, Lizenzen, Installationen und reguläre Benutzer verwalten; Lizenzen widerrufen und archivieren |
+| `ROLE_SALES` | Kunden verwalten und archivieren; Lizenzen anlegen, bearbeiten, verlängern und ausstellen |
+| `ROLE_SUPPORT` | Installationen verwalten; Lizenzen ausstellen, pausieren und reaktivieren |
+| `ROLE_VIEWER` | Nur lesen, einschließlich Audit- und Lizenzhistorie |
+
+Benutzer lassen sich mit `app:admin:create --role=super_admin|admin|sales|support|viewer` anlegen. Rollen werden in der Benutzerverwaltung zugewiesen. Reguläre Administratoren können Super-Admin-Konten weder bearbeiten noch diese Rolle vergeben. Aktivierte TOTP-Anmeldung muss vor schreibenden Vorgängen abgeschlossen sein; die Einrichtung bleibt freiwillig.
+
+Kunden, Produkte und Lizenzen besitzen `deletedAt`. **Archivieren** und **Wiederherstellen** sind eigene Aktionen in den Listen, mit Begründung und CSRF-Schutz. Der Archivstatus und das Datum sind sichtbar und filterbar. Archivierte Datensätze bleiben lesbar; Bearbeitung und Lizenzaktionen erfordern zuerst die Wiederherstellung. ORM-Löschversuche für diese drei Entitäten werden abgewiesen. Verknüpfungen, Lizenzschlüssel, Status, Ablaufdatum und bisherige Aktiv-Einstellungen bleiben erhalten. Das Dashboard zählt archivierte Datensätze nicht mit.
+
+Archivierte Lizenzen sowie Lizenzen archivierter Kunden oder Produkte werden von Aktivierung und Erneuerung abgewiesen. Bereits ausgestellte Tokens bleiben bis zum nächsten Serverkontakt oder ihrem Ablauf wirksam. Wiederherstellen entfernt ausschließlich das Archivdatum: Eine zuvor gesperrte, widerrufene, inaktive oder abgelaufene Lizenz wird dadurch nicht automatisch gültig. Änderungen und eigene Archivierungsereignisse erscheinen mit Bearbeiter und Begründung im Audit-Log.
 
 ## Lizenzvergabe
 
@@ -98,6 +116,17 @@ Verlängern verlangt ein zukünftiges Ablaufdatum nach dem bisherigen Datum und 
 ## JSON-API
 
 HTTPS verwenden. Alle Anfragen sind `POST` mit `Content-Type: application/json`. Tokens und Lizenzschlüssel sind Zugangsdaten und gehören nicht in URLs oder Logs. Die API ist auf 60 Anfragen pro Minute je Client-IP, Methode und Pfad begrenzt.
+
+Swagger UI steht unter `/api/doc`, die vollständige OpenAPI-3-Spezifikation unter `/api/doc.json`. Sie enthält beide v1-Endpunkte, DTO-Schemas mit Pflichtfeldern, Antworten und Fehlercodes. Die Endpunkte bleiben unter `/api/v1/licenses`; inkompatible Vertragsänderungen erhalten eine neue API-Version. Die exportierte Spezifikation liegt in `docs/openapi.json` und kann für Client-Generatoren verwendet werden.
+
+```bash
+# Spezifikation nach API-Änderungen aktualisieren:
+ddev exec php bin/console nelmio:apidoc:dump --format=json > docs/openapi.json
+# Beispiel mit einem installierten OpenAPI Generator:
+openapi-generator-cli generate -i docs/openapi.json -g php -o build/license-client
+```
+
+Der [OpenAPI Generator](https://openapi-generator.tech/docs/usage/) unterstützt die oben gezeigte Client-Generierung. Die Dokumentationsendpunkte liefern keine Zugangsdaten. Swagger-Anfragen benötigen dieselben Lizenzschlüssel bzw. Tokens wie reguläre Clients.
 
 ### Aktivieren: `/api/v1/licenses/activate`
 

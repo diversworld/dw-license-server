@@ -244,8 +244,8 @@ dashboard:
 "license_action.token_notice": "Les jetons en ligne existants expirent à la fin de leur durée plus le délai de grâce. Les jetons hors ligne restent valables jusqu’à leur expiration."
 "role.admin": "Administration"
 "role.support": "Assistance"
-"role.sales": "Ventes"
-"role.viewer": "Lecture seule"
+"role.sales": "Responsable commercial"
+"role.viewer": "Auditeur en lecture seule"
 license_status.active: 'Active'
 license_status.suspended: 'Suspendue'
 license_status.revoked: 'Révoquée'
@@ -256,3 +256,15 @@ license_status.revoked: 'Révoquée'
 "two_factor.optional_help": "La configuration est facultative. Ignorer s’applique à cette session ; refuser arrête les rappels. Vous pouvez configurer la 2FA plus tard dans le menu utilisateur."
 "two_factor.skip": "Ignorer pour le moment"
 "two_factor.decline": "Refuser la 2FA"
+
+"role.super_admin": "Super administrateur"
+"archive.archive": "Archiver"
+"archive.restore": "Restaurer"
+"archive.archived": "Archivé"
+"archive.date": "Archivé le"
+"archive.current": "Enregistrements actuels"
+"archive.saved": "Modification enregistrée."
+"archive.notice": "Les enregistrements archivés sont conservés et peuvent être restaurés. Les jetons émis deviennent invalides à expiration ou au prochain contrôle du serveur."
+"archive.back": "Retour à la liste"
+"archive.invalid_transition": "Cette opération ne correspond pas à l’état actuel de l’archive."
+"archive.must_restore": "Restaurez d’abord la licence."

@@ -25,10 +25,8 @@ class UserCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         return $actions
-            ->disable(
-                Action::DELETE,
-                Action::NEW
-            );
+            ->disable(Action::DELETE, Action::NEW)
+            ->setPermission(Action::EDIT, 'USER_MANAGE');
     }
 
     public function configureFields(string $pageName): iterable
@@ -72,11 +70,24 @@ class UserCrudController extends AbstractCrudController
         yield FormField::addFieldset('Berechtigungen')
             ->setIcon('fa fa-shield');
 
-        yield ChoiceField::new('roles', 'Rollen')->setChoices(['role.admin' => 'ROLE_ADMIN', 'role.support' => 'ROLE_SUPPORT', 'role.sales' => 'ROLE_SALES', 'role.viewer' => 'ROLE_VIEWER'])->allowMultipleChoices()
+        $roles = ['role.admin' => 'ROLE_ADMIN', 'role.support' => 'ROLE_SUPPORT', 'role.sales' => 'ROLE_SALES', 'role.viewer' => 'ROLE_VIEWER'];
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
+            $roles['role.super_admin'] = 'ROLE_SUPER_ADMIN';
+        }
+        yield ChoiceField::new('roles', 'Rollen')->setChoices($roles)->allowMultipleChoices()
             ->setColumns(6);
 
         yield BooleanField::new('active', 'Aktiv')
             ->renderAsSwitch(false)
             ->setColumns(6);
+    }
+    public function updateEntity(\Doctrine\ORM\EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        $original = $entityManager->getUnitOfWork()->getOriginalEntityData($entityInstance);
+        if ((in_array('ROLE_SUPER_ADMIN', $original['roles'] ?? [], true)
+            || in_array('ROLE_SUPER_ADMIN', $entityInstance->getRoles(), true)) && !$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+        parent::updateEntity($entityManager, $entityInstance);
     }
 }

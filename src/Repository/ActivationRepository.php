@@ -19,6 +19,8 @@ class ActivationRepository extends ServiceEntityRepository
     public function getDashboardStatistics(): array
     {
         $result = $this->createQueryBuilder('a')
+            ->innerJoin('a.license', 'l')
+            ->andWhere('l.deletedAt IS NULL')
             ->select('COUNT(a.id) AS total')
             ->addSelect("
                 SUM(

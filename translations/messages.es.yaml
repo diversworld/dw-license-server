@@ -244,8 +244,8 @@ dashboard:
 "license_action.token_notice": "Los tokens en línea existentes vencen al finalizar su duración más el periodo de gracia. Los tokens sin conexión siguen válidos hasta su vencimiento."
 "role.admin": "Administración"
 "role.support": "Soporte"
-"role.sales": "Ventas"
-"role.viewer": "Solo lectura"
+"role.sales": "Responsable de ventas"
+"role.viewer": "Auditor de solo lectura"
 license_status.active: 'Activa'
 license_status.suspended: 'Pausada'
 license_status.revoked: 'Revocada'
@@ -256,3 +256,15 @@ license_status.revoked: 'Revocada'
 "two_factor.optional_help": "La configuración es opcional. Omitir se aplica a esta sesión; rechazar evita futuros avisos. Puedes configurar la 2FA más tarde desde el menú de usuario."
 "two_factor.skip": "Omitir por ahora"
 "two_factor.decline": "Rechazar 2FA"
+
+"role.super_admin": "Superadministrador"
+"archive.archive": "Archivar"
+"archive.restore": "Restaurar"
+"archive.archived": "Archivado"
+"archive.date": "Archivado el"
+"archive.current": "Registros actuales"
+"archive.saved": "Cambio guardado."
+"archive.notice": "Los registros archivados se conservan y se pueden restaurar. Los tokens emitidos dejan de ser válidos al caducar o en la siguiente comprobación del servidor."
+"archive.back": "Volver a la lista"
+"archive.invalid_transition": "Esta operación no corresponde al estado actual del archivo."
+"archive.must_restore": "Restaure primero la licencia."

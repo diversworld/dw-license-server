@@ -24,7 +24,7 @@ class LicenseLifecycle
             throw new \InvalidArgumentException('Unknown license action.');
         }
         $actor = $this->security->getUser();
-        if (!$actor instanceof User || !$this->security->isGranted('LICENSE_'.strtoupper($action))) {
+        if (!$actor instanceof User || !$this->security->isGranted('LICENSE_'.strtoupper($action), $license)) {
             throw new AccessDeniedException();
         }
         $reason = trim($reason);
@@ -35,6 +35,9 @@ class LicenseLifecycle
         // The database row lock also serializes against concurrent activations.
         return $this->em->getConnection()->transactional(function () use ($license, $action, $reason, $expiresAt, $actor): LicenseAction {
             $this->em->refresh($license, LockMode::PESSIMISTIC_WRITE);
+            if ($license->isArchived()) {
+                throw new \DomainException('archive.must_restore');
+            }
             $beforeStatus = $license->getStatus();
             $beforeExpiry = $license->getExpiresAt();
             $now = new \DateTimeImmutable();
