@@ -1,135 +1,72 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}
-    Anmeldung | Diversworld Lizenzverwaltung
-{% endblock %}
+{% block login %}
+    {# Login #}
+    <div class=" col-lg-6 login-area d-flex align-items-center justify-content-center p-4">
+        <div class="login-wrapper">
+            {# Mobile Logo #}
+            <div class=" d-lg-none text-center mb-4 ">
+                <strong class="fs-4">
+                    Diversworld
+                </strong>
 
-{% block body %}
-
-<div class="container-fluid login-layout">
-    <div class="row min-vh-100">
-
-		{# Linke Branding-Seite #}
-        <div class=" col-lg-6 login-brand d-none d-lg-flex flex-column justify-content-between p-5">
-            <div class="brand-content">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="brand-logo">
-                        <img src="images/Diversworld-ws.png" alt="Diversworld Logo" class="brand-logo-img">
-                    </div>
-                </div>
-            </div>
-
-			<div class="brand-content">
-                <div class=" text-uppercase fw-semibold text-info small mb-3 ">
+                <div class="text-secondary">
                     Lizenzverwaltung
                 </div>
-
-                <h1 class="brand-title mb-4">
-                    Lizenzen einfach verwalten.
-                </h1>
-
-                <p class="brand-description mb-5">
-                    Zentrale Verwaltung deiner Kunden, Produkte, Lizenzen und Installationen in einer übersichtlichen Oberfläche.
-                </p>
-
-                <div class="d-flex flex-column gap-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="feature-icon">
-                            <i class="bi bi-check-lg"></i>
-                        </span>
-                        Kunden und Produkte zentral verwalten
-                    </div>
-
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="feature-icon">
-                            <i class="bi bi-check-lg"></i>
-                        </span>
-                        Lizenzen und Aktivierungen kontrollieren
-                    </div>
-
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="feature-icon">
-                            <i class="bi bi-check-lg"></i>
-                        </span>
-                        Übersichtliche Administration
-                    </div>
-                </div>
             </div>
 
-            <div class="brand-content text-white-50 small">
-                &copy; {{ "now"|date("Y") }} Diversworld
-            </div>
-        </div>
-
-        {# Login #}
-        <div class=" col-lg-6 login-area d-flex align-items-center justify-content-center p-4">
-            <div class="login-wrapper">
-                {# Mobile Logo #}
-                <div class=" d-lg-none text-center mb-4 ">
-                    <strong class="fs-4">
-                        Diversworld
-                    </strong>
-
-                    <div class="text-secondary">
-                        Lizenzverwaltung
+            <div class="card login-card">
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h2 class="fw-bold mb-2">
+                            Willkommen zurück
+                        </h2>
+                        <p class="text-secondary mb-0">Melde dich mit deinen Zugangsdaten an, um die Lizenzverwaltung zu öffnen.</p>
                     </div>
-                </div>
 
-                <div class="card login-card">
-                    <div class="card-body">
-                        <div class="mb-4">
-                            <h2 class="fw-bold mb-2">
-                                Willkommen zurück
-                            </h2>
-                            <p class="text-secondary mb-0">Melde dich mit deinen Zugangsdaten an, um die Lizenzverwaltung zu öffnen.</p>
+                    {% if error %}
+                        <div class="alert alert-danger d-flex align-items-center gap-2">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <div>
+                                {{ error.messageKey|trans(error.messageData,'security') }}
+                            </div>
                         </div>
+                    {% endif %}
 
-                        {% if error %}
-                            <div class="alert alert-danger d-flex align-items-center gap-2">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                <div>
-                                    {{ error.messageKey|trans(error.messageData,'security') }}
-                                </div>
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label fw-semibold">E-Mail-Adresse</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" placeholder="name@beispiel.de" required autofocus>
                             </div>
-                        {% endif %}
-
-                        <form method="post">
-                            <div class="mb-3">
-                                <label for="username" class="form-label fw-semibold">E-Mail-Adresse</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-envelope"></i>
-                                    </span>
-                                    <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" placeholder="name@beispiel.de" required autofocus>
-                                </div>
+                        </div>
+                        <div class="mb-2">
+                            <label for="password" class="form-label fw-semibold" >Kennwort</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" placeholder="Kennwort" required>
                             </div>
-                            <div class="mb-2">
-                                <label for="password" class="form-label fw-semibold" >Kennwort</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-lock"></i>
-                                    </span>
-                                    <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" placeholder="Kennwort" required>
-                                </div>
-                            </div>
-	                        {# Kennwort vergessen #}
-                            <div class="text-end mb-4">
-                               <a href="#" class="forgot-password">
-                                    Kennwort vergessen?
-                                </a>
-                            </div>
-                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-box-arrow-in-right me-2"></i>Anmelden</button>
-                        </form>
-                    </div>
+                        </div>
+                        {# Kennwort vergessen #}
+                        <div class="text-end mb-4">
+                            <a href="#" class="forgot-password">
+                                Kennwort vergessen?
+                            </a>
+                        </div>
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-box-arrow-in-right me-2"></i>Anmelden</button>
+                    </form>
                 </div>
-                <div class="text-center text-secondary small mt-4">
-                    <i class="bi bi-shield-lock me-1"></i>
-                    Geschützter Administrationsbereich
-                </div>
+            </div>
+            <div class="text-center text-secondary small mt-4">
+                <i class="bi bi-shield-lock me-1"></i>
+                Geschützter Administrationsbereich
             </div>
         </div>
     </div>
-</div>
-
 {% endblock %}
