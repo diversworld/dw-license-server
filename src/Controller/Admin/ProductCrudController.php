@@ -36,9 +36,9 @@ class ProductCrudController extends AbstractCrudController
             ArrayField::new('allowedFeatures', 'entitlements.allowed'),
             ArrayField::new('requiredFeatures', 'entitlements.required'),
             ArrayField::new('featureQuotas', 'entitlements.quotas')->setFormType(\App\Form\QuotaCollectionType::class),
-            IntegerField::new('maxInstallations', 'entitlements.installations'),
-            IntegerField::new('tokenLifetimeSeconds')->setHelp('policy.token_help'),
-            IntegerField::new('gracePeriodSeconds')->setHelp('policy.grace_help'),
+            IntegerField::new('maxInstallations', 'entitlements.installations')->setFormType(\App\Form\BoundedIntegerType::class)->setFormTypeOptions(['minimum' => 1, 'maximum' => 1000000]),
+            IntegerField::new('tokenLifetimeSeconds')->setFormType(\App\Form\BoundedIntegerType::class)->setFormTypeOptions(['minimum' => 60, 'maximum' => 31536000])->setHelp('policy.token_help'),
+            IntegerField::new('gracePeriodSeconds')->setFormType(\App\Form\BoundedIntegerType::class)->setFormTypeOptions(['minimum' => 0, 'maximum' => 31536000])->setHelp('policy.grace_help'),
         ];
     }
 }

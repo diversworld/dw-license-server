@@ -371,3 +371,8 @@ entitlements:
     invalid_features: "Unzulässige Features oder Installationsgrenze."
     invalid_quotas: "Ungültige Kontingente."
     invalid_plan: "Dieser Lizenzplan ist nicht verwendbar."
+
+user_creation:
+    password: "Kennwort (mindestens 12 Zeichen)"
+    repeat: "Kennwort wiederholen"
+    mismatch: "Die Kennwörter stimmen nicht überein."

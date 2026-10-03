@@ -373,3 +373,8 @@ entitlements:
     invalid_features: "Funciones o límite no válidos."
     invalid_quotas: "Cuotas inválidas."
     invalid_plan: "Este plan de licencia no está disponible."
+
+user_creation:
+    password: "Contraseña (al menos 12 caracteres)"
+    repeat: "Repetir contraseña"
+    mismatch: "Las contraseñas no coinciden."

@@ -373,3 +373,8 @@ entitlements:
     invalid_features: "Fonctionnalités ou limite invalides."
     invalid_quotas: "Quotas invalides."
     invalid_plan: "Ce plan de licence est indisponible."
+
+user_creation:
+    password: "Mot de passe (12 caractères minimum)"
+    repeat: "Confirmer le mot de passe"
+    mismatch: "Les mots de passe ne correspondent pas."
