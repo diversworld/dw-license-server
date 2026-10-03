@@ -7,7 +7,7 @@ The requirements are implemented and checked in this order. Each completed secti
 
 1. Profile image content validation, own-profile enforcement and webserver protection — completed: 8 HTTP tests / 40 assertions; container lint passed.
 2. Central role validation and HTTP-tested Super Admin protection — completed: 6 HTTP tests / 29 assertions, including forged direct POSTs and persisted roles.
-3. Explicit withdrawal of revocation and centrally defined license transitions — pending.
+3. Explicit withdrawal of revocation and centrally defined license transitions — completed: HTTP/service role/state/expiry tests plus a real two-process MariaDB row-lock test (1 test / 11 assertions).
 4. Concurrent, versioned audit chain; verifier and external checkpoints — pending.
 5. CI, isolated installation/upgrade checks and pinned real Contao client integration — pending.
 6. Role/action 2FA policy, recovery, session invalidation and encryption — pending.
@@ -40,3 +40,7 @@ Verify the deployed webserver rules independently; PHP tests cannot prove a remo
 ## Administrative roles
 
 `RoleCatalog` is the single definition of assignable roles, allowed persisted roles and the role hierarchy. Entity validation includes `ROLE_SUPER_ADMIN`. Normal administrators cannot modify Super-Admin targets or assign that role through crafted requests. Both the pre-form voter and the persistence guard enforce this boundary. No data migration is needed for this correction.
+
+## License transitions
+
+Support can reactivate only suspended licenses. Revoked licenses require the separate `withdraw_revocation` action and `LICENSE_WITHDRAW_REVOCATION` capability, inherited by Admin and Super Admin. Every action validates its reason, stores the actor and before/after status and expiry, and checks the current state after obtaining a database row lock. Expired licenses must first be extended. Renewing a suspended or revoked license preserves its status; extension alone cannot undo a suspension or revocation. No schema change is required: the existing action column accommodates the additional action.

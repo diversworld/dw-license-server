@@ -266,3 +266,5 @@ license_status.revoked: 'Widerrufen'
 "archive.back": "Zurück zur Liste"
 "archive.invalid_transition": "Dieser Vorgang passt nicht zum aktuellen Archivstatus."
 "archive.must_restore": "Bitte zuerst die Lizenz wiederherstellen."
+
+"license_action.withdraw_revocation": "Widerruf zurücknehmen"

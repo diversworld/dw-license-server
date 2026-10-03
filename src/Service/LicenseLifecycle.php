@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class LicenseLifecycle
 {
-    public const array ACTIONS = ['renew', 'pause', 'revoke', 'reactivate'];
+    public const array ACTIONS = LicenseTransitions::ACTIONS;
 
     public function __construct(private readonly EntityManagerInterface $em, private readonly Security $security)
     {
@@ -41,19 +41,14 @@ class LicenseLifecycle
             $beforeStatus = $license->getStatus();
             $beforeExpiry = $license->getExpiresAt();
             $now = new \DateTimeImmutable();
+            $target = LicenseTransitions::target($action, $beforeStatus, $license->isExpired());
             if ($action === 'renew') {
                 if ($expiresAt === null || $expiresAt <= $now || ($beforeExpiry !== null && $expiresAt <= $beforeExpiry)) {
                     throw new \DomainException('license_action.invalid_expiry');
                 }
                 $license->setExpiresAt($expiresAt);
-            } elseif ($action === 'pause' && $beforeStatus === 'active') {
-                $license->setStatus('suspended');
-            } elseif ($action === 'revoke' && $beforeStatus !== 'revoked') {
-                $license->setStatus('revoked');
-            } elseif ($action === 'reactivate' && $beforeStatus !== 'active' && !$license->isExpired()) {
-                $license->setStatus('active');
             } else {
-                throw new \DomainException('license_action.invalid_transition');
+                $license->setStatus($target);
             }
             $license->setUpdatedAt($now);
             $entry = new LicenseAction($license, $action, $reason, $actor, $beforeStatus, $license->getStatus(), $beforeExpiry, $license->getExpiresAt());

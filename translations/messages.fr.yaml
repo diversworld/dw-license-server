@@ -268,3 +268,5 @@ license_status.revoked: 'Révoquée'
 "archive.back": "Retour à la liste"
 "archive.invalid_transition": "Cette opération ne correspond pas à l’état actuel de l’archive."
 "archive.must_restore": "Restaurez d’abord la licence."
+
+"license_action.withdraw_revocation": "Annuler la révocation"

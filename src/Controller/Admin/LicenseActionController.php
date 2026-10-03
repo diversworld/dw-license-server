@@ -28,8 +28,8 @@ class LicenseActionController extends AbstractController
         return $this->render('admin/license/action.html.twig', ['license' => $license, 'action' => null, 'form' => null, 'history' => $this->historyEntries($license)]);
     }
 
-    #[Route('/admin/{_locale}/licenses/{id}/actions/{action}', name: 'admin_license_action', defaults: ['_locale' => 'de'], requirements: ['action' => 'renew|pause|revoke|reactivate'], methods: ['GET', 'POST'])]
-    #[Route('/admin/licenses/{id}/actions/{action}', name: 'admin_license_action_legacy', requirements: ['action' => 'renew|pause|revoke|reactivate'], methods: ['GET', 'POST'])]
+    #[Route('/admin/{_locale}/licenses/{id}/actions/{action}', name: 'admin_license_action', defaults: ['_locale' => 'de'], requirements: \App\Service\LicenseTransitions::ROUTE_REQUIREMENTS, methods: ['GET', 'POST'])]
+    #[Route('/admin/licenses/{id}/actions/{action}', name: 'admin_license_action_legacy', requirements: \App\Service\LicenseTransitions::ROUTE_REQUIREMENTS, methods: ['GET', 'POST'])]
     public function perform(License $license, string $action, Request $request): Response
     {
         $this->denyAccessUnlessGranted('LICENSE_'.strtoupper($action), $license);

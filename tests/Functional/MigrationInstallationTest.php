@@ -117,6 +117,46 @@ class MigrationInstallationTest extends KernelTestCase
         });
     }
 
+    public function testConcurrentLicenseActionsUseSeparateConnectionsAndOnlyOneTransitionSucceeds(): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment): void {
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            $ids = [];
+            foreach (['user', 'customer', 'product', 'license'] as $name) { $ids[$name] = \Symfony\Component\Uid\Uuid::v7(); }
+            $created = '2026-10-03 12:00:00';
+            $connection->insert('user', ['id' => $ids['user']->toBinary(), 'email' => 'concurrent@example.test', 'firstname' => 'Test', 'lastname' => 'Support', 'roles' => '["ROLE_SUPPORT"]', 'password' => 'unused-hash', 'active' => 1, 'created_at' => $created, 'backup_code_hashes' => '[]']);
+            $connection->insert('customer', ['id' => $ids['customer']->toBinary(), 'company' => 'Test', 'firstname' => 'Test', 'lastname' => 'Customer', 'email' => 'customer@example.test', 'street' => 'Test 1', 'zip' => '12345', 'city' => 'Test', 'created_at' => $created]);
+            $connection->insert('product', ['id' => $ids['product']->toBinary(), 'slug' => 'concurrency', 'created_at' => $created]);
+            $connection->insert('license', ['id' => $ids['license']->toBinary(), 'license_key' => 'concurrency-test', 'type' => 'single', 'status' => 'active', 'max_domains' => 1, 'features' => '[]', 'created_at' => $created, 'customer_id' => $ids['customer']->toBinary(), 'product_id' => $ids['product']->toBinary()]);
+            $streams = $processes = [];
+            try {
+                for ($i = 0; $i < 2; ++$i) {
+                    
+                    $processes[$i] = new Process([PHP_BINARY, dirname(__DIR__).'/Support/license_transition_worker.php', (string) $ids['license'], (string) $ids['user']], dirname(__DIR__, 2), $environment);
+                    $processes[$i]->setInput("go\n");
+                    $processes[$i]->setTimeout(20);
+                    $processes[$i]->start();
+                }
+                $deadline = microtime(true) + 20;
+                do {
+                    $running = false;
+                    foreach ($processes as $process) { $running = $process->isRunning() || $running; }
+                    if ($running) { usleep(1000); }
+                } while ($running && microtime(true) < $deadline);
+                self::assertFalse($running, 'Concurrent transition workers timed out.');
+                $codes = array_map(static fn ($p) => $p->getExitCode(), $processes);
+                sort($codes);
+                self::assertSame([0, 2], $codes, implode(' | ', array_map(static fn ($p) => $p->getErrorOutput(), $processes)));
+                self::assertSame('suspended', $connection->fetchOne('SELECT status FROM license'));
+                self::assertSame(1, (int) $connection->fetchOne('SELECT COUNT(*) FROM license_action'));
+                self::assertSame('active', $connection->fetchOne('SELECT from_status FROM license_action'));
+                self::assertSame('suspended', $connection->fetchOne('SELECT to_status FROM license_action'));
+            } finally {
+                foreach ($processes as $process) { if ($process->isRunning()) { $process->stop(); } }
+            }
+        });
+    }
+
     public function testFreshInstallationAndRepeatedMigrationRun(): void
     {
         $this->withDatabase(function (Connection $connection, array $environment): void {

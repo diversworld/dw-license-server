@@ -246,7 +246,7 @@ class PriorityFeaturesTest extends WebTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('tbody', 'Customer request');
         self::assertSelectorTextContains('tbody', $user->getFullname());
-        foreach (['revoke', 'renew', 'reactivate'] as $action) {
+        foreach (['revoke', 'renew', 'withdraw_revocation'] as $action) {
             $this->client->request('GET', $url.$action);
             $values = ['form[reason]' => 'Approved '.$action];
             if ($action === 'renew') {

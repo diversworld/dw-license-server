@@ -28,6 +28,9 @@ class LicenseCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, Action::new('history', 'license_action.history')->linkToRoute('admin_license_history', fn (License $license) => ['id' => (string) $license->getId()]));
         foreach (\App\Service\LicenseLifecycle::ACTIONS as $name) {
             $action = Action::new($name, 'license_action.'.$name)
+                ->displayIf(static fn (License $license) => !$license->isArchived()
+                    && isset(\App\Service\LicenseTransitions::TARGETS[$name][$license->getStatus()])
+                    && ($name === 'renew' || \App\Service\LicenseTransitions::TARGETS[$name][$license->getStatus()] !== 'active' || !$license->isExpired()))
                 ->linkToRoute('admin_license_action', fn (License $license) => ['id' => (string) $license->getId(), 'action' => $name]);
             $actions->add(Crud::PAGE_INDEX, $action)->setPermission($name, 'LICENSE_'.strtoupper($name));
         }

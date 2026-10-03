@@ -34,4 +34,14 @@ abstract class IsolatedWebTestCase extends WebTestCase
 
         return $user;
     }
+    protected function license(): \App\Entity\License
+    {
+        $customer = (new \App\Entity\Customer())->setCompany('Test')->setFirstname('Test')->setLastname('Customer')->setEmail('customer@example.test')->setStreet('Test 1')->setZip('12345')->setCity('Berlin');
+        $product = (new \App\Entity\Product())->setName('Test')->setSlug('test');
+        $license = (new \App\Entity\License())->setCustomer($customer)->setProduct($product);
+        foreach ([$customer, $product, $license] as $entity) { $this->em->persist($entity); }
+        $this->em->flush();
+
+        return $license;
+    }
 }
