@@ -15,6 +15,7 @@ final class CustomerScopeTest extends IsolatedWebTestCase
         $second->getCustomer()->setCompany('Foreign Customer');
         $user = $this->user('ROLE_SALES');
         $user->setGlobalAccess(false)->addCustomer($first->getCustomer());
+        $otherUser = $this->user('ROLE_SALES')->setGlobalAccess(false)->addCustomer($second->getCustomer());
         $this->em->flush();
         $this->client->loginUser($user);
         $router = static::getContainer()->get('router');
@@ -33,6 +34,11 @@ final class CustomerScopeTest extends IsolatedWebTestCase
         $this->client->request('GET', $router->generate('admin_user_edit', ['_locale' => 'de', 'entityId' => (string) $user->getId()]));
         self::assertResponseStatusCodeSame(403);
         $this->client->request('GET', '/admin/de/licenses/'.$first->getId().'/history');
+        self::assertResponseIsSuccessful();
+        $this->client->loginUser($otherUser);
+        $this->client->request('GET', '/admin/de/licenses/'.$first->getId().'/history');
+        self::assertContains($this->client->getResponse()->getStatusCode(), [403, 404]);
+        $this->client->request('GET', '/admin/de/licenses/'.$second->getId().'/history');
         self::assertResponseIsSuccessful();
     }
 

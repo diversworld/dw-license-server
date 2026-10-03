@@ -12,7 +12,7 @@ The requirements are implemented and checked in this order. Each completed secti
 5. CI, isolated installation/upgrade checks and pinned real Contao client integration — completed: local full suite 98 tests / 877 assertions; final real-client/vector suite 8 tests / 80 assertions; Python deployment suite 13 tests; strict Composer validation and audit passed; YAML 30 files, Twig 15 templates and PHP 111 files passed. The remote workflow, full PHP 8.5 suite and MySQL matrix are not claimed as executed.
 6. Role/action 2FA policy, recovery, session invalidation and encryption — completed: full suite 119 tests / 987 assertions, including actual HTTP recovery, optional/required policy, CSRF/rate limits, independent-key protection, legacy upgrade/conversion and separate database connections.
 7. Signing-key lifecycle, emergency revocation, rollout and history — completed: 22 service/HTTP/real-client tests / 230 assertions; prepared keys remain untrusted, stale activation and invalid private keys are rejected, lease bounds block early retirement, signed manifests and emergency revocation are exercised.
-8. Customer assignments, global/scoped permissions and object-level isolation — pending.
+8. Customer assignments, global/scoped permissions and object-level isolation — completed: 4 HTTP tests / 24 assertions for both customers, forged associations and API tenant misuse; full suite 127 cases / 812 assertions with 16 initially skipped database cases then separately executed successfully (16 / 229); container lint passed.
 9. Health, bounded metrics, request IDs, backup and recovery test — pending.
 10. Persistent, asynchronous expiry reminders and simulated deliveries — pending.
 11. Customer portal, protected license downloads and domain-change history — pending.
@@ -60,3 +60,7 @@ See [Two-factor security](TWO_FACTOR_SECURITY.md). Default enrollment remains vo
 ## Signing keys
 
 See [Signing-key operations](SIGNING_KEYS.md). Operator-only lifecycle commands require actor, reason and current fingerprint; activation requires explicit distribution acknowledgment. Production instances must share their lock store and writable keyring. Disconnected clients require trusted out-of-band revocation updates. No key files in the real installation were changed.
+
+## Customer access
+
+See [Customer authorization](CUSTOMER_ACCESS.md). Migration `Version20261003101128` preserves existing global access and supports interrupted DDL. A concurrent user commit (`215b508`) captured the implementation; reverse-customer tests and completed verification follow separately.
