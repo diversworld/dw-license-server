@@ -7,6 +7,7 @@ namespace App\EventSubscriber;
 use App\Audit\AuditableEntityInterface;
 use App\Audit\AuditChanges;
 use App\Entity\AuditLog;
+use App\Entity\AuditChainHead;
 use App\Entity\User;
 use App\Service\AuditService;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
@@ -15,12 +16,14 @@ use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Event\PostRemoveEventArgs;
 use Doctrine\ORM\Event\PostUpdateEventArgs;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Bundle\SecurityBundle\Security;
 
 #[AsDoctrineListener(event: Events::postPersist)]
 #[AsDoctrineListener(event: Events::postUpdate)]
 #[AsDoctrineListener(event: Events::preRemove)]
+#[AsDoctrineListener(event: Events::preUpdate)]
 #[AsDoctrineListener(event: Events::postRemove)]
 final class AuditSubscriber
 {
@@ -45,13 +48,23 @@ final class AuditSubscriber
         $this->record($args->getObject(), $args->getObjectManager(), 'updated', 'Datensatz geändert');
     }
 
+    public function preUpdate(PreUpdateEventArgs $args): void
+    {
+        if ($args->getObject() instanceof AuditLog || $args->getObject() instanceof AuditChainHead) {
+            throw new \LogicException('Audit records and chain metadata are immutable through ORM operations.');
+        }
+    }
+
     public function preRemove(PreRemoveEventArgs $args): void
     {
         $entity = $args->getObject();
+        if ($entity instanceof AuditLog || $entity instanceof AuditChainHead) {
+            throw new \LogicException('Audit records and chain metadata cannot be deleted through ORM operations.');
+        }
         if ($entity instanceof \App\Archive\ArchivableInterface) {
             throw new \LogicException('Customers, products and licenses must be archived instead of deleted.');
         }
-        if (!$entity instanceof AuditLog) {
+        if (!($entity instanceof AuditLog || $entity instanceof AuditChainHead)) {
             // Doctrine clears generated identifiers before postRemove is dispatched.
             $this->removedEntities[$entity] = $this->describe($entity, $args->getObjectManager()) + [
                 'changes' => $this->auditChanges->capture($entity, $args->getObjectManager(), deleted: true),
@@ -67,7 +80,7 @@ final class AuditSubscriber
 
     private function record(object $entity, EntityManagerInterface $em, string $action, string $message): void
     {
-        if ($entity instanceof AuditLog) {
+        if ($entity instanceof AuditLog || $entity instanceof AuditChainHead) {
             return;
         }
 

@@ -47,6 +47,27 @@ final class AuditLogRepository extends ServiceEntityRepository
     /** Writes inside the caller's transaction without re-entering ORM flush(). */
     public function append(AuditLog $log): void
     {
+        $connection = $this->getEntityManager()->getConnection();
+        $connection->transactional(function () use ($connection, $log): void {
+            // A singleton row serializes all appenders across every application instance.
+            $query = $connection->createQueryBuilder()->select('sequence', 'entry_hash')->from('audit_chain_head')->where('id = 1');
+            if (!$connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\SQLitePlatform) { $query->forUpdate(); }
+            $head = $query->executeQuery()->fetchAssociative();
+            if ($head === false) {
+                // SchemaTool-created isolated schemas have no migration seed. Initial installation
+                // seeds the row in the migration; this path is deliberately test-schema compatible.
+                $connection->insert('audit_chain_head', ['id' => 1, 'sequence' => 0, 'entry_hash' => $this->getLastHash()]);
+                $head = $query->executeQuery()->fetchAssociative();
+            }
+            $log->setHashVersion(2)->setChainSequence((int) $head['sequence'] + 1)->setPreviousHash($head['entry_hash']);
+            $log->setEntryHash(\App\Audit\AuditCanonical::hash($log));
+            $this->insertEntry($log);
+            $connection->update('audit_chain_head', ['sequence' => $log->getChainSequence(), 'entry_hash' => $log->getEntryHash()], ['id' => 1]);
+        });
+    }
+
+    private function insertEntry(AuditLog $log): void
+    {
         $em = $this->getEntityManager();
         $connection = $em->getConnection();
         $metadata = $em->getClassMetadata(AuditLog::class);

@@ -13,8 +13,18 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Table(name: 'audit_log')]
 #[ORM\Index(columns: ['event_type'], name: 'idx_audit_event')]
 #[ORM\Index(columns: ['created_at'], name: 'idx_audit_created')]
+#[ORM\UniqueConstraint(name: 'uniq_audit_sequence', columns: ['chain_sequence'])]
 class AuditLog
 {
+    #[ORM\Column(options: ['default' => 1])]
+    private int $hashVersion = 1;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $chainSequence = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $actorIdentity = null;
+
     #[ORM\Id]
     #[ORM\Column(type: 'uuid')]
     private Uuid $id;
@@ -50,7 +60,7 @@ class AuditLog
     private string $entryHash = '';
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $performedBy = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
@@ -60,6 +70,42 @@ class AuditLog
     {
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function getHashVersion(): int
+    {
+        return $this->hashVersion;
+    }
+
+    public function setHashVersion(int $hashVersion): self
+    {
+        $this->hashVersion = $hashVersion;
+
+        return $this;
+    }
+
+    public function getChainSequence(): ?int
+    {
+        return $this->chainSequence;
+    }
+
+    public function setChainSequence(?int $chainSequence): self
+    {
+        $this->chainSequence = $chainSequence;
+
+        return $this;
+    }
+
+    public function getActorIdentity(): ?string
+    {
+        return $this->actorIdentity;
+    }
+
+    public function setActorIdentity(?string $actorIdentity): self
+    {
+        $this->actorIdentity = $actorIdentity;
+
+        return $this;
     }
 
     public function getId(): Uuid

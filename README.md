@@ -109,7 +109,7 @@ Zulässige Rollenoptionen: `admin`, `support`, `sales`, `viewer`. Änderungen un
 
 ## Lizenzaktionen und Historie
 
-In der Lizenzliste stehen Verlängern, Pausieren, Widerrufen, Reaktivieren und Lizenzhistorie bereit. Jede Änderung benötigt eine Begründung mit 3 bis 1000 Zeichen. Die Historie speichert Bearbeiter, Zeitpunkt, Begründung sowie Status und Ablaufdatum vor und nach der Aktion. Sie ist über die Anwendung unveränderlich; auch AuditLogs dürfen weder manuell angelegt, bearbeitet noch gelöscht werden.
+In der Lizenzliste stehen Verlängern, Pausieren, Widerrufen, Reaktivieren, Widerruf zurücknehmen und Lizenzhistorie bereit. Jede Änderung benötigt eine Begründung mit 3 bis 1000 Zeichen. Die Historie speichert Bearbeiter, Zeitpunkt, Begründung sowie Status und Ablaufdatum vor und nach der Aktion. Sie ist über die Anwendung unveränderlich; auch AuditLogs dürfen weder manuell angelegt, bearbeitet noch gelöscht werden.
 
 Verlängern verlangt ein zukünftiges Ablaufdatum nach dem bisherigen Datum und lässt den Status unverändert. Pausieren ist für aktive Lizenzen möglich. Widerrufen verlangt Administrationsrechte. Abgelaufene Lizenzen müssen vor einer Reaktivierung verlängert werden. Status und das spätere Ablaufdatum werden über diese Vorgänge geändert; ein initiales Ablaufdatum kann beim Anlegen gesetzt werden. Bereits ausgegebene Online-Tokens bleiben bis zum nächsten Serverkontakt oder ihrer signierten harten Grenze verwendbar. Offline-Tokens bleiben bis zu ihrem Ablaufdatum verwendbar und lassen sich ohne Serverkontakt nicht vorzeitig sperren.
 
@@ -264,3 +264,5 @@ Die Datei `public/.htaccess` wird über das Symfony-Apache-Pack bereitgestellt u
 ## Sicherheits- und Plattformweiterentwicklung
 
 Der aktuelle Umsetzungsstand, geprüfte Anforderungen und sichere Upgrade-Schritte stehen in [PLATFORM_HARDENING.md](docs/PLATFORM_HARDENING.md). Profilbilder benötigen GD und werden serverseitig geprüft und neu kodiert. Die dort beschriebenen Apache-/Nginx-Regeln müssen auf dem Zielserver aktiv sein.
+
+Die transaktionale, versionierte Audit-Hashkette und externe Prüfpunkte sind in [Audit integrity](docs/SECURITY_AUDIT.md) beschrieben.

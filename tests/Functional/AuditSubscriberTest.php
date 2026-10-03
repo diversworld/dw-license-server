@@ -68,7 +68,7 @@ class AuditSubscriberTest extends WebTestCase
         }
         $mappedTables = array_map(static fn ($metadata) => $metadata->getTableName(), array_filter(
             $this->em->getMetadataFactory()->getAllMetadata(),
-            static fn ($metadata) => $metadata->name !== AuditLog::class,
+            static fn ($metadata) => !in_array($metadata->name, [AuditLog::class, \App\Entity\AuditChainHead::class], true),
         ));
         sort($tables);
         sort($mappedTables);

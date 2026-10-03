@@ -8,7 +8,7 @@ The requirements are implemented and checked in this order. Each completed secti
 1. Profile image content validation, own-profile enforcement and webserver protection — completed: 8 HTTP tests / 40 assertions; container lint passed.
 2. Central role validation and HTTP-tested Super Admin protection — completed: 6 HTTP tests / 29 assertions, including forged direct POSTs and persisted roles.
 3. Explicit withdrawal of revocation and centrally defined license transitions — completed: HTTP/service role/state/expiry tests plus a real two-process MariaDB row-lock test (1 test / 11 assertions).
-4. Concurrent, versioned audit chain; verifier and external checkpoints — pending.
+4. Concurrent, versioned audit chain; verifier and external checkpoints — completed: 21 audit tests / 192 assertions; complete MariaDB migration suite 15 tests / 205 assertions, including three independent append workers and four interrupted audit-DDL stages; container lint passed.
 5. CI, isolated installation/upgrade checks and pinned real Contao client integration — pending.
 6. Role/action 2FA policy, recovery, session invalidation and encryption — pending.
 7. Signing-key lifecycle, emergency revocation, rollout and history — pending.
@@ -44,3 +44,7 @@ Verify the deployed webserver rules independently; PHP tests cannot prove a remo
 ## License transitions
 
 Support can reactivate only suspended licenses. Revoked licenses require the separate `withdraw_revocation` action and `LICENSE_WITHDRAW_REVOCATION` capability, inherited by Admin and Super Admin. Every action validates its reason, stores the actor and before/after status and expiry, and checks the current state after obtaining a database row lock. Expired licenses must first be extended. Renewing a suspended or revoked license preserves its status; extension alone cannot undo a suspension or revocation. No schema change is required: the existing action column accommodates the additional action.
+
+## Audit integrity
+
+See [Audit integrity](SECURITY_AUDIT.md) for hash versions, transactional sequencing, immutable actor snapshots, legacy limitations and external checkpoints. No production migration has been run. The generated and reviewed audit migration is `Version20261003090353`.

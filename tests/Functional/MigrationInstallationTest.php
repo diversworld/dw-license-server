@@ -17,6 +17,8 @@ use Symfony\Component\Process\Process;
 /** Runs real production installation commands against disposable MySQL/MariaDB databases. */
 class MigrationInstallationTest extends KernelTestCase
 {
+    private static bool $containerRebuilt = false;
+
     private const string CLEANUP = 'DoctrineMigrations\\Version20261003080525';
     private const string PREVIOUS = 'DoctrineMigrations\\Version20261002154946';
 
@@ -157,6 +159,68 @@ class MigrationInstallationTest extends KernelTestCase
         });
     }
 
+    public static function interruptedAuditStages(): iterable
+    {
+        foreach ([1, 4, 6, 8] as $stage) { yield 'after '.$stage.' statements' => [$stage]; }
+    }
+
+    #[DataProvider('interruptedAuditStages')]
+    public function testInterruptedAuditChainMigrationPreservesLegacyRows(int $stage): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment) use ($stage): void {
+            $this->console(['doctrine:migrations:migrate', 'DoctrineMigrations\\Version20261003083348', '--no-interaction'], $environment);
+            $legacy = $this->auditEntry('Preserve legacy contents');
+            $connection->insert('audit_log', $legacy);
+            require_once dirname(__DIR__, 2).'/migrations/Version20261003090353.php';
+            $migration = new \DoctrineMigrations\Version20261003090353($connection, new NullLogger());
+            $migration->up($connection->createSchemaManager()->introspectSchema());
+            foreach (array_slice($migration->getSql(), 0, $stage) as $sql) {
+                $connection->executeStatement($sql->getStatement(), $sql->getParameters(), $sql->getTypes());
+            }
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            $this->console(['doctrine:schema:validate', '-v'], $environment);
+            self::assertSame($legacy['entry_hash'], $connection->fetchOne('SELECT entry_hash FROM audit_log'));
+            self::assertSame($legacy['entry_hash'], $connection->fetchOne('SELECT entry_hash FROM audit_chain_head'));
+            self::assertSame(1, (int) $connection->fetchOne('SELECT hash_version FROM audit_log'));
+            self::assertSame(0, (int) $connection->fetchOne('SELECT sequence FROM audit_chain_head'));
+        });
+    }
+
+    public function testConcurrentAuditAppendsUseDistinctPredecessorsAcrossConnections(): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment): void {
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            $processes = [];
+            try {
+                for ($i = 0; $i < 3; ++$i) {
+                    $process = new Process([PHP_BINARY, dirname(__DIR__).'/Support/audit_append_worker.php'], dirname(__DIR__, 2), $environment);
+                    $process->setInput("go\n"); $process->setTimeout(30); $process->start(); $processes[] = $process;
+                }
+                $deadline = microtime(true) + 30;
+                do {
+                    $running = false;
+                    foreach ($processes as $process) { $running = $process->isRunning() || $running; }
+                    if ($running) { usleep(1000); }
+                } while ($running && microtime(true) < $deadline);
+                self::assertFalse($running);
+                foreach ($processes as $process) { self::assertSame(0, $process->getExitCode(), $process->getErrorOutput()); }
+                $rows = $connection->fetchAllAssociative('SELECT chain_sequence, previous_hash, entry_hash FROM audit_log ORDER BY chain_sequence');
+                self::assertCount(9, $rows);
+                $previous = null;
+                foreach ($rows as $i => $row) {
+                    self::assertSame($i + 1, (int) $row['chain_sequence']);
+                    self::assertSame($previous, $row['previous_hash']);
+                    $previous = $row['entry_hash'];
+                }
+                self::assertSame($previous, $connection->fetchOne('SELECT entry_hash FROM audit_chain_head'));
+                self::assertStringContainsString('Verified 9 entries', $this->console(['app:audit:verify'], $environment));
+                $this->console(['doctrine:schema:validate', '-v'], $environment);
+            } finally {
+                foreach ($processes as $process) { if ($process->isRunning()) { $process->stop(); } }
+            }
+        });
+    }
+
     public function testFreshInstallationAndRepeatedMigrationRun(): void
     {
         $this->withDatabase(function (Connection $connection, array $environment): void {
@@ -194,7 +258,7 @@ class MigrationInstallationTest extends KernelTestCase
             self::assertNull($connection->createSchemaManager()->introspectTable('user')->getColumn('backup_code_hashes')->getDefault());
             self::assertSame(2, (int) $connection->fetchOne('SELECT COUNT(*) FROM audit_log'));
             foreach ([$first, $second] as $entry) {
-                self::assertEquals($entry, $connection->fetchAssociative('SELECT * FROM audit_log WHERE id = ?', [$entry['id']]));
+                self::assertEquals($entry + ['hash_version' => 1, 'chain_sequence' => null, 'actor_identity' => null], $connection->fetchAssociative('SELECT * FROM audit_log WHERE id = ?', [$entry['id']]));
             }
             self::assertFalse($connection->createSchemaManager()->tablesExist(['license_audit_log']));
             $this->console(['doctrine:migrations:migrate', self::PREVIOUS, '--no-interaction'], $environment);
@@ -253,6 +317,8 @@ class MigrationInstallationTest extends KernelTestCase
             $url .= (str_contains($url, '?') ? '&' : '?').'serverVersion='.rawurlencode($parameters['serverVersion']).'&charset=utf8mb4';
             // Dotenv variables inherited from PHPUnit must not override the explicitly isolated DSN.
             $environment = ['DATABASE_URL' => $url, 'APP_ENV' => 'prod', 'APP_DEBUG' => '0', 'SYMFONY_DOTENV_VARS' => false];
+            // Production containers intentionally do not detect added services without a rebuild.
+            if (!self::$containerRebuilt) { $this->console(['cache:clear'], $environment); self::$containerRebuilt = true; }
             self::assertStringContainsString($database, $this->console(['dbal:run-sql', 'SELECT DATABASE()'], $environment));
             $connection = DriverManager::getConnection(array_replace($parameters, ['dbname' => $database]));
             $test($connection, $environment);

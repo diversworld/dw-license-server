@@ -26,18 +26,7 @@ final class AuditService
         ?User $user = null,
         array $context = [],
     ): AuditLog {
-        $previousHash = $this->repository->getLastHash();
-
         $request = $this->requestStack->getCurrentRequest();
-
-        $entryHash = hash(
-            'sha256',
-            ($previousHash ?? '')
-            . $eventType
-            . $entityType
-            . $entityIdentifier
-            . json_encode($context, JSON_THROW_ON_ERROR)
-        );
 
         $log = new AuditLog();
 
@@ -47,13 +36,13 @@ final class AuditService
             ->setEntityIdentifier($entityIdentifier)
             ->setEntityId($entityId)
             ->setMessage($message)
-            ->setContext($context)
-            ->setPreviousHash($previousHash)
-            ->setEntryHash($entryHash)
+            ->setContext(\App\Audit\AuditCanonical::mask($context))
+            ->setHashVersion(2)
+            ->setActorIdentity($user === null ? null : (string) $user->getId().":".$user->getUserIdentifier())
             ->setPerformedBy($user)
             ->setIpAddress($request?->getClientIp())
             ->setUserAgent(
-                $request?->headers->get('User-Agent')
+                ($agent = $request?->headers->get('User-Agent')) === null ? null : mb_substr($agent, 0, 512)
             );
 
         $this->repository->append($log);
