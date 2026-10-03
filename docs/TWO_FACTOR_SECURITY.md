@@ -7,6 +7,10 @@ TWO_FACTOR_REQUIRED_ROLES='["ROLE_ADMIN","ROLE_SUPER_ADMIN"]'
 TWO_FACTOR_REQUIRED_ACTIONS='["LICENSE_REVOKE","LICENSE_WITHDRAW_REVOCATION","USER_MANAGE"]'
 ```
 
+Missing `TWO_FACTOR_REQUIRED_ROLES` or `TWO_FACTOR_REQUIRED_ACTIONS` also defaults to an empty JSON array through container parameters. This preserves voluntary enrollment on existing installations with older environment files. Explicit settings take precedence and invalid settings still fail validation; the fallback does not bypass an enrolled account's challenge or any configured mandatory policy.
+
+After updating by Git, refresh a compiled production environment (`.env.local.php`) with `composer dump-env prod`, then run `php bin/console cache:clear --env=prod --no-debug` using the website's PHP version and user. Clearing Symfony's cache alone does not regenerate `.env.local.php`. If production deliberately retains an older `.env`, add the two missing policy entries to the ignored `.env.prod.local` first, using `'[]'` for voluntary enrollment or the intended role/permission arrays. Preserve existing policies. An `EnvNotFoundException` for these settings aborts requests before account-management authorization and is not evidence that Super Admin lacks user-management permissions.
+
 Role rules use the actual role hierarchy, so requiring a lower role also covers roles that inherit it. Permission rules apply at the voter/service boundary; hiding buttons is supplementary. Unknown role or permission names fail configuration validation. A required role cannot bypass enrollment by sending a valid-CSRF skip/decline request. A voluntarily declined user can still enroll later, but an action requiring verified 2FA stays forbidden until its challenge has been completed.
 
 ## Independent encryption key

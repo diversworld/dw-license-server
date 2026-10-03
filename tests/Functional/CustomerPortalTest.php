@@ -8,6 +8,27 @@ use Symfony\Component\Filesystem\Filesystem;
 
 final class CustomerPortalTest extends IsolatedWebTestCase
 {
+    public function testPortalLogoutLinkEndsSessionAndRequiresCsrf(): void
+    {
+        $this->client->loginUser($this->account($this->license()));
+        $crawler = $this->client->request('GET', '/portal/de');
+        self::assertResponseIsSuccessful();
+        $logout = $crawler->filter('header a[href*="/logout"]')->link();
+        parse_str(parse_url($logout->getUri(), PHP_URL_QUERY) ?? '', $query);
+        self::assertArrayHasKey('_csrf_token', $query);
+        self::assertNotSame('', $query['_csrf_token']);
+
+        $this->client->request('GET', '/logout');
+        self::assertResponseStatusCodeSame(403);
+        $this->client->request('GET', '/portal/de');
+        self::assertResponseIsSuccessful();
+
+        $this->client->click($logout);
+        self::assertResponseRedirects('/login');
+        $this->client->request('GET', '/portal/de');
+        self::assertResponseRedirects('/login');
+    }
+
     private function account(License $license): User
     {
         $user = $this->user('ROLE_CUSTOMER')->setGlobalAccess(false)->addCustomer($license->getCustomer()); $this->em->flush(); return $user;

@@ -8,7 +8,7 @@
             </a>
             <div class="d-flex flex-wrap align-items-center gap-3">
                 {% if app.user %}<span class="text-white-50 small text-break">{{ app.user.userIdentifier }}</span>{% endif %}
-                <a class="btn btn-outline-light btn-sm" href="{{ path('app_logout') }}">{{ 'dashboard.logoff'|trans }}</a>
+                <a class="btn btn-outline-light btn-sm" href="{{ logout_path('main') }}">{{ 'dashboard.logoff'|trans }}</a>
             </div>
         </nav>
     </header>
