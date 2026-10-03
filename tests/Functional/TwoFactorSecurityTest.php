@@ -39,6 +39,83 @@ final class TwoFactorSecurityTest extends IsolatedWebTestCase
         $this->client->request('GET', '/admin/de'); self::assertResponseIsSuccessful();
     }
 
+    public function testRecoveryCodeCompletesLoginAfterRejectedTotpAndCannotBeReused(): void
+    {
+        $user = $this->account();
+        $email = $user->getEmail();
+        $this->em->clear();
+        foreach ([true, false] as $firstLogin) {
+            $this->client->restart();
+            $this->client->request('GET', '/login');
+            $this->client->submitForm('Anmelden', ['_username' => $email, '_password' => self::PASSWORD]);
+            $this->client->request('GET', '/2fa');
+            $this->client->submitForm('Bestätigen', ['_auth_code' => 'invalid']);
+            self::assertResponseRedirects('/2fa');
+            $this->client->followRedirect();
+            $this->client->submitForm('Bestätigen', ['_auth_code' => self::BACKUP]);
+            if ($firstLogin) {
+                self::assertResponseRedirects();
+                $this->client->request('GET', '/admin/de');
+                self::assertResponseIsSuccessful();
+            } else {
+                self::assertResponseRedirects('/2fa');
+                $this->client->followRedirect();
+                self::assertSelectorExists('.alert-danger');
+                $this->client->request('GET', '/admin/de');
+                self::assertResponseRedirects('/2fa');
+            }
+        }
+    }
+
+    public function testDiagnosticsReportStoredStateWithoutSecretsOrWrites(): void
+    {
+        $user = $this->account();
+        $before = $this->em->getConnection()->fetchAssociative('SELECT * FROM user WHERE email = ?', [$user->getEmail()]);
+        $command = new \Symfony\Component\Console\Tester\CommandTester(static::getContainer()->get(\App\Command\DiagnoseTwoFactorCommand::class));
+        self::assertSame(0, $command->execute(['email' => $user->getEmail()]));
+        $display = $command->getDisplay();
+        self::assertStringContainsString('Recovery-code listener: enabled', $display);
+        self::assertStringContainsString('Unused recovery codes: 1', $display);
+        self::assertStringContainsString('Authenticator storage: encrypted', $display);
+        self::assertStringContainsString('Authenticator readable: yes', $display);
+        foreach ([self::SECRET, self::BACKUP, $before['totp_secret'], hash('sha256', self::BACKUP)] as $secret) {
+            self::assertStringNotContainsString($secret, $display);
+        }
+        self::assertSame($before, $this->em->getConnection()->fetchAssociative('SELECT * FROM user WHERE email = ?', [$user->getEmail()]));
+        self::assertSame(1, $command->execute(['email' => 'missing@example.test']));
+        self::assertStringContainsString('Account not found', $command->getDisplay());
+    }
+
+    public function testDiagnosticsIdentifyMissingKeyWithoutCreatingAReplacement(): void
+    {
+        $user = $this->account();
+        $keyFile = sys_get_temp_dir().'/missing-diagnostic-key-'.bin2hex(random_bytes(8));
+        $cipher = new TotpSecretCipher(new \Symfony\Component\Filesystem\Filesystem(), new \Symfony\Component\Lock\LockFactory(new \Symfony\Component\Lock\Store\InMemoryStore()), $keyFile, false);
+        $command = new \Symfony\Component\Console\Tester\CommandTester(new \App\Command\DiagnoseTwoFactorCommand(
+            $this->em->getConnection(), $cipher,
+            static::getContainer()->get(\Symfony\Component\EventDispatcher\EventDispatcherInterface::class), static::$kernel,
+        ));
+        self::assertSame(1, $command->execute(['email' => $user->getEmail()]));
+        self::assertStringContainsString('Unused recovery codes: 1', $command->getDisplay());
+        self::assertStringContainsString('Authenticator encryption key is missing.', $command->getDisplay());
+        self::assertStringNotContainsString(self::SECRET, $command->getDisplay());
+        self::assertFileDoesNotExist($keyFile);
+        self::assertTrue($user->isBackupCode(self::BACKUP));
+    }
+
+    public function testDiagnosticsIdentifyAnUnregisteredRecoveryCodeListener(): void
+    {
+        $user = $this->account();
+        $command = new \Symfony\Component\Console\Tester\CommandTester(new \App\Command\DiagnoseTwoFactorCommand(
+            $this->em->getConnection(), static::getContainer()->get(TotpSecretCipher::class),
+            new \Symfony\Component\EventDispatcher\EventDispatcher(), static::$kernel,
+        ));
+        self::assertSame(1, $command->execute(['email' => $user->getEmail()]));
+        self::assertStringContainsString('Recovery-code listener: MISSING', $command->getDisplay());
+        self::assertStringContainsString('Authenticator readable: yes', $command->getDisplay());
+        self::assertTrue($user->isBackupCode(self::BACKUP));
+    }
+
     public function testRequiredRoleCannotSkipOrDeclineEvenWithValidCsrf(): void
     {
         $this->policy(['ROLE_ADMIN']);

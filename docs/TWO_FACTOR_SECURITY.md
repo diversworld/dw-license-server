@@ -36,6 +36,16 @@ An invalid-code message alone does not establish a key problem: encrypted-secret
 
 For an invalid-code message, compare `date -u` on the server with a phone using automatic date and time. TOTP uses Unix time, a 30-second period and zero configured leeway; changing the displayed timezone does not fix clock drift. Correct time synchronization, then try a freshly generated code for the correct account. If an authenticator was replaced, use the current app entry or the password plus an unused recovery code through the recovery form. For multiple application instances, check time synchronization, the database and the encryption key on each instance. Do not send authenticator secrets, encryption keys or recovery codes in diagnostic reports.
 
+If unused recovery codes are also rejected, clock drift alone cannot explain the problem. From the actual production project, using the same PHP version and website user as PHP-FPM, run:
+
+```sh
+php bin/console app:security:2fa:diagnose account@example.org --env=prod --no-debug
+```
+
+This read-only command reports the account's presence, active state, authenticator storage/readability, number of stored recovery codes and registration of the recovery-code listener. It prints no secrets or hashes, consumes no codes, and creates no keys. A zero code count means that the stored codes are exhausted or absent; a positive count does not prove that the user's saved codes match the current set. A missing listener points to configuration, dependencies or a stale container. An absent account points to the email/database configuration. Encrypted-secret errors identify a key/access problem. CLI and PHP-FPM must use the same release and configuration.
+
+For an update by Git, install the locked production dependencies with `composer install --no-dev --optimize-autoloader` and rebuild the production container with `php bin/console cache:clear --env=prod --no-debug` as part of the reviewed deployment process. Reload PHP-FPM if OPcache does not check file timestamps. Do not reset an account's factors or regenerate its encryption key merely to suppress an invalid-code message.
+
 ## User operations
 
 The account's two-factor menu opens `/security/2fa/manage` once enrolled. Authenticator replacement requires the current password, a current app code or unused recovery code, and a valid code from the replacement authenticator. Recovery-code regeneration requires the current password and an existing factor. All previous recovery codes become invalid; new codes are shown once and stored only as hashes.
