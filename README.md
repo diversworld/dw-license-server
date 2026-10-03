@@ -163,18 +163,15 @@ Ein abgelaufenes Online-Token darf erneuert werden, wenn seine Signatur und Bind
 
 Die mitgelieferte `.env.test` verwendet DDEVs lokale Standardzugangsdaten `root/root`, damit Doctrine die separate Testdatenbank anlegen kann. Diese Zugangsdaten gelten ausschließlich für DDEV.
 
-Die HTTP-Tests verwenden ausschließlich die separate Doctrine-Testdatenbank (`db_test`); die Produktions-/Entwicklungsdatenbank wird nicht geleert.
+Die HTTP-Tests verwenden jeweils ein eigenes SQLite-Schema im Speicher. Die Migrationstests verwenden zufällig angelegte MariaDB-/MySQL-Datenbanken; bestehende Produktions-, Entwicklungs- und Testdatenbanken werden nicht geleert.
 
 ```bash
-ddev exec php bin/console doctrine:database:create --env=test --if-not-exists
-ddev exec php bin/console doctrine:migrations:migrate --env=test --no-interaction
-ddev exec php bin/phpunit
+ddev exec --raw -- env MIGRATION_TEST_DATABASE_URL=mysql://root:root@db:3306/db php bin/phpunit
 ddev exec php bin/console lint:container
 ddev exec php bin/console lint:twig templates/
-ddev exec php bin/console doctrine:schema:validate
 ```
 
-Die Tests decken Ausstellung, wiederholte Aktivierung, Limits, Sperren, Ablauf, Manipulation, Mandantenbindung, Offline-Modus, Wiederherstellung abgelaufener Online-Tokens sowie Login und Verwaltungsseiten ab. Ein Test prüft ausgegebene Tokens gegen eine Kopie des tatsächlichen Contao-Validators unter `tests/Fixtures`.
+Die Tests decken Ausstellung, wiederholte Aktivierung, Limits, Sperren, Ablauf, Manipulation, Mandantenbindung, Offline-Modus, Wiederherstellung abgelaufener Online-Tokens sowie Login und Verwaltungsseiten ab. Die echte Client-Integration verwendet unveränderten Quellcode aus festgelegten Git-Commits; Vorbereitung, erforderliche Clientversion und Grenzen sind in [Pinned real Contao client tests](docs/CLIENT_INTEGRATION.md) dokumentiert. Die lokale Validator-Fixture ist ergänzend erhalten.
 
 Die Migrationstests führen die Installationskommandos mit `APP_ENV=prod` auf jeweils neu angelegten, zufällig benannten Datenbanken aus. Sie prüfen die vollständige Neuinstallation einschließlich Schemaabgleich und Produktinitialisierung, wiederholte Ausführung, vorhandene Benutzer sowie die Übernahme alter Audit-Einträge, Rückmigration und Konflikte. Die temporären Datenbanken werden anschließend entfernt; bestehende Datenbanken werden nicht geleert. Ohne `MIGRATION_TEST_DATABASE_URL` werden diese Tests übersprungen. Der angegebene Datenbankbenutzer benötigt Rechte zum Anlegen und Entfernen der Testdatenbanken.
 

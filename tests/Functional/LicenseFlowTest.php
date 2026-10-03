@@ -14,9 +14,8 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class LicenseFlowTest extends WebTestCase
+class LicenseFlowTest extends \App\Tests\Support\IsolatedWebTestCase
 {
-    private KernelBrowser $client;
     private License $license;
     private string $keyPath;
     private LicenseSigner $signer;
@@ -24,16 +23,14 @@ class LicenseFlowTest extends WebTestCase
 
     protected function setUp(): void
     {
-        $this->client = static::createClient();
-        $this->client->disableReboot();
+        parent::setUp();
         $this->keyPath = tempnam(sys_get_temp_dir(), 'license-test-');
         chmod($this->keyPath, 0600);
         file_put_contents($this->keyPath, base64_encode(sodium_crypto_sign_secretkey(sodium_crypto_sign_keypair())));
         $this->signer = new LicenseSigner($this->keyPath);
         static::getContainer()->set(LicenseSigner::class, $this->signer);
         $em = static::getContainer()->get(EntityManagerInterface::class);
-        // Tests run exclusively on the database configured with Doctrine's _test suffix.
-        self::assertStringEndsWith('_test', $em->getConnection()->getDatabase());
+        // This HTTP suite uses its own schema; MariaDB installation and locking are tested separately.
         $id = bin2hex(random_bytes(8));
         $this->email = $id.'@example.org';
         $customer = (new Customer())->setCompany('Test')->setFirstname('Test')->setLastname('Customer')->setEmail($this->email)->setStreet('Test 1')->setZip('12345')->setCity('Berlin')->setActive(true);

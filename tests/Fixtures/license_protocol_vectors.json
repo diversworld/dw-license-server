@@ -1,0 +1,55 @@
+{
+    "description": "Public deterministic interoperability vectors; seed is 32 bytes of 0x01.",
+    "publicKey": "iojj3XQJ8ZX9UtstPLpdcspnCb8dlBIb83SIAbQPb1w=",
+    "kid": "34750f98bd59fcfc",
+    "vectors": {
+        "legacy": {
+            "claims": {
+                "tenant": "real-client",
+                "domain": "example.org",
+                "features": [
+                    "sla"
+                ],
+                "mode": "online",
+                "status": "valid",
+                "issued_at": 1710000000,
+                "refresh_after": 1710000100,
+                "grace_until": 1710000300,
+                "expires_at": 1710000300
+            },
+            "token": "eyJ0ZW5hbnQiOiJyZWFsLWNsaWVudCIsImRvbWFpbiI6ImV4YW1wbGUub3JnIiwiZmVhdHVyZXMiOlsic2xhIl0sIm1vZGUiOiJvbmxpbmUiLCJzdGF0dXMiOiJ2YWxpZCIsImlzc3VlZF9hdCI6MTcxMDAwMDAwMCwicmVmcmVzaF9hZnRlciI6MTcxMDAwMDEwMCwiZ3JhY2VfdW50aWwiOjE3MTAwMDAzMDAsImV4cGlyZXNfYXQiOjE3MTAwMDAzMDB9.UaclTcVcQrnrj5ga0VSnybz5lJf_gE-SxI2ZZL34mjE8QO6I_OPv1XVBRAFvxHVLvtU5EXee5BdQHruOa3IlBA"
+        },
+        "kid": {
+            "claims": {
+                "tenant": "real-client",
+                "domain": "example.org",
+                "features": [
+                    "sla"
+                ],
+                "mode": "online",
+                "status": "valid",
+                "issued_at": 1710000000,
+                "refresh_after": 1710000100,
+                "grace_until": 1710000300,
+                "expires_at": 1710000300,
+                "kid": "34750f98bd59fcfc"
+            },
+            "token": "eyJ0ZW5hbnQiOiJyZWFsLWNsaWVudCIsImRvbWFpbiI6ImV4YW1wbGUub3JnIiwiZmVhdHVyZXMiOlsic2xhIl0sIm1vZGUiOiJvbmxpbmUiLCJzdGF0dXMiOiJ2YWxpZCIsImlzc3VlZF9hdCI6MTcxMDAwMDAwMCwicmVmcmVzaF9hZnRlciI6MTcxMDAwMDEwMCwiZ3JhY2VfdW50aWwiOjE3MTAwMDAzMDAsImV4cGlyZXNfYXQiOjE3MTAwMDAzMDAsImtpZCI6IjM0NzUwZjk4YmQ1OWZjZmMifQ.oWezd4tBXTcYM5cGAlXa3mV_E3cwzht5n7REthO_5ewx_LdNODRqxlzTyOdPHUjmRiDthOf-EID7e-8k68IrBg"
+        },
+        "offline": {
+            "claims": {
+                "tenant": "real-client",
+                "domain": "example.org",
+                "features": [
+                    "sla"
+                ],
+                "mode": "offline",
+                "status": "valid",
+                "issued_at": 1710000000,
+                "expires_at": 1710000300,
+                "kid": "34750f98bd59fcfc"
+            },
+            "token": "eyJ0ZW5hbnQiOiJyZWFsLWNsaWVudCIsImRvbWFpbiI6ImV4YW1wbGUub3JnIiwiZmVhdHVyZXMiOlsic2xhIl0sIm1vZGUiOiJvZmZsaW5lIiwic3RhdHVzIjoidmFsaWQiLCJpc3N1ZWRfYXQiOjE3MTAwMDAwMDAsImV4cGlyZXNfYXQiOjE3MTAwMDAzMDAsImtpZCI6IjM0NzUwZjk4YmQ1OWZjZmMifQ.dDskMotEYi02D6uCTt5AGMioe3_oyFAcr8ZnRvI2Oc_9-JeR4NZvKh0aS5DMJmV62UfYIW1s1FarKcJOb_trBQ"
+        }
+    }
+}

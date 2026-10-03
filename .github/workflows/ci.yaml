@@ -1,0 +1,89 @@
+name: License server checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.4'
+            database: mariadb:11.8
+            server_version: 11.8.0-MariaDB
+          - php: '8.5'
+            database: mariadb:11.8
+            server_version: 11.8.0-MariaDB
+          - php: '8.4'
+            database: mysql:8.4
+            server_version: 8.4.0
+          - php: '8.5'
+            database: mysql:8.4
+            server_version: 8.4.0
+    services:
+      database:
+        image: ${{ matrix.database }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_DATABASE: license_ci_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot || mariadb-admin ping -h 127.0.0.1 -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=15
+    env:
+      APP_ENV: test
+      APP_SECRET: isolated-ci-only-secret-not-for-deployment
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/license_ci?serverVersion=${{ matrix.server_version }}&charset=utf8mb4
+      MIGRATION_TEST_DATABASE_URL: mysql://root:root@127.0.0.1:3306/license_ci_test
+      REQUIRE_REAL_CONTAO_CLIENT: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: diversworld/contao-issue-service-bundle
+          ref: 75eed10a6bda5f627324386f8a580b19e40228a8
+          path: var/contao-client
+          persist-credentials: false
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ctype, gd, iconv, mbstring, simplexml, sodium, pdo_mysql, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+      - name: Install locked Symfony 8.1 dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Validate dependencies
+        run: |
+          composer validate --strict
+          composer audit --locked --no-interaction
+      - name: Prepare the unchanged pinned real Contao client
+        run: python3 scripts/prepare_contao_client.py public var/contao-client
+      - name: Check Symfony configuration and syntax
+        run: |
+          php bin/console lint:container --env=test
+          php bin/console lint:yaml config translations .github/workflows --parse-tags
+          php bin/console lint:twig templates
+          find src migrations tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Migrate and validate the isolated runner database
+        run: |
+          php bin/console doctrine:migrations:migrate --env=test --no-interaction
+          php bin/console doctrine:schema:validate --env=test
+      - name: PHP HTTP, service, protocol, installation and upgrade tests
+        run: php bin/phpunit
+      - name: Python deployment tests with simulated delivery targets
+        run: python3 -m unittest discover -s tests/deployment -v

@@ -9,7 +9,7 @@ The requirements are implemented and checked in this order. Each completed secti
 2. Central role validation and HTTP-tested Super Admin protection — completed: 6 HTTP tests / 29 assertions, including forged direct POSTs and persisted roles.
 3. Explicit withdrawal of revocation and centrally defined license transitions — completed: HTTP/service role/state/expiry tests plus a real two-process MariaDB row-lock test (1 test / 11 assertions).
 4. Concurrent, versioned audit chain; verifier and external checkpoints — completed: 21 audit tests / 192 assertions; complete MariaDB migration suite 15 tests / 205 assertions, including three independent append workers and four interrupted audit-DDL stages; container lint passed.
-5. CI, isolated installation/upgrade checks and pinned real Contao client integration — pending.
+5. CI, isolated installation/upgrade checks and pinned real Contao client integration — completed: local full suite 98 tests / 877 assertions; final real-client/vector suite 8 tests / 80 assertions; Python deployment suite 13 tests; strict Composer validation and audit passed; YAML 30 files, Twig 15 templates and PHP 111 files passed. The remote workflow, full PHP 8.5 suite and MySQL matrix are not claimed as executed.
 6. Role/action 2FA policy, recovery, session invalidation and encryption — pending.
 7. Signing-key lifecycle, emergency revocation, rollout and history — pending.
 8. Customer assignments, global/scoped permissions and object-level isolation — pending.
@@ -48,3 +48,7 @@ Support can reactivate only suspended licenses. Revoked licenses require the sep
 ## Audit integrity
 
 See [Audit integrity](SECURITY_AUDIT.md) for hash versions, transactional sequencing, immutable actor snapshots, legacy limitations and external checkpoints. No production migration has been run. The generated and reviewed audit migration is `Version20261003090353`.
+
+## CI and client integration
+
+See [Pinned real Contao client tests](CLIENT_INTEGRATION.md). CI pins original client source and Actions commits. MariaDB 11.8 / PHP 8.4.24 was exercised locally. Host PHP 8.5.4 is available for the Python Dotenv test but lacks GD and PDO-SQLite, so its complete functional suite was not run. Local MySQL and the remote Actions execution were not exercised. The advanced real client Git commit was tested locally; a published release containing it was not verified.

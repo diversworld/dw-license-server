@@ -1,0 +1,16 @@
+{
+  "public": {
+    "repository": "diversworld/contao-issue-service-bundle",
+    "commit": "75eed10a6bda5f627324386f8a580b19e40228a8",
+    "path": "src/Application/License/LicenseValidationService.php",
+    "sha256": "875782947441362605fc6ebf0f842db2255b39636754fdd51a6ee46768cb8632",
+    "published": true
+  },
+  "advanced": {
+    "repository": "diversworld/contao-issue-service-bundle",
+    "commit": "fd01ad0d04554f7b2d010eef76c5a1858aef6736",
+    "path": "src/Application/License/LicenseValidationService.php",
+    "sha256": "2aff978946cc7926a187df5d8dce7caab56a0b08910df5603f3e372311164975",
+    "published": false
+  }
+}
