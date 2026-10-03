@@ -260,3 +260,7 @@ Bei Verwendung einer anderen PHP-Version muss der PHP-Pfad angepasst werden (min
 ### Apache: 404 bei /login oder /admin
 
 Die Datei `public/.htaccess` wird über das Symfony-Apache-Pack bereitgestellt und vom Deployment mitkopiert. Bei manuellen Uploads müssen auch versteckte Dateien übertragen werden. DocumentRoot muss auf `ZIEL/public` zeigen. Apache muss Rewrite-Regeln aus `.htaccess` zulassen; bei reinem Nginx-Betrieb sind entsprechende Regeln im Hostingpanel nötig. Symfony-Routen lassen sich mit `php bin/console debug:router --env=prod` kontrollieren.
+
+## Sicherheits- und Plattformweiterentwicklung
+
+Der aktuelle Umsetzungsstand, geprüfte Anforderungen und sichere Upgrade-Schritte stehen in [PLATFORM_HARDENING.md](docs/PLATFORM_HARDENING.md). Profilbilder benötigen GD und werden serverseitig geprüft und neu kodiert. Die dort beschriebenen Apache-/Nginx-Regeln müssen auf dem Zielserver aktiv sein.

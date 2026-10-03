@@ -1,0 +1,11 @@
+# Uploaded images are static data. Never inherit PHP/CGI execution handlers.
+Options -Indexes -ExecCGI
+<FilesMatch "(?i)\.(jpe?g|png|webp)$">
+    SetHandler none
+</FilesMatch>
+<FilesMatch "(?i)^(?!.*\.(jpe?g|png|webp)$)">
+    Require all denied
+</FilesMatch>
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>

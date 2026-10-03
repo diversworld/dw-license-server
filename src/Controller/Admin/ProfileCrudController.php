@@ -19,6 +19,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_VIEWER')]
 class ProfileCrudController extends AbstractCrudController
 {
+    public function __construct(private readonly \App\Service\ProfileImageUpload $images)
+    {
+    }
+
     public static function getEntityFqcn(): string
     {
         return User::class;
@@ -61,48 +65,16 @@ class ProfileCrudController extends AbstractCrudController
                 'Diese E-Mail-Adresse wird auch für die Anmeldung verwendet.'
             );
 
-/*		yield ImageField::new('profileImage', 'Profilbild')
-			->setBasePath('/uploads/profile')
-			->setUploadDir('public/uploads/profile')
-			->setUploadedFileNamePattern('[uuid].[extension]')
-			->setRequired(false)
-			->setColumns(12)
-			->setHelp(
-				'Erlaubte Formate: JPG, PNG oder WebP. Maximale Dateigröße: 5 MB.'
-			)
-			->setFormTypeOption(
-				'attr',
-				[
-					'accept' => 'image/jpeg,image/png,image/webp',
-				]
-			)
-			->setFormTypeOption(
-				'constraints',
-				[
-					new Assert\Image(
-						maxSize: '5M',
-						mimeTypes: [
-							'image/jpeg',
-							'image/png',
-							'image/webp',
-						],
-						mimeTypesMessage:
-							'Bitte lade ein JPG-, PNG- oder WebP-Bild hoch.',
-						maxSizeMessage:
-							'Das Profilbild darf maximal 5 MB groß sein.',
-					),
-				]
-			);*/
-		yield ImageField::new('profileImage', 'Profilbild')
-			->setBasePath('/uploads/profile')
-			->setUploadDir('public/uploads/profile')
-			->setUploadedFileNamePattern('[uuid].[extension]')
-			->setRequired(false)
-			->setColumns(12)
-			->setHelp('Profilbild als JPG, PNG oder WebP.')
-			->setFormTypeOption('attr', [
-				'accept' => 'image/jpeg,image/png,image/webp',
-			]);
+        yield ImageField::new('profileImage', 'Profilbild')
+            ->setBasePath('/uploads/profile')
+            ->setUploadDir('public/uploads/profile')
+            ->setUploadedFileNamePattern($this->images->filename(...))
+            ->setFileConstraints($this->images->constraint())
+            ->setFormTypeOption('upload_new', $this->images->store(...))
+            ->setRequired(false)
+            ->setColumns(12)
+            ->setHelp('JPEG, PNG oder WebP; maximal 5 MB; 16–4096 Pixel je Seite, maximal 16 Megapixel.')
+            ->setFormTypeOption('attr', ['accept' => 'image/jpeg,image/png,image/webp']);
         
         yield FormField::addFieldset('Anschrift')
             ->setIcon('fa fa-address-card');
@@ -146,7 +118,7 @@ class ProfileCrudController extends AbstractCrudController
         // Sicherheitsprüfung:
         // Über diesen Controller darf nur das eigene Profil
         // verändert werden.
-        if ($entityInstance !== $this->getUser()) {
+        if (!$this->getUser() instanceof User || (string) $entityInstance->getId() !== (string) $this->getUser()->getId()) {
             throw $this->createAccessDeniedException(
                 'Du darfst nur dein eigenes Profil bearbeiten.'
             );
