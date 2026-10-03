@@ -1,0 +1,1 @@
+<ul>{% for attempt in field.value %}<li>{{ attempt.at|date('Y-m-d H:i:s') }}: {{ ('expiry_reminder.' ~ attempt.status)|trans }}{% if attempt.errorClass %} ({{ attempt.errorClass }}){% endif %}</li>{% endfor %}</ul>

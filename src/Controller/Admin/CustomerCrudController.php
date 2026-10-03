@@ -82,6 +82,8 @@ class CustomerCrudController extends AbstractCrudController
 		yield TextField::new('vatId', 'USt-ID')
 			->setColumns(6);
 
+        yield ChoiceField::new('reminderLocale', 'expiry_reminder.locale')->setChoices(['Deutsch' => 'de', 'English' => 'en', 'Français' => 'fr', 'Español' => 'es']);
+        yield ArrayField::new('reminderRecipients', 'expiry_reminder.recipients');
 		yield BooleanField::new('active', 'Aktiv')
 			->setColumns(6);		
     }

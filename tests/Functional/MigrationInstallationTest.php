@@ -383,6 +383,28 @@ class MigrationInstallationTest extends KernelTestCase
         });
     }
 
+    public function testPersistentReminderQueueAndNullTransportDelivery(): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment): void {
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            $this->console(['app:license:init'], $environment);
+            $customerId = \Symfony\Component\Uid\Uuid::v7()->toBinary();
+            $connection->insert('customer', ['id' => $customerId, 'company' => 'Reminder Test', 'active' => 1, 'firstname' => 'Test', 'lastname' => 'Customer', 'email' => 'simulation@example.test', 'street' => 'Test 1', 'zip' => '12345', 'city' => 'Berlin', 'created_at' => '2026-10-03 12:00:00']);
+            $connection->insert('license', ['id' => \Symfony\Component\Uid\Uuid::v7()->toBinary(), 'license_key' => str_repeat('b', 64), 'type' => 'single', 'status' => 'active', 'max_domains' => 1, 'features' => '[]', 'expires_at' => gmdate('Y-m-d H:i:s', time() + 86400), 'created_at' => '2026-10-03 12:00:00', 'customer_id' => $customerId, 'product_id' => $connection->fetchOne('SELECT id FROM product')]);
+            $environment['REMINDERS_ENABLED'] = '1'; $environment['MAILER_DSN'] = 'null://null'; $environment['REMINDER_FROM'] = 'simulation-sender@example.test';
+            self::assertStringContainsString('Queued 1', $this->console(['app:licenses:remind'], $environment));
+            self::assertStringContainsString('Queued 0', $this->console(['app:licenses:remind'], $environment));
+            self::assertSame(1, (int) $connection->fetchOne('SELECT COUNT(*) FROM messenger_messages'));
+            self::assertSame('queued', $connection->fetchOne('SELECT status FROM reminder_delivery'));
+            $this->console(['messenger:consume', 'async', '--limit=1', '--time-limit=10', '--no-interaction'], $environment);
+            self::assertSame(0, (int) $connection->fetchOne('SELECT COUNT(*) FROM messenger_messages'));
+            self::assertSame('sent', $connection->fetchOne('SELECT status FROM reminder_delivery'));
+            self::assertSame(1, (int) $connection->fetchOne('SELECT attempts FROM reminder_delivery'));
+            self::assertStringContainsString('Verified', $this->console(['app:audit:verify'], $environment));
+            $this->console(['doctrine:schema:validate'], $environment);
+        });
+    }
+
     private function withDatabase(callable $test): void
     {
         $dsn = getenv('MIGRATION_TEST_DATABASE_URL');

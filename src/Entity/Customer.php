@@ -68,6 +68,18 @@ class Customer implements \App\Archive\ArchivableInterface
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: License::class, cascade: ['persist'])]
     private Collection $licenses;
 
+    #[ORM\Column(length: 2, options: ['default' => 'de'])]
+    #[Assert\Choice(choices: ['de', 'en', 'fr', 'es'])]
+    private string $reminderLocale = 'de';
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Assert\Count(max: 20)]
+    #[Assert\All([new Assert\Email(), new Assert\NotBlank()])]
+    private ?array $reminderRecipients = null;
+    public function getReminderLocale(): string { return $this->reminderLocale; }
+    public function setReminderLocale(string $locale): static { $this->reminderLocale = $locale; return $this; }
+    public function getReminderRecipients(): array { return $this->reminderRecipients ?? []; }
+    public function setReminderRecipients(array $recipients): static { $this->reminderRecipients = $recipients; return $this; }
+
     public function __construct()
     {
         $this->licenses = new ArrayCollection();

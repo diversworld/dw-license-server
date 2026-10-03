@@ -171,6 +171,7 @@ class DashboardController extends AbstractDashboardController
             icon: 'fa fa-history'
         );
 
+        yield MenuItem::linkTo(ReminderDeliveryCrudController::class, label: 'expiry_reminder.deliveries', icon: 'fa fa-envelope');
         yield MenuItem::section('entities.'.User::class.'.plural');
         yield MenuItem::linkTo(
             UserCrudController::class,

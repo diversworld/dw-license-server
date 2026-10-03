@@ -49,8 +49,9 @@ class AuditSubscriberTest extends WebTestCase
             (new UpdateRelease())->setProduct($product)->setChangelog('Test')->setPackageUrl('https://example.org/package'),
             new ResetPasswordRequest($user, new \DateTimeImmutable('+1 hour'), 'selector', 'secret-reset-token'),
             new \App\Entity\LicenseAction($license, 'pause', 'Test reason', $user, 'active', 'suspended', null, null),
+            new \App\Entity\ReminderDelivery($license, new \DateTimeImmutable('+1 day'), 1, 'customer@example.test', 'de'),
         ];
-        $changes = ['city', 'name', 'notes', 'firstname', 'domain', 'name', 'action', 'version', 'expiresAt', 'reason'];
+        $changes = ['city', 'name', 'notes', 'firstname', 'domain', 'name', 'action', 'version', 'expiresAt', 'reason', 'status'];
         foreach ($entities as $entity) {
             $this->em->persist($entity);
         }

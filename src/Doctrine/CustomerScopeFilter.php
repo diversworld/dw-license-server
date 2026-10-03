@@ -17,7 +17,7 @@ final class CustomerScopeFilter extends SQLFilter
         return match ($targetEntity->name) {
             Customer::class => $targetTableAlias.'.id IN ('.$binary.')',
             License::class, ApiToken::class => $targetTableAlias.'.customer_id IN ('.$binary.')',
-            Activation::class, LicenseAction::class => $targetTableAlias.'.license_id IN (SELECT scope_license.id FROM license scope_license WHERE scope_license.customer_id IN ('.$binary.'))',
+            \App\Entity\ReminderDelivery::class, Activation::class, LicenseAction::class => $targetTableAlias.'.license_id IN (SELECT scope_license.id FROM license scope_license WHERE scope_license.customer_id IN ('.$binary.'))',
             AuditLog::class => $this->auditConstraint($targetTableAlias, $ids),
             LogEntry::class => '1 = 0',
             default => '',
