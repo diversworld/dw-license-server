@@ -302,7 +302,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
         $this->twoFactorDeclined = true;
     }
 
-    #[ORM\Column(type: 'json', options: ['default' => '[]'])]
+    #[ORM\Column(type: 'json')]
     private array $backupCodeHashes = [];
 
     public function isTotpAuthenticationEnabled(): bool

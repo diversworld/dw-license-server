@@ -147,6 +147,14 @@ ddev exec php bin/console doctrine:schema:validate
 
 Die Tests decken Ausstellung, wiederholte Aktivierung, Limits, Sperren, Ablauf, Manipulation, Mandantenbindung, Offline-Modus, Wiederherstellung abgelaufener Online-Tokens sowie Login und Verwaltungsseiten ab. Ein Test prüft ausgegebene Tokens gegen eine Kopie des tatsächlichen Contao-Validators unter `tests/Fixtures`.
 
+Die Migrationstests führen die Installationskommandos mit `APP_ENV=prod` auf jeweils neu angelegten, zufällig benannten Datenbanken aus. Sie prüfen die vollständige Neuinstallation einschließlich Schemaabgleich und Produktinitialisierung, wiederholte Ausführung, vorhandene Benutzer sowie die Übernahme alter Audit-Einträge, Rückmigration und Konflikte. Die temporären Datenbanken werden anschließend entfernt; bestehende Datenbanken werden nicht geleert. Ohne `MIGRATION_TEST_DATABASE_URL` werden diese Tests übersprungen. Der angegebene Datenbankbenutzer benötigt Rechte zum Anlegen und Entfernen der Testdatenbanken.
+
+```bash
+ddev exec env MIGRATION_TEST_DATABASE_URL=mysql://root:root@db:3306/db php vendor/bin/phpunit tests/Functional/MigrationInstallationTest.php
+```
+
+Die Bereinigungsmigration übernimmt Einträge aus der früheren Tabelle `license_audit_log` nach `audit_log`, bevor sie die alte Tabelle entfernt. Bei gleichen IDs mit unterschiedlichen Inhalten bricht sie ab, damit keine Protokolle verloren gehen. Wiederherstellungscodes werden für vorhandene Benutzer mit einem leeren JSON-Array initialisiert; ein literaler JSON-Standardwert wird vermieden, weil [MySQL dafür einen Ausdruck verlangt](https://dev.mysql.com/doc/refman/8.4/en/data-type-defaults.html).
+
 ## Installation in eine vorhandene Symfony-Umgebung
 
 Das Skript `scripts/deploy.py` läuft **auf dem Webserver**. Voraussetzung: Python 3.9+, PHP >= 8.4 mit PDO-MySQL und Sodium, Composer 2 sowie eine konfigurierte, erreichbare MySQL-/MariaDB-Datenbank. Es benötigt zwei getrennte Projektordner. Der Zielordner ist das Symfony-Projektverzeichnis **oberhalb von `public/`**, nicht der DocumentRoot.

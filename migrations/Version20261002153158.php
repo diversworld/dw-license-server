@@ -24,7 +24,10 @@ final class Version20261002153158 extends AbstractMigration
         $this->addSql('ALTER TABLE license_action ADD CONSTRAINT FK_3D22E294460F904B FOREIGN KEY (license_id) REFERENCES license (id)');
         $this->addSql('ALTER TABLE license_action ADD CONSTRAINT FK_3D22E2942E65C292 FOREIGN KEY (performed_by_id) REFERENCES user (id) ON DELETE SET NULL');
         $this->addSql('ALTER TABLE product ADD token_lifetime_seconds INT DEFAULT 86400 NOT NULL, ADD grace_period_seconds INT DEFAULT 2592000 NOT NULL');
-        $this->addSql('ALTER TABLE user ADD totp_secret VARCHAR(128) DEFAULT NULL, ADD backup_code_hashes JSON DEFAULT \'[]\' NOT NULL');
+        // Add nullable first and backfill: a literal JSON default is not portable to MySQL.
+        $this->addSql('ALTER TABLE user ADD totp_secret VARCHAR(128) DEFAULT NULL, ADD backup_code_hashes JSON DEFAULT NULL');
+        $this->addSql('UPDATE user SET backup_code_hashes = ? WHERE backup_code_hashes IS NULL', ['[]']);
+        $this->addSql('ALTER TABLE user CHANGE backup_code_hashes backup_code_hashes JSON NOT NULL');
     }
 
     public function down(Schema $schema): void
