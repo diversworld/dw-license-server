@@ -15,7 +15,7 @@ The requirements are implemented and checked in this order. Each completed secti
 8. Customer assignments, global/scoped permissions and object-level isolation — completed: 4 HTTP tests / 24 assertions for both customers, forged associations and API tenant misuse; full suite 127 cases / 812 assertions with 16 initially skipped database cases then separately executed successfully (16 / 229); container lint passed.
 9. Health, bounded metrics, request IDs, backup and recovery test — completed: operations/policy/isolation suite 21 tests / 114 assertions; real two-database MariaDB recovery 1 test / 29 assertions, including customer/license/installation, old/new signing keys, TOTP decryption, schema and audit verification. Container lint passed.
 10. Persistent, asynchronous expiry reminders and simulated deliveries — completed: reminder/audit suite 9 tests / 188 assertions; isolated real Doctrine queue and Null transport 1 / 20; fresh/repeated installation 1 / 18; full suite 136 cases / 874 assertions with 18 explicit database skips. Container lint and all 17 Twig templates passed.
-11. Customer portal, protected license downloads and domain-change history — pending.
+11. Customer portal, protected license downloads and domain-change history — completed: final portal HTTP suite 5 tests / 30 assertions; shared portal/2FA/role suite 23 / 123; isolated fresh/repeated installation 1 / 18; container and all 20 Twig templates passed.
 12. Scoped hashed API credentials, idempotency and signed safe webhooks — pending.
 13. Product entitlements, plans, declarative rules and preservation of existing rights — pending.
 
@@ -72,3 +72,7 @@ See [Monitoring and recovery](OPERATIONS.md). Snapshots require acknowledged mai
 ## Expiry reminders
 
 See [Expiry reminders](EXPIRY_REMINDERS.md). Delivery defaults off; enable only after migration and reviewed mail configuration. Migration `Version20261003102654` creates persistent dispatch records and Messenger queues with partial-DDL guards. Provider-level exactly-once delivery remains an SMTP limitation; stable identifiers suppress ordinary duplicate scheduling/handling.
+
+## Customer portal
+
+See [Customer portal](CUSTOMER_PORTAL.md). `ROLE_CUSTOMER` inherits no administrative viewing role and requires explicit non-global assignments. Migration `Version20261003103656` preserves previous action histories and adds domain-change details. Requests for invalid/foreign downloads and domain changes are rejected; existing offline files still need replacement after an approved domain change.

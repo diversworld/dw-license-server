@@ -6,7 +6,7 @@
     {% if codes is not empty %}
         <p>{{ 'two_factor.recovery_help'|trans }}</p>
         <ul>{% for code in codes %}<li><code>{{ code }}</code></li>{% endfor %}</ul>
-        <a href="{{ path('admin') }}">{{ 'dashboard.overview'|trans }}</a>
+        <a href="{{ path(is_granted('ROLE_CUSTOMER') ? 'portal_index' : 'admin') }}">{{ 'dashboard.overview'|trans }}</a>
     {% else %}
         <p>{{ 'two_factor.setup_help'|trans }}</p>
         <img class="two-factor-qr" src="{{ qrCode }}" alt="{{ 'two_factor.qr_alt'|trans }}" width="256" height="256">

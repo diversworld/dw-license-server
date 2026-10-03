@@ -38,7 +38,7 @@ class TwoFactorController extends AbstractController
     }
 
     #[Route('/security/2fa/setup', name: 'two_factor_setup', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_VIEWER')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[RateLimit('two_factor')]
     public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens, \Symfony\Contracts\Translation\TranslatorInterface $translator, TwoFactorQrCode $qrCode, \App\Security\TwoFactorPolicy $policy, \App\Security\PendingTotpEnrollment $enrollment): Response
     {
@@ -79,7 +79,7 @@ class TwoFactorController extends AbstractController
     }
 
     #[Route('/security/2fa/decision/{decision}', name: 'two_factor_decision', requirements: ['decision' => 'skip|decline'], methods: ['POST'])]
-    #[IsGranted('ROLE_VIEWER')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function decide(string $decision, Request $request, EntityManagerInterface $em, \App\Security\TwoFactorPolicy $policy): Response
     {
         $user = $this->getUser();
@@ -95,6 +95,6 @@ class TwoFactorController extends AbstractController
         }
         $request->getSession()->remove('two_factor_setup_secret');
 
-        return $this->redirectToRoute('admin');
+        return $this->redirectToRoute(in_array('ROLE_CUSTOMER', $user->getRoles(), true) ? 'portal_index' : 'admin');
     }
 }

@@ -50,6 +50,7 @@ security:
         - { path: ^/logout, roles: PUBLIC_ACCESS }
         - { path: ^/security/2fa/recover, roles: [IS_AUTHENTICATED_FULLY, IS_AUTHENTICATED_2FA_IN_PROGRESS] }
         - { path: ^/security/2fa, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/portal, roles: ROLE_CUSTOMER }
         - { path: ^/admin, roles: ROLE_VIEWER }
         - { path: ^/kennwort-zuruecksetzen, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }

@@ -272,3 +272,5 @@ Konfigurierbare 2FA-Pflichten, sicherer Authenticator-Wechsel, Wiederherstellung
 Betriebsprüfungen, Metriken und isolierte Wiederherstellung: [Betrieb und Recovery](docs/OPERATIONS.md).
 
 Konfiguration, Versandhistorie und Worker für Ablauf-Erinnerungen: [Erinnerungen](docs/EXPIRY_REMINDERS.md). Standardmäßig ist der Versand deaktiviert.
+
+Eigene Kundenkonten, Lizenzdownloads und begrenzte Domainwechsel: [Kundenportal](docs/CUSTOMER_PORTAL.md).

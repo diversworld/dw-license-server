@@ -1,0 +1,1 @@
+{% extends 'base.html.twig' %}{% block body %}<main class="container py-4"><a href="{{ path('portal_license', {id: license.id, _locale: app.request.locale}) }}">{{ license.product.name }}</a><h1>{{ title|trans }}</h1>{{ form_start(form) }}{{ form_widget(form) }}<button type="submit">{{ title|trans }}</button>{{ form_end(form) }}</main>{% endblock %}

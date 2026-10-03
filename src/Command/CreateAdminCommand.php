@@ -23,7 +23,8 @@ class CreateAdminCommand extends Command
 
     protected function configure(): void
     {
-        $this->addOption('role', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'super_admin, admin, support, sales oder viewer', 'admin');
+        $this->addOption('role', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'super_admin, admin, support, sales, viewer oder customer', 'admin');
+        $this->addOption('customer', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED | \Symfony\Component\Console\Input\InputOption::VALUE_IS_ARRAY, 'Explicit customer IDs; disables global access');
         $this->addArgument('email', InputArgument::REQUIRED)->addArgument('firstname', InputArgument::OPTIONAL, '', 'Admin')->addArgument('lastname', InputArgument::OPTIONAL, '', '');
     }
 
@@ -41,6 +42,13 @@ class CreateAdminCommand extends Command
 
             return Command::FAILURE;
         }
+        $customers = [];
+        foreach ($input->getOption('customer') as $id) {
+            $customer = \Symfony\Component\Uid\Uuid::isValid($id) ? $this->em->find(\App\Entity\Customer::class, \Symfony\Component\Uid\Uuid::fromString($id)) : null;
+            if ($customer === null || !$customer->isActive()) { $io->error('Unknown or inactive customer.'); return Command::FAILURE; }
+            $customers[] = $customer;
+        }
+        if ($role === 'CUSTOMER' && $customers === []) { $io->error('Portal users require --customer assignments.'); return Command::FAILURE; }
         if (!$input->isInteractive()) {
             $io->error('Dieses Kommando benötigt eine interaktive Passwortabfrage.');
 
@@ -54,6 +62,7 @@ class CreateAdminCommand extends Command
             return $value;
         });
         $user = (new User())->setEmail($email)->setFirstname($input->getArgument('firstname'))->setLastname($input->getArgument('lastname'))->setRoles(['ROLE_'.$role]);
+        if ($customers !== []) { $user->setGlobalAccess(false); foreach ($customers as $customer) { $user->addCustomer($customer); } }
         $user->setPassword($this->hasher->hashPassword($user, $password));
         $this->em->persist($user);
         $this->em->flush();

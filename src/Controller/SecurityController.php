@@ -24,6 +24,6 @@ class SecurityController extends AbstractController
     #[Route('/', name: 'app_home', methods: ['GET'])]
     public function home(): Response
     {
-        return $this->redirectToRoute('admin');
+        return $this->redirectToRoute($this->isGranted('ROLE_CUSTOMER') ? 'portal_index' : 'admin');
     }
 }

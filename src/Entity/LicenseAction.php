@@ -41,6 +41,11 @@ class LicenseAction
         $this->createdAt = new \DateTimeImmutable();
     }
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $details = null;
+    public function getDetails(): array { return $this->details ?? []; }
+    public function setDetails(array $details): static { $this->details = $details; return $this; }
+
     public function getId(): Uuid { return $this->id; }
     public function getLicense(): License { return $this->license; }
     public function getAction(): string { return $this->action; }

@@ -92,6 +92,14 @@ class User implements \Symfony\Component\Security\Core\User\EquatableInterface, 
         return $this;
     }
 
+    #[\Symfony\Component\Validator\Constraints\Callback]
+    public function validateCustomerAccess(\Symfony\Component\Validator\Context\ExecutionContextInterface $context): void
+    {
+        if (in_array('ROLE_CUSTOMER', $this->roles, true) && ($this->globalAccess || $this->customers->isEmpty())) {
+            $context->buildViolation('portal.assignment_required')->atPath('customers')->addViolation();
+        }
+    }
+
     public function __construct()
     {
         $this->customers = new \Doctrine\Common\Collections\ArrayCollection();
