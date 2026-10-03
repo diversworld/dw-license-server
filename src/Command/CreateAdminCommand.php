@@ -31,7 +31,7 @@ class CreateAdminCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $role = strtoupper($input->getOption('role'));
-        if (!in_array($role, ['SUPER_ADMIN', 'ADMIN', 'SUPPORT', 'SALES', 'VIEWER'], true)) {
+        if (!in_array('ROLE_'.$role, \App\Security\RoleCatalog::choices(true), true)) {
             $io->error('Unbekannte Rolle.');
             return Command::FAILURE;
         }

@@ -6,7 +6,7 @@ Runtime: PHP 8.4+, Symfony 8.1, Doctrine ORM 3.7 / DBAL 4.5. Production migratio
 The requirements are implemented and checked in this order. Each completed section records its evidence; pending sections are not claimed as implemented.
 
 1. Profile image content validation, own-profile enforcement and webserver protection — completed: 8 HTTP tests / 40 assertions; container lint passed.
-2. Central role validation and HTTP-tested Super Admin protection — pending.
+2. Central role validation and HTTP-tested Super Admin protection — completed: 6 HTTP tests / 29 assertions, including forged direct POSTs and persisted roles.
 3. Explicit withdrawal of revocation and centrally defined license transitions — pending.
 4. Concurrent, versioned audit chain; verifier and external checkpoints — pending.
 5. CI, isolated installation/upgrade checks and pinned real Contao client integration — pending.
@@ -36,3 +36,7 @@ location ^~ /uploads/profile/ {
 ```
 
 Verify the deployed webserver rules independently; PHP tests cannot prove a remote Apache/Nginx configuration. Preserve existing upload files during upgrades. The profile controller accepts only the authenticated user's identifier; direct foreign object IDs must return 403.
+
+## Administrative roles
+
+`RoleCatalog` is the single definition of assignable roles, allowed persisted roles and the role hierarchy. Entity validation includes `ROLE_SUPER_ADMIN`. Normal administrators cannot modify Super-Admin targets or assign that role through crafted requests. Both the pre-form voter and the persistence guard enforce this boundary. No data migration is needed for this correction.

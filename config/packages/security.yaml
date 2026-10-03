@@ -11,12 +11,7 @@ security:
                 class: App\Entity\User
                 property: email
 
-    role_hierarchy:
-        ROLE_VIEWER: [ROLE_USER]
-        ROLE_SUPPORT: [ROLE_VIEWER, ROLE_LICENSE_OPERATE, ROLE_ACTIVATION_MANAGE]
-        ROLE_SALES: [ROLE_VIEWER, ROLE_CUSTOMER_MANAGE, ROLE_LICENSE_SELL]
-        ROLE_ADMIN: [ROLE_SUPPORT, ROLE_SALES, ROLE_PRODUCT_MANAGE, ROLE_USER_MANAGE, ROLE_LICENSE_REVOKE]
-        ROLE_SUPER_ADMIN: [ROLE_ADMIN]
+    role_hierarchy: !php/const App\Security\RoleCatalog::HIERARCHY
 
     firewalls:
         dev:

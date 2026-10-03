@@ -70,10 +70,7 @@ class UserCrudController extends AbstractCrudController
         yield FormField::addFieldset('Berechtigungen')
             ->setIcon('fa fa-shield');
 
-        $roles = ['role.admin' => 'ROLE_ADMIN', 'role.support' => 'ROLE_SUPPORT', 'role.sales' => 'ROLE_SALES', 'role.viewer' => 'ROLE_VIEWER'];
-        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
-            $roles['role.super_admin'] = 'ROLE_SUPER_ADMIN';
-        }
+        $roles = \App\Security\RoleCatalog::choices($this->isGranted('ROLE_SUPER_ADMIN'));
         yield ChoiceField::new('roles', 'Rollen')->setChoices($roles)->allowMultipleChoices()
             ->setColumns(6);
 

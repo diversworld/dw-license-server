@@ -31,7 +31,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
      * @var list<string>
      */
     #[ORM\Column]
-    #[\Symfony\Component\Validator\Constraints\Choice(choices: ['ROLE_ADMIN', 'ROLE_SUPPORT', 'ROLE_SALES', 'ROLE_VIEWER', 'ROLE_USER'], multiple: true)]
+    #[\Symfony\Component\Validator\Constraints\Choice(choices: \App\Security\RoleCatalog::ALLOWED, multiple: true)]
     private array $roles = [];
 
     #[ORM\Column]
