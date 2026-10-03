@@ -20,7 +20,9 @@ class CustomerCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        return $this->archiveActions($actions->disable(Action::DELETE)->setPermission(Action::NEW, 'CUSTOMER_MANAGE')->setPermission(Action::EDIT, 'CUSTOMER_MANAGE'));
+        return $this->archiveActions($actions->disable(Action::DELETE)->setPermission(Action::NEW, 'CUSTOMER_MANAGE')->setPermission(Action::EDIT, 'CUSTOMER_MANAGE')
+            ->add(Crud::PAGE_INDEX, Action::new('api_credentials', 'api_credentials.title')->linkToRoute('admin_api_credentials', fn (Customer $customer) => ['id' => (string) $customer->getId(), '_locale' => $this->getContext()?->getRequest()->getLocale() ?? 'de']))->setPermission('api_credentials', 'API_CREDENTIAL_MANAGE')
+            ->add(Crud::PAGE_INDEX, Action::new('webhooks', 'webhook.title')->linkToRoute('admin_webhooks', fn (Customer $customer) => ['id' => (string) $customer->getId(), '_locale' => $this->getContext()?->getRequest()->getLocale() ?? 'de']))->setPermission('webhooks', 'API_CREDENTIAL_MANAGE')); 
     }
 
     public function configureFields(string $pageName): iterable

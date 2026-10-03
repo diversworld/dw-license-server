@@ -120,7 +120,7 @@ Verlängern verlangt ein zukünftiges Ablaufdatum nach dem bisherigen Datum und 
 
 HTTPS verwenden. Alle Anfragen sind `POST` mit `Content-Type: application/json`. Tokens und Lizenzschlüssel sind Zugangsdaten und gehören nicht in URLs oder Logs. Die API ist auf 60 Anfragen pro Minute je Client-IP, Methode und Pfad begrenzt.
 
-Swagger UI steht unter `/api/doc`, die vollständige OpenAPI-3-Spezifikation unter `/api/doc.json`. Sie enthält beide v1-Endpunkte, DTO-Schemas mit Pflichtfeldern, Antworten und Fehlercodes. Die Endpunkte bleiben unter `/api/v1/licenses`; inkompatible Vertragsänderungen erhalten eine neue API-Version. Die exportierte Spezifikation liegt in `docs/openapi.json` und kann für Client-Generatoren verwendet werden.
+Swagger UI steht unter `/api/doc`, die vollständige OpenAPI-3-Spezifikation unter `/api/doc.json`. Sie enthält die öffentlichen Aktivierungs-/Refresh-Endpunkte und die berechtigungsgeschützten Verwaltungsendpunkte, DTO-Schemas mit Pflichtfeldern, Antworten und Fehlercodes. Die Endpunkte bleiben unter `/api/v1/licenses`; inkompatible Vertragsänderungen erhalten eine neue API-Version. Die exportierte Spezifikation liegt in `docs/openapi.json` und kann für Client-Generatoren verwendet werden.
 
 ```bash
 # Spezifikation nach API-Änderungen aktualisieren:
@@ -274,3 +274,7 @@ Betriebsprüfungen, Metriken und isolierte Wiederherstellung: [Betrieb und Recov
 Konfiguration, Versandhistorie und Worker für Ablauf-Erinnerungen: [Erinnerungen](docs/EXPIRY_REMINDERS.md). Standardmäßig ist der Versand deaktiviert.
 
 Eigene Kundenkonten, Lizenzdownloads und begrenzte Domainwechsel: [Kundenportal](docs/CUSTOMER_PORTAL.md).
+
+## API-Zugänge und Webhooks
+
+Kundengebundene, gehashte API-Zugänge unterstützen explizite Scopes, Ablauf, Widerruf und persistente Idempotenz. Signierte Webhooks laufen über die bestehende asynchrone Queue. Einrichtung, Upgrade bestehender Zugänge, SSRF-Schutz und replay-sichere Empfänger sind in [API integrations](docs/API_INTEGRATIONS.md) beschrieben.

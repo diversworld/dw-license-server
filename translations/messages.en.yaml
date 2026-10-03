@@ -329,3 +329,18 @@ portal:
     assignment_required: "Portal users need customer assignments without global access"
 license_action.domain_change: "Domain change"
 role.customer: "Customer"
+
+api_credentials:
+    title: "API credentials"
+    name: "Name"
+    scopes: "Scopes"
+    once: "This secret is shown only now. Store it securely."
+    create: "Create"
+    revoke: "Revoke"
+    invalid: "Invalid credential data or expiry"
+webhook:
+    title: "Webhooks"
+    url: "Target URL"
+    events: "Events"
+    invalid_url: "Use public HTTPS targets without credentials, queries or redirects."
+    invalid_events: "Invalid event selection"

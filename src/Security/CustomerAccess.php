@@ -10,6 +10,9 @@ final class CustomerAccess
     {
         return match (true) {
             $entity instanceof Customer => $entity,
+            $entity instanceof \App\Entity\ApiOperation => $entity->getCredential()->getCustomer(),
+            $entity instanceof \App\Entity\WebhookEndpoint => $entity->getCustomer(),
+            $entity instanceof \App\Entity\WebhookDelivery => $entity->getEndpoint()->getCustomer(),
             $entity instanceof License, $entity instanceof ApiToken => $entity->getCustomer(),
             $entity instanceof \App\Entity\ReminderDelivery, $entity instanceof Activation, $entity instanceof LicenseAction => $entity->getLicense()?->getCustomer(),
             default => null,

@@ -329,3 +329,18 @@ portal:
     assignment_required: "Portalbenutzer benötigen Kundenzuweisungen ohne globalen Zugriff"
 license_action.domain_change: "Domainwechsel"
 role.customer: "Kunde"
+
+api_credentials:
+    title: "API-Zugangsdaten"
+    name: "Name"
+    scopes: "Berechtigungen"
+    once: "Dieses Geheimnis wird nur jetzt angezeigt. Sicher speichern."
+    create: "Erstellen"
+    revoke: "Widerrufen"
+    invalid: "Ungültige Zugangsdaten oder Laufzeit"
+webhook:
+    title: "Webhooks"
+    url: "Ziel-URL"
+    events: "Ereignisse"
+    invalid_url: "Nur öffentliche HTTPS-Ziele ohne Zugangsdaten, Abfragen oder Umleitungen verwenden."
+    invalid_events: "Ungültige Ereignisauswahl"

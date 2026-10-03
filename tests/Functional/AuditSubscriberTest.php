@@ -41,17 +41,22 @@ class AuditSubscriberTest extends WebTestCase
         $product = (new Product())->setName('Testmodul')->setSlug('testmodul');
         $license = (new License())->setCustomer($customer)->setProduct($product);
         $user = (new User())->setEmail('admin@example.org')->setFirstname('Test')->setLastname('Admin')->setPassword('secret-password');
+        $credential = (new ApiToken())->setCustomer($customer)->setToken('secret-api-token');
+        $endpoint = new \App\Entity\WebhookEndpoint($customer, 'https://webhook.example.org/', 'encrypted-secret-fixture', ['license.created']);
         $entities = [
             $customer, $product, $license, $user,
             (new Activation())->setLicense($license)->setDomain('example.org'),
-            (new ApiToken())->setCustomer($customer)->setToken('secret-api-token'),
+            $credential,
             (new LogEntry())->setAction('test'),
             (new UpdateRelease())->setProduct($product)->setChangelog('Test')->setPackageUrl('https://example.org/package'),
             new ResetPasswordRequest($user, new \DateTimeImmutable('+1 hour'), 'selector', 'secret-reset-token'),
             new \App\Entity\LicenseAction($license, 'pause', 'Test reason', $user, 'active', 'suspended', null, null),
             new \App\Entity\ReminderDelivery($license, new \DateTimeImmutable('+1 day'), 1, 'customer@example.test', 'de'),
+            $endpoint,
+            new \App\Entity\WebhookDelivery($endpoint, \Symfony\Component\Uid\Uuid::v7(), ['version' => 1]),
+            new \App\Entity\ApiOperation($credential, 'idempotency-fixture', str_repeat('a', 64), ['licenseId' => (string) $license->getId()]),
         ];
-        $changes = ['city', 'name', 'notes', 'firstname', 'domain', 'name', 'action', 'version', 'expiresAt', 'reason', 'status'];
+        $changes = ['city', 'name', 'notes', 'firstname', 'domain', 'name', 'action', 'version', 'expiresAt', 'reason', 'status', 'url', 'status', 'bodyHash'];
         foreach ($entities as $entity) {
             $this->em->persist($entity);
         }

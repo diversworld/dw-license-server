@@ -47,7 +47,7 @@ final class RecoverySnapshot
             }
             $this->copyTree($this->projectDirectory.'/config/packages', $destination.'/configuration/packages');
             if (is_file($this->totpKey)) { $this->filesystem->copy($this->totpKey, $destination.'/security/totp.key'); }
-            elseif ((int) $this->connection->fetchOne("SELECT COUNT(*) FROM user WHERE totp_secret LIKE 'enc:v1:%'") > 0) { throw new \RuntimeException('Restore the independent authenticator key before taking a recovery snapshot.'); }
+            elseif ((int) $this->connection->fetchOne("SELECT COUNT(*) FROM user WHERE totp_secret LIKE 'enc:v1:%'") > 0 || ($this->connection->createSchemaManager()->tablesExist(['webhook_endpoint']) && (int) $this->connection->fetchOne("SELECT COUNT(*) FROM webhook_endpoint WHERE secret_ciphertext LIKE 'enc:v1:%'") > 0)) { throw new \RuntimeException('Restore the independent authenticator key before taking a recovery snapshot.'); }
             $hashes = [];
             foreach ($this->files($destination) as $relative) { $hashes[$relative] = hash_file('sha256', $destination.'/'.$relative); }
             ksort($hashes);

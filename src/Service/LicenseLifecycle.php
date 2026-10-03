@@ -14,7 +14,7 @@ class LicenseLifecycle
 {
     public const array ACTIONS = LicenseTransitions::ACTIONS;
 
-    public function __construct(private readonly EntityManagerInterface $em, private readonly Security $security)
+    public function __construct(private readonly EntityManagerInterface $em, private readonly Security $security, private readonly ?WebhookOutbox $webhooks = null)
     {
     }
 
@@ -55,6 +55,7 @@ class LicenseLifecycle
             $this->em->persist($entry);
             $this->em->flush();
 
+            $this->webhooks?->publish($action === 'renew' ? 'license.renewed' : 'license.'.$action, $license);
             return $entry;
         });
     }

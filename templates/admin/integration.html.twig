@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ (kind == 'api' ? 'api_credentials.title' : 'webhook.title')|trans }} — {{ customer.company }}{% endblock %}
+{% block body %}<main class="container py-4"><h1>{{ block('title') }}</h1>
+{% if secret %}<p>{{ 'api_credentials.once'|trans }}</p><code>{{ secret }}</code>{% endif %}
+{{ form_start(form) }}{{ form_widget(form) }}<button type="submit">{{ 'api_credentials.create'|trans }}</button>{{ form_end(form) }}
+<ul>{% for credential in credentials %}<li>{{ credential.name }} — {{ credential.scopes|join(', ') }} — {{ credential.expiresAt ? credential.expiresAt|date('Y-m-d H:i') : 'portal.unlimited'|trans }}{% if credential.active %}<form method="post" action="{{ path('admin_api_credential_revoke', {id: credential.id, _locale: app.request.locale}) }}"><input type="hidden" name="_token" value="{{ csrf_token('api_revoke_' ~ credential.id) }}"><button>{{ 'api_credentials.revoke'|trans }}</button></form>{% endif %}</li>{% endfor %}
+{% for endpoint in endpoints %}<li>{{ endpoint.url }} — {{ endpoint.events|join(', ') }}{% if endpoint.active %}<form method="post" action="{{ path('admin_webhook_disable', {id: endpoint.id, _locale: app.request.locale}) }}"><input type="hidden" name="_token" value="{{ csrf_token('webhook_disable_' ~ endpoint.id) }}"><button>{{ 'api_credentials.revoke'|trans }}</button></form>{% endif %}</li>{% endfor %}</ul>
+<h2>{{ 'expiry_reminder.history'|trans }}</h2><ul>{% for delivery in deliveries %}<li>{{ delivery.eventId }}: {{ delivery.status }} ({{ delivery.attempts }})<ul>{% for attempt in delivery.history %}<li>{{ attempt.at|date('Y-m-d H:i:s') }} — {{ attempt.status }}{% if attempt.httpStatus %} HTTP {{ attempt.httpStatus }}{% endif %}</li>{% endfor %}</ul></li>{% endfor %}</ul>
+</main>{% endblock %}

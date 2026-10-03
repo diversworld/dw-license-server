@@ -7,13 +7,14 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ApiTokenRepository::class)]
+#[ORM\Index(name: 'idx_api_token_hash', fields: ['tokenHash'])]
 class ApiToken
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?Uuid $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $token = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -37,6 +38,14 @@ class ApiToken
         $this->ceratedAt = new \DateTimeImmutable();
     }
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $tokenHash = null;
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $scopes = null;
+    public function getTokenHash(): ?string { return $this->tokenHash; }
+    public function getScopes(): array { return $this->scopes ?? []; }
+    public function setScopes(array $scopes): static { $this->scopes = $scopes; return $this; }
+
     public function getId(): ?Uuid
     {
         return $this->id;
@@ -56,7 +65,8 @@ class ApiToken
 
     public function setToken(string $token): static
     {
-        $this->token = $token;
+        $this->tokenHash = hash('sha256', $token);
+        $this->token = null;
 
         return $this;
     }

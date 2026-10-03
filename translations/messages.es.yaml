@@ -331,3 +331,18 @@ portal:
     assignment_required: "Los usuarios del portal requieren clientes asignados sin acceso global"
 license_action.domain_change: "Cambio de dominio"
 role.customer: "Cliente"
+
+api_credentials:
+    title: "Credenciales API"
+    name: "Nombre"
+    scopes: "Permisos"
+    once: "El secreto se muestra solo ahora. Guárdelo de forma segura."
+    create: "Crear"
+    revoke: "Revocar"
+    invalid: "Datos o caducidad no válidos"
+webhook:
+    title: "Webhooks"
+    url: "URL de destino"
+    events: "Eventos"
+    invalid_url: "Utilice destinos HTTPS públicos sin credenciales, consultas o redirecciones."
+    invalid_events: "Eventos no válidos"

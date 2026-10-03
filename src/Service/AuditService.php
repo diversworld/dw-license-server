@@ -14,6 +14,7 @@ final class AuditService
     public function __construct(
         private readonly AuditLogRepository $repository,
         private readonly RequestStack $requestStack,
+        private readonly ?\Symfony\Bundle\SecurityBundle\Security $security = null,
     ) {
     }
 
@@ -28,6 +29,7 @@ final class AuditService
     ): AuditLog {
         $request = $this->requestStack->getCurrentRequest();
 
+        $apiActor = $this->security?->getUser();
         $log = new AuditLog();
 
         $log
@@ -38,7 +40,7 @@ final class AuditService
             ->setMessage($message)
             ->setContext(\App\Audit\AuditCanonical::mask($context))
             ->setHashVersion(2)
-            ->setActorIdentity($user === null ? null : (string) $user->getId().":".$user->getUserIdentifier())
+            ->setActorIdentity($user === null ? ($apiActor instanceof \App\Security\ApiPrincipal ? $apiActor->getUserIdentifier() : null) : (string) $user->getId().":".$user->getUserIdentifier())
             ->setPerformedBy($user)
             ->setIpAddress($request?->getClientIp())
             ->setUserAgent(

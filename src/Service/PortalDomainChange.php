@@ -11,7 +11,7 @@ final class PortalDomainChange
 {
     public function __construct(private readonly EntityManagerInterface $em, private readonly Security $security, private readonly ValidatorInterface $validator,
         #[Autowire('%env(int:PORTAL_DOMAIN_CHANGE_LIMIT)%')] private readonly int $limit,
-        #[Autowire('%env(int:PORTAL_DOMAIN_CHANGE_WINDOW_DAYS)%')] private readonly int $windowDays) {
+        #[Autowire('%env(int:PORTAL_DOMAIN_CHANGE_WINDOW_DAYS)%')] private readonly int $windowDays, private readonly ?WebhookOutbox $webhooks = null) {
         if ($limit < 1 || $limit > 100 || $windowDays < 1 || $windowDays > 365) { throw new \InvalidArgumentException('Invalid domain change limits.'); }
     }
     public function change(Activation $activation, string $domain, string $reason): LicenseAction
@@ -30,7 +30,7 @@ final class PortalDomainChange
             if ($this->em->getRepository(Activation::class)->findOneBy(['license' => $license, 'domain' => $domain])) { throw new \DomainException('portal.domain_in_use'); }
             $old = $activation->getDomain(); $activation->setDomain($domain)->setUpdatedAt(new \DateTimeImmutable());
             $entry = (new LicenseAction($license, 'domain_change', $reason, $actor, $license->getStatus(), $license->getStatus(), $license->getExpiresAt(), $license->getExpiresAt()))->setDetails(['activationId' => $activation->getId(), 'fromDomain' => $old, 'toDomain' => $domain]);
-            $this->em->persist($entry); $this->em->flush(); return $entry;
+            $this->em->persist($entry); $this->em->flush(); $this->webhooks?->publish('license.domain_change', $license); return $entry;
         });
     }
 }

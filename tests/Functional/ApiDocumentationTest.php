@@ -17,7 +17,10 @@ class ApiDocumentationTest extends WebTestCase
         $document = json_decode($client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
         self::assertStringStartsWith('3.', $document['openapi']);
         self::assertSame('Diversworld License API', $document['info']['title']);
-        self::assertCount(2, $document['paths']);
+        self::assertCount(4, $document['paths']);
+        self::assertSame('bearer', $document['components']['securitySchemes']['apiBearer']['scheme']);
+        self::assertArrayHasKey('/api/v1/management/licenses', $document['paths']);
+        self::assertArrayHasKey('/api/v1/management/licenses/{id}/renew', $document['paths']);
         foreach (['activate' => ['licenseKey', 'product', 'tenant', 'domain'], 'validate' => ['token', 'tenant', 'domain']] as $action => $required) {
             $operation = $document['paths']['/api/v1/licenses/'.$action]['post'];
             self::assertNotEmpty($operation['operationId']);

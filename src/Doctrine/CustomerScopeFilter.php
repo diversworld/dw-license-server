@@ -16,9 +16,11 @@ final class CustomerScopeFilter extends SQLFilter
         if ($this->getConnection()->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\SQLitePlatform && $ids !== []) { $binary = implode(',', array_map(static fn (string $id): string => "CAST(X'".$id."' AS TEXT)", $ids)); }
         return match ($targetEntity->name) {
             Customer::class => $targetTableAlias.'.id IN ('.$binary.')',
-            License::class, ApiToken::class => $targetTableAlias.'.customer_id IN ('.$binary.')',
+            \App\Entity\WebhookEndpoint::class, License::class, ApiToken::class => $targetTableAlias.'.customer_id IN ('.$binary.')',
             \App\Entity\ReminderDelivery::class, Activation::class, LicenseAction::class => $targetTableAlias.'.license_id IN (SELECT scope_license.id FROM license scope_license WHERE scope_license.customer_id IN ('.$binary.'))',
             AuditLog::class => $this->auditConstraint($targetTableAlias, $ids),
+            \App\Entity\ApiOperation::class => $targetTableAlias.'.credential_id IN (SELECT scope_credential.id FROM api_token scope_credential WHERE scope_credential.customer_id IN ('.$binary.'))',
+            \App\Entity\WebhookDelivery::class => $targetTableAlias.'.endpoint_id IN (SELECT scope_endpoint.id FROM webhook_endpoint scope_endpoint WHERE scope_endpoint.customer_id IN ('.$binary.'))',
             LogEntry::class => '1 = 0',
             default => '',
         };

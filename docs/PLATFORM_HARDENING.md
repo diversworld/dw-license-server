@@ -16,7 +16,7 @@ The requirements are implemented and checked in this order. Each completed secti
 9. Health, bounded metrics, request IDs, backup and recovery test — completed: operations/policy/isolation suite 21 tests / 114 assertions; real two-database MariaDB recovery 1 test / 29 assertions, including customer/license/installation, old/new signing keys, TOTP decryption, schema and audit verification. Container lint passed.
 10. Persistent, asynchronous expiry reminders and simulated deliveries — completed: reminder/audit suite 9 tests / 188 assertions; isolated real Doctrine queue and Null transport 1 / 20; fresh/repeated installation 1 / 18; full suite 136 cases / 874 assertions with 18 explicit database skips. Container lint and all 17 Twig templates passed.
 11. Customer portal, protected license downloads and domain-change history — completed: final portal HTTP suite 5 tests / 30 assertions; shared portal/2FA/role suite 23 / 123; isolated fresh/repeated installation 1 / 18; container and all 20 Twig templates passed.
-12. Scoped hashed API credentials, idempotency and signed safe webhooks — pending.
+12. Scoped hashed API credentials, idempotency and signed safe webhooks — completed: 15 HTTP/service tests / 289 assertions; legacy API credential upgrade on disposable MariaDB 1 / 15, fresh installation and container lint passed. Mock transports exercised signatures, duplicate dispatch and private-IP rejection without external recipients.
 13. Product entitlements, plans, declarative rules and preservation of existing rights — pending.
 
 ## Profile images
@@ -76,3 +76,7 @@ See [Expiry reminders](EXPIRY_REMINDERS.md). Delivery defaults off; enable only 
 ## Customer portal
 
 See [Customer portal](CUSTOMER_PORTAL.md). `ROLE_CUSTOMER` inherits no administrative viewing role and requires explicit non-global assignments. Migration `Version20261003103656` preserves previous action histories and adds domain-change details. Requests for invalid/foreign downloads and domain changes are rejected; existing offline files still need replacement after an approved domain change.
+
+## API integrations
+
+See [Customer-scoped API and webhooks](API_INTEGRATIONS.md). Migration `Version20261003105033` hashes legacy credentials without granting scopes and adds persistent idempotency/outbox history. Encrypted webhook secrets use the independent security key; backup and key initialization cover both TOTP and webhooks. Receivers must commit event-ID deduplication with their side effects.

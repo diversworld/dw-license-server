@@ -331,3 +331,18 @@ portal:
     assignment_required: "Les utilisateurs du portail nécessitent des clients affectés sans accès global"
 license_action.domain_change: "Changement de domaine"
 role.customer: "Client"
+
+api_credentials:
+    title: "Identifiants API"
+    name: "Nom"
+    scopes: "Autorisations"
+    once: "Ce secret est affiché une seule fois. Conservez-le en sécurité."
+    create: "Créer"
+    revoke: "Révoquer"
+    invalid: "Données ou expiration invalides"
+webhook:
+    title: "Webhooks"
+    url: "URL cible"
+    events: "Événements"
+    invalid_url: "Utilisez des cibles HTTPS publiques sans identifiants, requêtes ou redirections."
+    invalid_events: "Événements invalides"

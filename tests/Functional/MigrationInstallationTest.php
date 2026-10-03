@@ -405,6 +405,22 @@ class MigrationInstallationTest extends KernelTestCase
         });
     }
 
+    public function testLegacyApiCredentialsBecomeHashesWithoutImplicitScopes(): void
+    {
+        $this->withDatabase(function (Connection $connection, array $environment): void {
+            $this->console(['doctrine:migrations:migrate', 'DoctrineMigrations\\Version20261003103656', '--no-interaction'], $environment);
+            $id = random_bytes(16); $customer = random_bytes(16); $secret = 'legacy-credential-unchanged-secret';
+            $connection->insert('customer', ['id' => $customer, 'company' => 'Test', 'firstname' => 'Test', 'lastname' => 'Customer', 'email' => 'api@example.test', 'street' => 'Test 1', 'zip' => '12345', 'city' => 'Berlin', 'active' => 1, 'created_at' => '2026-10-03 12:00:00']);
+            $connection->insert('api_token', ['id' => $id, 'customer_id' => $customer, 'name' => 'Legacy', 'token' => $secret, 'active' => 1, 'cerated_at' => '2026-10-03 12:00:00']);
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            $row = $connection->fetchAssociative('SELECT token, token_hash, scopes, active, customer_id FROM api_token WHERE id = ?', [$id]);
+            self::assertNull($row['token']); self::assertSame(hash('sha256', $secret), $row['token_hash']); self::assertNull($row['scopes']); self::assertSame($customer, $row['customer_id']); self::assertSame(1, (int) $row['active']);
+            $this->console(['doctrine:migrations:migrate', '--no-interaction'], $environment);
+            self::assertSame(hash('sha256', $secret), $connection->fetchOne('SELECT token_hash FROM api_token WHERE id = ?', [$id]));
+            $this->console(['doctrine:schema:validate'], $environment);
+        });
+    }
+
     private function withDatabase(callable $test): void
     {
         $dsn = getenv('MIGRATION_TEST_DATABASE_URL');

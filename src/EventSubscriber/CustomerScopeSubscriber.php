@@ -20,6 +20,12 @@ final class CustomerScopeSubscriber
 {
     public function __construct(private readonly EntityManagerInterface $em, private readonly Security $security) {}
 
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 256)]
+    public function resetScope(RequestEvent $event): void
+    {
+        if ($event->isMainRequest() && $this->em->getFilters()->isEnabled('customer_scope')) { $this->em->getFilters()->disable('customer_scope'); }
+    }
+
     #[AsEventListener(event: KernelEvents::REQUEST, priority: 7)]
     public function scope(RequestEvent $event): void
     {
@@ -27,6 +33,7 @@ final class CustomerScopeSubscriber
         $filters = $this->em->getFilters();
         if ($filters->isEnabled('customer_scope')) { $filters->disable('customer_scope'); }
         $user = $this->security->getUser();
+        if ($user instanceof \App\Security\ApiPrincipal) { $filters->enable('customer_scope')->setParameter('customers', bin2hex($user->customerId->toBinary())); return; }
         if (!$user instanceof User || $user->hasGlobalAccess()) { return; }
         $ids = [];
         foreach ($user->getCustomers() as $customer) { $ids[] = bin2hex($customer->getId()->toBinary()); }
@@ -51,6 +58,7 @@ final class CustomerScopeSubscriber
     private function assertReadable(object $entity): void
     {
         $user = $this->security->getUser();
+        if ($user instanceof \App\Security\ApiPrincipal && ($customer = CustomerAccess::customerOf($entity)) !== null && (string) $customer->getId() !== (string) $user->customerId) { throw new AccessDeniedException(); }
         if ($user instanceof User && !CustomerAccess::allows($user, $entity)) { throw new AccessDeniedException(); }
     }
 
@@ -60,6 +68,12 @@ final class CustomerScopeSubscriber
     private function guard(object $entity): void
     {
         $user = $this->security->getUser();
+        if ($user instanceof \App\Security\ApiPrincipal) {
+            if ($entity instanceof \App\Entity\AuditLog || $entity instanceof \App\Entity\AuditChainHead) { return; }
+            $customer = CustomerAccess::customerOf($entity);
+            if ($customer === null || (string) $customer->getId() !== (string) $user->customerId) { throw new AccessDeniedException(); }
+            return;
+        }
         if (!$user instanceof User || $user->hasGlobalAccess()) { return; }
         if ($entity instanceof \App\Entity\AuditLog || $entity instanceof \App\Entity\AuditChainHead) { return; }
         if ($entity instanceof User && (string) $entity->getId() === (string) $user->getId()) { return; }

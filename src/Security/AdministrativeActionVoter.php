@@ -13,6 +13,7 @@ class AdministrativeActionVoter extends Voter
     private const array ROLES = [
         'RECORD_ARCHIVE' => [],
         'RECORD_RESTORE' => [],
+        'API_CREDENTIAL_MANAGE' => ['ROLE_ADMIN'],
         'PORTAL_DOWNLOAD' => ['ROLE_CUSTOMER'],
         'PORTAL_DOMAIN_CHANGE' => ['ROLE_CUSTOMER'],
         'PROFILE_SELF' => ['ROLE_VIEWER'],
