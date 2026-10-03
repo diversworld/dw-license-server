@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[UniqueEntity(fields: ['email'],message: 'Diese E-Mail-Adresse wird bereits verwendet.')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface, \Scheb\TwoFactorBundle\Model\BackupCodeInterface
+class User implements \Symfony\Component\Security\Core\User\EquatableInterface, UserInterface, PasswordAuthenticatedUserInterface, \Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface, \Scheb\TwoFactorBundle\Model\BackupCodeInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
@@ -209,6 +209,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
 
     public function setActive(bool $active): static
     {
+        if ($this->active !== $active) { $this->revokeSessions(); }
         $this->active = $active;
 
         return $this;
@@ -239,6 +240,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
      */
     public function setRoles(array $roles): static
     {
+        if ($this->roles !== $roles) { $this->revokeSessions(); }
         $this->roles = $roles;
 
         return $this;
@@ -254,6 +256,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
 
     public function setPassword(string $password): static
     {
+        if ($this->password !== null && $this->password !== $password) { $this->revokeSessions(); }
         $this->password = $password;
 
         return $this;
@@ -283,8 +286,40 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
         return $this;
     }
 
-    #[ORM\Column(length: 128, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $totpSecret = null;
+
+    private ?string $decryptedTotpSecret = null;
+
+    #[ORM\Column(options: ['default' => 0])]
+    private int $securityVersion = 0;
+
+    public function getSecurityVersion(): int { return $this->securityVersion; }
+    public function revokeSessions(): void { ++$this->securityVersion; }
+    public function getStoredTotpSecret(): ?string { return $this->totpSecret; }
+    public function setStoredTotpSecret(string $stored): void { $this->totpSecret = $stored; }
+    public function hydrateTotpSecret(string $plain): void { $this->decryptedTotpSecret = $plain; }
+
+    public function isEqualTo(UserInterface $user): bool
+    {
+        return $user instanceof self && $this->securityVersion === $user->securityVersion
+            && $this->getRoles() === $user->getRoles() && $this->active === $user->active && $this->email === $user->email
+            && ($this->password === $user->password || $this->password === hash('crc32c', $user->password ?? ''));
+    }
+
+    public function regenerateBackupCodes(array $codes): void
+    {
+        $this->backupCodeHashes = array_map(static fn (string $code): string => hash('sha256', $code), $codes);
+        $this->revokeSessions();
+    }
+
+    public function disableTwoFactorForRecovery(): void
+    {
+        $this->totpSecret = $this->decryptedTotpSecret = null;
+        $this->backupCodeHashes = [];
+        $this->twoFactorDeclined = false;
+        $this->revokeSessions();
+    }
 
     #[ORM\Column(options: ['default' => false])]
     private bool $twoFactorDeclined = false;
@@ -317,13 +352,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
 
     public function getTotpAuthenticationConfiguration(): ?\Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface
     {
-        return $this->totpSecret === null ? null : new \Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration($this->totpSecret, 'sha1', 30, 6);
+        return $this->totpSecret === null ? null : new \Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration($this->decryptedTotpSecret ?? $this->totpSecret, 'sha1', 30, 6);
     }
 
     public function enableTwoFactor(string $secret, array $codes): void
     {
         $this->twoFactorDeclined = false;
-        $this->totpSecret = $secret;
+        $this->totpSecret = $this->decryptedTotpSecret = $secret;
+        $this->revokeSessions();
         $this->backupCodeHashes = array_map(static fn (string $code): string => hash('sha256', $code), $codes);
     }
 
@@ -359,6 +395,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Scheb\
 
         $data["\0" . self::class . "\0totpSecret"] = null;
         $data["\0" . self::class . "\0backupCodeHashes"] = [];
+        $data["\0" . self::class . "\0decryptedTotpSecret"] = null;
 
         return $data;
     }

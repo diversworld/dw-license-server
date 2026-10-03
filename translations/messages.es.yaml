@@ -270,3 +270,22 @@ license_status.revoked: 'Revocada'
 "archive.must_restore": "Restaure primero la licencia."
 
 "license_action.withdraw_revocation": "Retirar revocación"
+
+# Two-factor policy and secure recovery
+two_factor.required_help: "La autenticación de dos factores es obligatoria para tu rol."
+two_factor.manage: "Gestionar la autenticación de dos factores"
+two_factor.rotate: "Cambiar autenticador"
+two_factor.regenerate_codes: "Generar nuevos códigos de recuperación"
+two_factor.recover: "Autenticador perdido"
+two_factor.current_proof: "Código actual o código de recuperación sin usar"
+two_factor.recovery_code: "Código de recuperación sin usar"
+two_factor.new_code: "Código del nuevo autenticador"
+two_factor.confirm_change: "Confirmar cambio"
+two_factor.rotate_help: "Configura el nuevo autenticador. Confirma tu contraseña, un código actual y el código de la nueva aplicación."
+two_factor.codes_help: "Confirma tu contraseña y un código actual. Los códigos de recuperación anteriores quedarán invalidados."
+two_factor.recover_help: "Confirma tu contraseña y un código de recuperación sin usar. Se cerrarán todas las sesiones. Después podrás configurar un nuevo autenticador."
+two_factor.sessions_revoked: "Se han cerrado todas las sesiones anteriores. Guarda los nuevos códigos y vuelve a iniciar sesión."
+two_factor.login_again: "Volver a iniciar sesión"
+two_factor.reauthentication_failed: "La contraseña o el código de verificación no es válido."
+two_factor.invalid_new_code: "El código del nuevo autenticador no es válido."
+entities.App\Entity\User.properties.securityVersion: "Versión de sesión"

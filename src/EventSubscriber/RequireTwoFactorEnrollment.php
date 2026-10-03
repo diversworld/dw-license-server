@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class RequireTwoFactorEnrollment
 {
-    public function __construct(private readonly Security $security, private readonly UrlGeneratorInterface $router, private readonly TokenStorageInterface $tokens)
+    public function __construct(private readonly Security $security, private readonly UrlGeneratorInterface $router, private readonly TokenStorageInterface $tokens, private readonly \App\Security\TwoFactorPolicy $policy)
     {
     }
 
@@ -30,7 +30,7 @@ class RequireTwoFactorEnrollment
         }
         if (!$user->isTotpAuthenticationEnabled()) {
             $skipped = $event->getRequest()->getSession()->get('two_factor_enrollment_skipped_for') === (string) $user->getId();
-            if (!$user->hasDeclinedTwoFactor() && !$skipped) {
+            if ($this->policy->requiredForUser($user) || (!$user->hasDeclinedTwoFactor() && !$skipped)) {
                 $event->setResponse(new RedirectResponse($this->router->generate('two_factor_setup')));
             }
         } elseif (!$this->tokens->getToken()?->hasAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE) || !$this->tokens->getToken()->getAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE)) {

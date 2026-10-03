@@ -28,9 +28,11 @@ class AdministrativeActionVoter extends Voter
         'ACTIVATION_MANAGE' => ['ROLE_ACTIVATION_MANAGE'],
     ];
 
-    public function __construct(private readonly RoleHierarchyInterface $hierarchy)
+    public function __construct(private readonly RoleHierarchyInterface $hierarchy, private readonly TwoFactorPolicy $twoFactorPolicy)
     {
     }
+
+    public static function supportedActions(): array { return array_keys(self::ROLES); }
 
     protected function supports(string $attribute, mixed $subject): bool
     {
@@ -43,6 +45,7 @@ class AdministrativeActionVoter extends Voter
         if (!$user instanceof User || !$user->isActive()) {
             return false;
         }
+        if (!$this->twoFactorPolicy->permits($user, $attribute, $token)) { return false; }
         if ($user->isTotpAuthenticationEnabled() && (!$token->hasAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE)
             || !$token->getAttribute(TwoFactorAuthenticator::FLAG_2FA_COMPLETE))) {
             return false;

@@ -270,3 +270,22 @@ license_status.revoked: 'Révoquée'
 "archive.must_restore": "Restaurez d’abord la licence."
 
 "license_action.withdraw_revocation": "Annuler la révocation"
+
+# Two-factor policy and secure recovery
+two_factor.required_help: "L’authentification à deux facteurs est obligatoire pour votre rôle."
+two_factor.manage: "Gérer l’authentification à deux facteurs"
+two_factor.rotate: "Changer d’authentificateur"
+two_factor.regenerate_codes: "Générer de nouveaux codes de récupération"
+two_factor.recover: "Authentificateur perdu"
+two_factor.current_proof: "Code actuel ou code de récupération non utilisé"
+two_factor.recovery_code: "Code de récupération non utilisé"
+two_factor.new_code: "Code du nouvel authentificateur"
+two_factor.confirm_change: "Confirmer la modification"
+two_factor.rotate_help: "Configurez le nouvel authentificateur. Confirmez votre mot de passe, un code actuel et le code de la nouvelle application."
+two_factor.codes_help: "Confirmez votre mot de passe et un code actuel. Les anciens codes de récupération seront invalidés."
+two_factor.recover_help: "Confirmez votre mot de passe et un code de récupération non utilisé. Toutes les sessions seront fermées. Vous pourrez ensuite configurer un nouvel authentificateur."
+two_factor.sessions_revoked: "Toutes les sessions précédentes ont été fermées. Conservez les nouveaux codes en lieu sûr et reconnectez-vous."
+two_factor.login_again: "Se reconnecter"
+two_factor.reauthentication_failed: "Le mot de passe ou le code de vérification est invalide."
+two_factor.invalid_new_code: "Le code du nouvel authentificateur est invalide."
+entities.App\Entity\User.properties.securityVersion: "Version de session"

@@ -268,3 +268,22 @@ license_status.revoked: 'Widerrufen'
 "archive.must_restore": "Bitte zuerst die Lizenz wiederherstellen."
 
 "license_action.withdraw_revocation": "Widerruf zurücknehmen"
+
+# Two-factor policy and secure recovery
+two_factor.required_help: "Für deine Rolle ist die Zwei-Faktor-Anmeldung verpflichtend."
+two_factor.manage: "Zwei-Faktor-Anmeldung verwalten"
+two_factor.rotate: "Authenticator wechseln"
+two_factor.regenerate_codes: "Neue Wiederherstellungscodes"
+two_factor.recover: "Authenticator verloren"
+two_factor.current_proof: "Aktueller Code oder unbenutzter Wiederherstellungscode"
+two_factor.recovery_code: "Unbenutzter Wiederherstellungscode"
+two_factor.new_code: "Code aus dem neuen Authenticator"
+two_factor.confirm_change: "Änderung bestätigen"
+two_factor.rotate_help: "Richte den neuen Authenticator ein. Bestätige dein Passwort, einen aktuellen Code und den Code aus der neuen App."
+two_factor.codes_help: "Bestätige dein Passwort und einen aktuellen Code. Die bisherigen Wiederherstellungscodes werden ungültig."
+two_factor.recover_help: "Bestätige dein Passwort und einen unbenutzten Wiederherstellungscode. Alle Sitzungen werden beendet. Danach kannst du einen neuen Authenticator einrichten."
+two_factor.sessions_revoked: "Alle bisherigen Sitzungen wurden beendet. Bewahre die neuen Codes sicher auf und melde dich erneut an."
+two_factor.login_again: "Erneut anmelden"
+two_factor.reauthentication_failed: "Passwort oder Bestätigungscode ist ungültig."
+two_factor.invalid_new_code: "Der Code aus dem neuen Authenticator ist ungültig."
+entities.App\Entity\User.properties.securityVersion: "Sitzungsversion"

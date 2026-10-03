@@ -23,3 +23,5 @@
 /config/license/*.key
 /config/license/keys/
 /config/license/keyring.json
+
+/config/security/*.key

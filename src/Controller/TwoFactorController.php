@@ -40,14 +40,14 @@ class TwoFactorController extends AbstractController
     #[Route('/security/2fa/setup', name: 'two_factor_setup', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_VIEWER')]
     #[RateLimit('two_factor')]
-    public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens, \Symfony\Contracts\Translation\TranslatorInterface $translator, TwoFactorQrCode $qrCode): Response
+    public function setup(Request $request, TotpAuthenticatorInterface $totp, EntityManagerInterface $em, TokenStorageInterface $tokens, \Symfony\Contracts\Translation\TranslatorInterface $translator, TwoFactorQrCode $qrCode, \App\Security\TwoFactorPolicy $policy): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
             throw $this->createAccessDeniedException();
         }
         if ($user->isTotpAuthenticationEnabled()) {
-            return $this->redirectToRoute('admin');
+            return $this->redirectToRoute('two_factor_manage');
         }
         $session = $request->getSession();
         $secret = $session->get('two_factor_setup_secret') ?? $totp->generateSecret();
@@ -74,17 +74,17 @@ class TwoFactorController extends AbstractController
         }
 
         return $this->render('security/two_factor_setup.html.twig', [
-            'form' => $form->createView(), 'secret' => $codes === [] ? $secret : null,
+            'required' => $policy->requiredForUser($user), 'form' => $form->createView(), 'secret' => $codes === [] ? $secret : null,
             'qrCode' => $codes === [] ? $qrCode->dataUri($totp->getQRContent($pending)) : null, 'codes' => $codes,
         ], new Response(headers: ['Cache-Control' => 'no-store']));
     }
 
     #[Route('/security/2fa/decision/{decision}', name: 'two_factor_decision', requirements: ['decision' => 'skip|decline'], methods: ['POST'])]
     #[IsGranted('ROLE_VIEWER')]
-    public function decide(string $decision, Request $request, EntityManagerInterface $em): Response
+    public function decide(string $decision, Request $request, EntityManagerInterface $em, \App\Security\TwoFactorPolicy $policy): Response
     {
         $user = $this->getUser();
-        if (!$user instanceof User || $user->isTotpAuthenticationEnabled()
+        if (!$user instanceof User || $policy->requiredForUser($user) || $user->isTotpAuthenticationEnabled()
             || !$this->isCsrfTokenValid('two_factor_decision', $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
         }

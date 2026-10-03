@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'two_factor.manage'|trans }}{% endblock %}
+{% block body %}
+<main class="container" style="max-width: 40rem; margin: 3rem auto">
+    <h1>{{ 'two_factor.manage'|trans }}</h1>
+    {% if codes is not empty %}
+        <p>{{ 'two_factor.recovery_help'|trans }}</p>
+        <ul>{% for code in codes %}<li><code>{{ code }}</code></li>{% endfor %}</ul>
+        <p>{{ 'two_factor.sessions_revoked'|trans }}</p>
+        <a href="{{ path('app_login') }}">{{ 'two_factor.login_again'|trans }}</a>
+    {% elseif operation %}
+        <p>{{ ('two_factor.' ~ operation ~ '_help')|trans }}</p>
+        {% if qrCode %}
+            <img class="two-factor-qr" src="{{ qrCode }}" alt="{{ 'two_factor.qr_alt'|trans }}" width="256" height="256">
+            <p><code>{{ secret }}</code></p>
+        {% endif %}
+        {{ form_start(form) }}{{ form_widget(form) }}<button type="submit">{{ 'two_factor.confirm_change'|trans }}</button>{{ form_end(form) }}
+    {% else %}
+        <p><a href="{{ path('two_factor_change', {operation: 'rotate'}) }}">{{ 'two_factor.rotate'|trans }}</a></p>
+        <p><a href="{{ path('two_factor_change', {operation: 'codes'}) }}">{{ 'two_factor.regenerate_codes'|trans }}</a></p>
+        <p><a href="{{ path('two_factor_recover') }}">{{ 'two_factor.recover'|trans }}</a></p>
+    {% endif %}
+</main>
+{% endblock %}

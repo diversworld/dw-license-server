@@ -268,3 +268,22 @@ license_status.revoked: 'Revoked'
 "archive.must_restore": "Restore the license first."
 
 "license_action.withdraw_revocation": "Withdraw revocation"
+
+# Two-factor policy and secure recovery
+two_factor.required_help: "Two-factor authentication is required for your role."
+two_factor.manage: "Manage two-factor authentication"
+two_factor.rotate: "Change authenticator"
+two_factor.regenerate_codes: "Generate new recovery codes"
+two_factor.recover: "Lost authenticator"
+two_factor.current_proof: "Current code or unused recovery code"
+two_factor.recovery_code: "Unused recovery code"
+two_factor.new_code: "Code from the new authenticator"
+two_factor.confirm_change: "Confirm change"
+two_factor.rotate_help: "Set up the new authenticator. Confirm your password, a current code and the code from the new app."
+two_factor.codes_help: "Confirm your password and a current code. Previous recovery codes will become invalid."
+two_factor.recover_help: "Confirm your password and an unused recovery code. All sessions will end. You can then set up a new authenticator."
+two_factor.sessions_revoked: "All previous sessions have ended. Store the new codes safely and sign in again."
+two_factor.login_again: "Sign in again"
+two_factor.reauthentication_failed: "The password or verification code is invalid."
+two_factor.invalid_new_code: "The code from the new authenticator is invalid."
+entities.App\Entity\User.properties.securityVersion: "Session version"
