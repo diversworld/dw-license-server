@@ -2,14 +2,16 @@
  * Zentrale Theme-Variablen fuer EasyAdmin.
  * Farben, Abstaende und Rundungen hier anpassen; admin.css verwendet sie.
  * Diese Datei wird nach den allgemeinen Styles geladen.
- * EasyAdmin verwendet bewusst das helle Farbschema.
+ * Helle Werte stehen im ersten Block, dunkle Anpassungen am Ende.
  */
 :root,
-body.ea-light-scheme {
+body.ea-light-scheme,
+body.ea-dark-scheme {
     color-scheme: light;
 
     /* Grundfarben */
     --dw-admin-primary: #003366;
+    --dw-admin-link: var(--dw-admin-primary);
     --dw-admin-background: #f4f7fb;
     --dw-admin-surface: #ffffff;
     --dw-admin-text: #334155;
@@ -20,10 +22,15 @@ body.ea-light-scheme {
     /* Einzelne Bereiche koennen unabhaengig angepasst werden. */
     --dw-admin-header-bg: var(--dw-admin-background);
     --dw-admin-content-bg: var(--dw-admin-surface);
-    --dw-admin-sidebar-bg: var(--dw-admin-surface);
-    --dw-admin-sidebar-text: var(--dw-admin-text);
-    --dw-admin-sidebar-heading: #475569;
-    --dw-admin-sidebar-active-bg: #e2e8f0;
+    --dw-admin-sidebar-bg: #172554;
+    --dw-admin-sidebar-background: linear-gradient(145deg, #111827 0%, #172554 50%, #1d4ed8 100%);
+    --dw-admin-sidebar-text: #e2e8f0;
+    --dw-admin-sidebar-heading: #93c5fd;
+    --dw-admin-sidebar-icon: #cbd5e1;
+    --dw-admin-sidebar-logo: #ffffff;
+    --dw-admin-sidebar-active-text: #ffffff;
+    --dw-admin-sidebar-active-bg: rgba(255, 255, 255, .12);
+    --dw-admin-sidebar-hover-bg: rgba(255, 255, 255, .1);
     --dw-admin-card-bg: var(--dw-admin-surface);
 
     /* Form und Layout */
@@ -39,7 +46,7 @@ body.ea-light-scheme {
     --text-muted: var(--dw-admin-muted);
     --color-primary: var(--dw-admin-primary);
     --ea-primary: var(--dw-admin-primary);
-    --link-color: var(--dw-admin-primary);
+    --link-color: var(--dw-admin-link);
     --content-bg: var(--dw-admin-content-bg);
     --content-panel-bg: var(--dw-admin-content-bg);
     --content-top-border-color: var(--dw-admin-border);
@@ -48,15 +55,16 @@ body.ea-light-scheme {
     --responsive-header-logo-color: var(--dw-admin-primary);
     --responsive-header-border-color: var(--dw-admin-border);
     --sidebar-bg: var(--dw-admin-sidebar-bg);
-    --sidebar-logo-color: var(--dw-admin-primary);
+    --sidebar-logo-color: var(--dw-admin-sidebar-logo);
     --sidebar-menu-color: var(--dw-admin-sidebar-text);
     --sidebar-menu-header-color: var(--dw-admin-sidebar-heading);
-    --sidebar-menu-icon-color: var(--dw-admin-muted);
-    --sidebar-menu-active-item-color: var(--dw-admin-primary);
+    --sidebar-menu-icon-color: var(--dw-admin-sidebar-icon);
+    --sidebar-menu-active-item-color: var(--dw-admin-sidebar-active-text);
     --sidebar-menu-active-item-bg: var(--dw-admin-sidebar-active-bg);
-    --sidebar-menu-hover-color: var(--dw-admin-primary);
-    --sidebar-item-hover-bg: var(--dw-admin-hover);
-    --sidebar-border-color: var(--dw-admin-border);
+    --sidebar-menu-hover-color: var(--dw-admin-sidebar-active-text);
+    --sidebar-menu-submenu-color: var(--dw-admin-sidebar-text);
+    --sidebar-item-hover-bg: var(--dw-admin-sidebar-hover-bg);
+    --sidebar-border-color: transparent;
     --table-thead-color: var(--dw-admin-text);
     --table-cell-color: var(--dw-admin-text);
     --table-cell-border-color: var(--dw-admin-border);
@@ -72,4 +80,20 @@ body.ea-light-scheme {
     --bs-body-color: var(--dw-admin-text);
     --bs-secondary-color: var(--dw-admin-muted);
     --bs-border-color: var(--dw-admin-border);
+}
+
+/* Dunkles Theme: blaue Flaechen statt schwarzer Hintergruende.
+ * Die Anbindung oben wird auch auf body.ea-dark-scheme neu aufgeloest.
+ */
+body.ea-dark-scheme {
+    color-scheme: dark;
+    --dw-admin-primary: #2563eb;
+    --dw-admin-link: #93c5fd;
+    --dw-admin-background: #1e293b;
+    --dw-admin-surface: #243449;
+    --dw-admin-text: #e2e8f0;
+    --dw-admin-muted: #94a3b8;
+    --dw-admin-border: #475569;
+    --dw-admin-hover: #334155;
+    --dw-admin-shadow: 0 12px 35px rgba(15, 23, 42, .2);
 }

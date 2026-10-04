@@ -37,7 +37,7 @@
 
 /* Theme-Werte zentral in admin-theme.css anpassen. */
 .ea-sidebar {
-    background: var(--dw-admin-sidebar-bg);
+    background: var(--dw-admin-sidebar-background);
 }
 .ea-sidebar .ea-sidebar-group-label { color: var(--sidebar-menu-header-color); }
 .ea-sidebar .ea-sidebar-item.active, .ea-sidebar .ea-sidebar-item:hover { border-radius: var(--dw-admin-radius); }
