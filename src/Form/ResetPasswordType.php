@@ -21,7 +21,7 @@ class ResetPasswordType extends AbstractType
                 'mapped' => false,
 
                 'first_options' => [
-                    'label' => 'Neues Kennwort',
+                    'label' => 'ui.new_password',
 
                     'attr' => [
                         'autocomplete' => 'new-password',
@@ -29,7 +29,7 @@ class ResetPasswordType extends AbstractType
                 ],
 
                 'second_options' => [
-                    'label' => 'Kennwort wiederholen',
+                    'label' => 'ui.repeat_password',
 
                     'attr' => [
                         'autocomplete' => 'new-password',

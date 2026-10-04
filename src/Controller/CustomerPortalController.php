@@ -50,7 +50,7 @@ final class CustomerPortalController extends AbstractController
             try {
                 $token = $manager->activate(new ActivationRequest($license->getLicenseKey(), $license->getProduct()->getSlug(), $activation->getTenant(), $activation->getDomain()));
                 return new Response($token."\n", headers: ['Content-Type' => 'application/octet-stream', 'Content-Disposition' => 'attachment; filename="license-'.$license->getId().'.lic"', 'Cache-Control' => 'no-store, private', 'X-Content-Type-Options' => 'nosniff']);
-            } catch (\Symfony\Component\HttpKernel\Exception\HttpException $error) { $form->addError(new FormError($error->getMessage())); }
+            } catch (\Symfony\Component\HttpKernel\Exception\HttpException $error) { $form->addError(new FormError($this->translator->trans($error->getMessage()))); }
         }
         return $this->render('portal/form.html.twig', ['form' => $form, 'license' => $license, 'title' => 'portal.download'], new Response(status: $form->isSubmitted() ? 422 : 200, headers: ['Cache-Control' => 'no-store']));
     }

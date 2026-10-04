@@ -24,12 +24,12 @@ class ActivationCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            AssociationField::new('license', 'Lizenz')->hideOnForm(),
-            TextField::new('tenant', 'Mandant')->hideOnForm(),
-            TextField::new('domain', 'Domain')->hideOnForm(),
-            BooleanField::new('active', 'Aktiv')->renderAsSwitch(false),
-            DateTimeField::new('activatedAt', 'Aktiviert')->hideOnForm(),
-            DateTimeField::new('updatedAt', 'Zuletzt geprüft')->hideOnForm(),
+            AssociationField::new('license', 'ui.license')->hideOnForm(),
+            TextField::new('tenant', 'ui.tenant')->hideOnForm(),
+            TextField::new('domain', 'ui.domain')->hideOnForm(),
+            BooleanField::new('active', 'ui.active')->renderAsSwitch(false),
+            DateTimeField::new('activatedAt', 'ui.activated')->hideOnForm(),
+            DateTimeField::new('updatedAt', 'ui.last_checked')->hideOnForm(),
         ];
     }
 }

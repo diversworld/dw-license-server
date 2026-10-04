@@ -20,7 +20,7 @@ final class BoundedIntegerType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['minimum' => 0, 'maximum' => 1000000, 'required' => true]);
+        $resolver->setDefaults(['minimum' => 0, 'maximum' => 1000000, 'required' => true, 'invalid_message' => 'validation.number_bounds']);
         $resolver->setAllowedTypes('minimum', 'int');
         $resolver->setAllowedTypes('maximum', 'int');
     }

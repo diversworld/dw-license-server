@@ -271,7 +271,7 @@ class ResetPasswordController extends AbstractController
 
             $this->addFlash(
                 'danger',
-                'Der Link zum Zurücksetzen des Kennworts ist ungültig.'
+                'reset.invalid_link'
             );
 
             return $this->redirectToRoute(
@@ -312,7 +312,7 @@ class ResetPasswordController extends AbstractController
 
             $this->addFlash(
                 'danger',
-                'Der Link zum Zurücksetzen des Kennworts ist ungültig oder abgelaufen.'
+                'reset.expired_link'
             );
 
             return $this->redirectToRoute(
@@ -382,7 +382,7 @@ class ResetPasswordController extends AbstractController
 
             $this->addFlash(
                 'success',
-                'Dein Kennwort wurde erfolgreich geändert. Du kannst dich jetzt anmelden.'
+                'reset.success'
             );
 
             return $this->redirectToRoute(

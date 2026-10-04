@@ -32,9 +32,9 @@ class ProfileCrudController extends AbstractCrudController
     {
         return $crud
             ->setEntityPermission('PROFILE_SELF')
-            ->setPageTitle(Crud::PAGE_EDIT, 'Mein Profil')
-            ->setEntityLabelInSingular('Profil')
-            ->setEntityLabelInPlural('Profile');
+            ->setPageTitle(Crud::PAGE_EDIT, 'ui.my_profile')
+            ->setEntityLabelInSingular('ui.profile')
+            ->setEntityLabelInPlural('ui.profiles');
     }
 
     public function configureActions(Actions $actions): Actions
@@ -50,22 +50,22 @@ class ProfileCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield FormField::addFieldset('Persönliche Daten')
+        yield FormField::addFieldset('ui.personal')
             ->setIcon('fa fa-user');
 
-        yield TextField::new('firstname', 'Vorname')
+        yield TextField::new('firstname', 'ui.first_name')
             ->setColumns(6);
 
-        yield TextField::new('lastname', 'Nachname')
+        yield TextField::new('lastname', 'ui.last_name')
             ->setColumns(6);
 
-        yield EmailField::new('email', 'E-Mail-Adresse')
+        yield EmailField::new('email', 'ui.email')
             ->setColumns(12)
             ->setHelp(
-                'Diese E-Mail-Adresse wird auch für die Anmeldung verwendet.'
+                'ui.email_help'
             );
 
-        yield ImageField::new('profileImage', 'Profilbild')
+        yield ImageField::new('profileImage', 'ui.profile_image')
             ->setBasePath('/uploads/profile')
             ->setUploadDir('public/uploads/profile')
             ->setUploadedFileNamePattern($this->images->filename(...))
@@ -73,28 +73,28 @@ class ProfileCrudController extends AbstractCrudController
             ->setFormTypeOption('upload_new', $this->images->store(...))
             ->setRequired(false)
             ->setColumns(12)
-            ->setHelp('JPEG, PNG oder WebP; maximal 5 MB; 16–4096 Pixel je Seite, maximal 16 Megapixel.')
+            ->setHelp('ui.image_limits')
             ->setFormTypeOption('attr', ['accept' => 'image/jpeg,image/png,image/webp']);
         
-        yield FormField::addFieldset('Anschrift')
+        yield FormField::addFieldset('ui.address')
             ->setIcon('fa fa-address-card');
 
-        yield TextField::new('street', 'Straße')
+        yield TextField::new('street', 'ui.street')
             ->setColumns(9);
 
-        yield TextField::new('postalCode', 'PLZ')
+        yield TextField::new('postalCode', 'ui.postal_code')
             ->setColumns(4);
 
-        yield TextField::new('city', 'Wohnort')
+        yield TextField::new('city', 'ui.city')
             ->setColumns(8);
 
-        yield FormField::addFieldset('Kontaktdaten')
+        yield FormField::addFieldset('ui.contact')
             ->setIcon('fa fa-phone');
 
-        yield TextField::new('mobile', 'Mobil')
+        yield TextField::new('mobile', 'ui.mobile')
             ->setColumns(6);
 
-        yield TextField::new('phone', 'Telefon')
+        yield TextField::new('phone', 'ui.phone')
             ->setColumns(6);
     }
 

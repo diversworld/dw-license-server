@@ -1,7 +1,7 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
 {% block content_title %}
-    Lizenzübersicht
+    {{ 'ui.overview'|trans }}
 {% endblock %}
 
 {% block main %}
@@ -17,13 +17,13 @@
                 <div class="card-body">
                     <div class="text-muted mb-2">
                         <i class="fa fa-users me-2"></i>
-                        Aktive Kunden
+                        {{ 'ui.active_customers'|trans }}
                     </div>
                     <div class="fs-2 fw-bold">
                         {{ stats.customers.active }}
                     </div>
                     <div class="small text-muted">
-                        {{ stats.customers.total }} insgesamt
+                        {{ stats.customers.total }} {{ 'ui.total'|trans }}
                     </div>
                 </div>
             </div>
@@ -39,13 +39,13 @@
                     <div class="card-body">
                         <div class="text-muted mb-2">
                             <i class="fa fa-key me-2"></i>
-                            Aktive Lizenzen
+                            {{ 'ui.active_licenses'|trans }}
                         </div>
                         <div class="fs-2 fw-bold">
                             {{ stats.licenses.active }}
                         </div>
                         <div class="small text-muted">
-                            {{ stats.licenses.total }} insgesamt
+                            {{ stats.licenses.total }} {{ 'ui.total'|trans }}
                         </div>
                     </div>
                 </div>
@@ -58,13 +58,13 @@
                 <div class="card-body">
                     <div class="text-muted mb-2">
                         <i class="fa fa-globe me-2"></i>
-                        Aktive Installationen
+                        {{ 'ui.active_installations'|trans }}
                     </div>
                     <div class="fs-2 fw-bold">
                         {{ stats.activations.active }}
                     </div>
                     <div class="small text-muted">
-                        {{ stats.activations.total }} insgesamt
+                        {{ stats.activations.total }} {{ 'ui.total'|trans }}
                     </div>
                 </div>
             </div>
@@ -80,13 +80,13 @@
                     <div class="card-body">
                         <div class="text-muted mb-2">
                             <i class="fa fa-clock me-2"></i>
-                            Läuft bald ab
+                            {{ 'ui.expiring_soon'|trans }}
                         </div>
                         <div class="fs-2 fw-bold">
                             {{ stats.licenses.expiring }}
                         </div>
                         <div class="small text-muted">
-                            innerhalb von 30 Tagen
+                            {{ 'ui.within_days'|trans }}
                         </div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
         <div class="card border-info">
             <div class="card-body">
                 <h5 class="card-title">
-                    Audit-Einträge
+                    {{ 'ui.audit_entries'|trans }}
                 </h5>
                 <h2>
                     {{ auditEntries }}
@@ -113,7 +113,7 @@
         <div class="card-header">
             <strong>
                 <i class="fa fa-chart-pie me-2"></i>
-                Lizenzstatus
+                {{ 'ui.license_status'|trans }}
             </strong>
         </div>
         <div class="card-body">
@@ -128,7 +128,7 @@
                             {{ stats.licenses.active }}
                         </div>
                         <div class="text-muted">
-                            Aktiv
+                            {{ 'ui.active'|trans }}
                         </div>
                     </a>
                 </div>
@@ -143,7 +143,7 @@
                             {{ stats.licenses.suspended }}
                         </div>
                         <div class="text-muted">
-                            Gesperrt
+                            {{ 'ui.suspended'|trans }}
                         </div>
                     </a>
                 </div>
@@ -158,7 +158,7 @@
                             {{ stats.licenses.revoked }}
                         </div>
                         <div class="text-muted">
-                            Widerrufen
+                            {{ 'ui.revoked'|trans }}
                         </div>
                     </a>
                 </div>
@@ -173,7 +173,7 @@
                             {{ stats.licenses.expired }}
                         </div>
                         <div class="text-muted">
-                            Abgelaufen
+                            {{ 'ui.expired'|trans }}
                         </div>
                     </a>
                 </div>
@@ -189,13 +189,13 @@
             <div class="d-flex justify-content-between align-items-center">
                 <strong>
                     <i class="fa fa-box me-2"></i>
-                    Lizenzen nach Modul
+                    {{ 'ui.by_module'|trans }}
                 </strong>
                 <a
                     href="{{ dashboardUrls.licenses }}"
                     class="btn btn-sm btn-secondary"
                 >
-                    Alle Lizenzen
+                    {{ 'ui.all_licenses'|trans }}
                 </a>
             </div>
         </div>
@@ -204,13 +204,13 @@
             <table class="table mb-0 align-middle">
                 <thead>
                     <tr>
-                        <th>Modul</th>
-                        <th>Status</th>
+                        <th>{{ 'ui.module'|trans }}</th>
+                        <th>{{ 'ui.status'|trans }}</th>
                         <th class="text-end">
-                            Lizenzen
+                            {{ 'ui.licenses'|trans }}
                         </th>
                         <th class="text-end">
-                            Installationen
+                            {{ 'ui.installations'|trans }}
                         </th>
                     </tr>
                 </thead>
@@ -231,11 +231,11 @@
                             <td>
                                 {% if product.productActive %}
                                     <span class="badge bg-success">
-                                        Aktiv
+                                        {{ 'ui.active'|trans }}
                                     </span>
                                 {% else %}
                                     <span class="badge bg-secondary">
-                                        Inaktiv
+                                        {{ 'ui.inactive'|trans }}
                                     </span>
                                 {% endif %}
                             </td>
@@ -252,7 +252,7 @@
                                 colspan="4"
                                 class="text-center text-muted py-4"
                             >
-                                Noch keine Module vorhanden.
+                                {{ 'ui.no_modules'|trans }}
                             </td>
                         </tr>
                     {% endfor %}

@@ -34,43 +34,43 @@ class UserCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield FormField::addFieldset('Persönliche Daten')
+        yield FormField::addFieldset('ui.personal')
             ->setIcon('fa fa-user');
 
-        yield TextField::new('firstname', 'Vorname')->setFormTypeOption('constraints', [new \Symfony\Component\Validator\Constraints\NotBlank()])
+        yield TextField::new('firstname', 'ui.first_name')->setFormTypeOption('constraints', [new \Symfony\Component\Validator\Constraints\NotBlank()])
             ->setColumns(6);
 
-        yield TextField::new('lastname', 'Nachname')->setFormTypeOption('constraints', [new \Symfony\Component\Validator\Constraints\NotBlank()])
+        yield TextField::new('lastname', 'ui.last_name')->setFormTypeOption('constraints', [new \Symfony\Component\Validator\Constraints\NotBlank()])
             ->setColumns(6);
 
-        yield EmailField::new('email', 'E-Mail-Adresse')->setFormTypeOption('constraints', [new \Symfony\Component\Validator\Constraints\NotBlank(), new \Symfony\Component\Validator\Constraints\Email()])
+        yield EmailField::new('email', 'ui.email')->setFormTypeOption('constraints', [new \Symfony\Component\Validator\Constraints\NotBlank(), new \Symfony\Component\Validator\Constraints\Email()])
             ->setColumns(12)
             ->setHelp(
-                'Diese E-Mail-Adresse wird auch für die Anmeldung verwendet.'
+                'ui.email_help'
             );
 
-        yield FormField::addFieldset('Anschrift')
+        yield FormField::addFieldset('ui.address')
             ->setIcon('fa fa-address-card');
 
-        yield TextField::new('street', 'Straße')
+        yield TextField::new('street', 'ui.street')
             ->setColumns(9);
 
-        yield TextField::new('postalCode', 'PLZ')
+        yield TextField::new('postalCode', 'ui.postal_code')
             ->setColumns(4);
 
-        yield TextField::new('city', 'Wohnort')
+        yield TextField::new('city', 'ui.city')
             ->setColumns(8);
 
-        yield FormField::addFieldset('Kontaktdaten')
+        yield FormField::addFieldset('ui.contact')
             ->setIcon('fa fa-phone');
 
-        yield TextField::new('mobile', 'Mobil')
+        yield TextField::new('mobile', 'ui.mobile')
             ->setColumns(6);
 
-        yield TextField::new('phone', 'Telefon')
+        yield TextField::new('phone', 'ui.phone')
             ->setColumns(6);
 
-        yield FormField::addFieldset('Berechtigungen')
+        yield FormField::addFieldset('ui.permissions')
             ->setIcon('fa fa-shield');
 
         if ($pageName === \EasyCorp\Bundle\EasyAdminBundle\Config\Crud::PAGE_NEW) {
@@ -84,13 +84,13 @@ class UserCrudController extends AbstractCrudController
         }
 
         $roles = \App\Security\RoleCatalog::choices($this->isGranted('ROLE_SUPER_ADMIN'));
-        yield ChoiceField::new('roles', 'Rollen')->setChoices($roles)->allowMultipleChoices()
+        yield ChoiceField::new('roles', 'ui.roles')->setChoices($roles)->allowMultipleChoices()
             ->setColumns(6);
 
         yield BooleanField::new('globalAccess', 'customer_scope.global')->renderAsSwitch(false);
         yield \EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField::new('customers', 'customer_scope.assignments')->setFormTypeOption('by_reference', false);
 
-        yield BooleanField::new('active', 'Aktiv')
+        yield BooleanField::new('active', 'ui.active')
             ->renderAsSwitch(false)
             ->setColumns(6);
     }

@@ -16,7 +16,7 @@ class ResetPasswordRequestType extends AbstractType
     ): void {
         $builder
             ->add('email', EmailType::class, [
-                'label' => 'E-Mail-Adresse',
+                'label' => 'ui.email',
                 'mapped' => false,
 
                 'attr' => [

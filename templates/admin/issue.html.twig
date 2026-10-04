@@ -1,17 +1,17 @@
 {% extends 'layout/application.html.twig' %}
-{% block title %}Installation zuweisen{% endblock %}
+{% block title %}{{ 'ui.assign_installation'|trans }}{% endblock %}
 {% block page_content %}
 
-    <a href="{{ path('admin') }}">Zur Lizenzverwaltung</a>
-    <h1>Installation zuweisen</h1>
+    <a href="{{ path('admin') }}">{{ 'ui.back_management'|trans }}</a>
+    <h1>{{ 'ui.assign_installation'|trans }}</h1>
     <p>{{ license.product }} — {{ license.customer }}</p>
-    {{ form_start(form) }}{{ form_widget(form) }}<button type="submit" class="btn btn-primary">Lizenz ausstellen</button>{{ form_end(form) }}
+    {{ form_start(form) }}{{ form_widget(form) }}<button type="submit" class="btn btn-primary">{{ 'ui.issue_license'|trans }}</button>{{ form_end(form) }}
     {% if token %}
-        <h2>Signierte Lizenz</h2>
-        <p>Dieses Token in der Contao-Lizenzverwaltung einfügen oder als Datei mit der Endung .lic speichern und importieren.</p>
-        <textarea readonly rows="8" class="form-control font-monospace" aria-label="Signierte Lizenz">{{ token }}</textarea>
-        <h2>Öffentliche Ed25519-Prüfschlüssel</h2><p>Diese JSON-Schlüsselliste in Contao als <code>contao_issue_service.license_public_key</code> eintragen. Die Datei <code>config/jwt/public.pem</code> gehört zur separaten JWT-Anmeldung und ist hierfür ungeeignet.</p><pre class="dw-code">{{ public_key }}</pre>
-        <p>Validierungs-Endpunkt: <code>{{ url('api_license_validate') }}</code></p>
+        <h2>{{ 'ui.signed_license'|trans }}</h2>
+        <p>{{ 'ui.signed_help'|trans }}</p>
+        <textarea readonly rows="8" class="form-control font-monospace" aria-label="{{ 'ui.signed_license'|trans }}">{{ token }}</textarea>
+        <h2>{{ 'ui.public_keys'|trans }}</h2><p>{{ 'ui.keys_help'|trans }} <code>contao_issue_service.license_public_key</code>. {{ 'ui.file'|trans }} <code>config/jwt/public.pem</code> {{ 'ui.jwt_help'|trans }}</p><pre class="dw-code">{{ public_key }}</pre>
+        <p>{{ 'ui.validation_endpoint'|trans }} <code>{{ url('api_license_validate') }}</code></p>
     {% endif %}
 
 {% endblock %}

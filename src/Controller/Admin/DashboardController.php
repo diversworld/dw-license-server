@@ -335,7 +335,7 @@ class DashboardController extends AbstractDashboardController
 
             $this->addFlash(
                 'success',
-                'Dein Kennwort wurde erfolgreich geändert.'
+                $this->translator->trans('ui.password_saved')
             );
 
             return $this->redirectToRoute(

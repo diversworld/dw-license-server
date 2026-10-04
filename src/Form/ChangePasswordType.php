@@ -18,7 +18,7 @@ class ChangePasswordType extends AbstractType
     ): void {
         $builder
             ->add('currentPassword', PasswordType::class, [
-                'label' => 'Aktuelles Kennwort',
+                'label' => 'ui.current_password',
                 'mapped' => false,
                 'attr' => [
                     'autocomplete' => 'current-password',
@@ -40,14 +40,14 @@ class ChangePasswordType extends AbstractType
                 'mapped' => false,
 
                 'first_options' => [
-                    'label' => 'Neues Kennwort',
+                    'label' => 'ui.new_password',
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
                 ],
 
                 'second_options' => [
-                    'label' => 'Neues Kennwort wiederholen',
+                    'label' => 'ui.repeat_new_password',
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],

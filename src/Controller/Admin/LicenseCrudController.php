@@ -23,7 +23,7 @@ class LicenseCrudController extends AbstractCrudController
         $actions->disable(Action::DELETE)
             ->setPermission(Action::NEW, 'LICENSE_CREATE')
             ->setPermission(Action::EDIT, 'LICENSE_EDIT')
-            ->add(Crud::PAGE_INDEX, Action::new('issue', 'Installation zuweisen / Token')->linkToRoute('admin_license_issue', fn (License $license) => ['id' => (string) $license->getId()]))
+            ->add(Crud::PAGE_INDEX, Action::new('issue', 'ui.issue_action')->linkToRoute('admin_license_issue', fn (License $license) => ['id' => (string) $license->getId()]))
             ->setPermission('issue', 'LICENSE_ISSUE')
             ->add(Crud::PAGE_INDEX, Action::new('history', 'license_action.history')->linkToRoute('admin_license_history', fn (License $license) => ['id' => (string) $license->getId()]));
         foreach (\App\Service\LicenseLifecycle::ACTIONS as $name) {
@@ -43,27 +43,27 @@ class LicenseCrudController extends AbstractCrudController
         return [
             BooleanField::new('archived', 'archive.archived')->hideOnForm()->renderAsSwitch(false),
             DateTimeField::new('deletedAt', 'archive.date')->hideOnForm(),
-            AssociationField::new('customer', 'Kunde'),
-            AssociationField::new('product', 'Modul'),
-            TextField::new('licenseKey', 'Lizenzschlüssel')->hideOnIndex()->setFormTypeOption('disabled', true),
-            ChoiceField::new('status')->hideOnForm()->setChoices(['Aktiv' => 'active', 'Gesperrt' => 'suspended', 'Widerrufen' => 'revoked']),
-            ChoiceField::new('mode', 'Modus')->setChoices(['Online' => 'online', 'Offline' => 'offline']),
-            IntegerField::new('maxDomains', 'Max. Installationen'),
+            AssociationField::new('customer', 'ui.customer'),
+            AssociationField::new('product', 'ui.module'),
+            TextField::new('licenseKey', 'ui.license_key')->hideOnIndex()->setFormTypeOption('disabled', true),
+            ChoiceField::new('status')->hideOnForm()->setChoices(['ui.active' => 'active', 'ui.suspended' => 'suspended', 'ui.revoked' => 'revoked']),
+            ChoiceField::new('mode', 'ui.mode')->setChoices(['ui.online' => 'online', 'ui.offline' => 'offline']),
+            IntegerField::new('maxDomains', 'ui.max_installations'),
             ArrayField::new('features', 'entitlements.allowed')->setHelp('entitlements.features_help'),
             ArrayField::new('quotas', 'entitlements.quotas')->setFormType(\App\Form\QuotaCollectionType::class),
             ChoiceField::new('updatesAllowed', 'entitlements.updates')->hideOnForm()->setChoices(['entitlements.allowed_updates' => 1, 'entitlements.no_updates' => 0]),
             DateTimeField::new('updatesUntil', 'entitlements.updates_until')->hideOnForm(),
-            DateTimeField::new('expiresAt', 'Gültig bis')->setFormTypeOption('disabled', $pageName !== Crud::PAGE_NEW),
-            TextareaField::new('notes', 'Notizen'),
-            DateTimeField::new('lastValidationAt', 'Letzte Prüfung')->hideOnForm(),
+            DateTimeField::new('expiresAt', 'ui.expires')->setFormTypeOption('disabled', $pageName !== Crud::PAGE_NEW),
+            TextareaField::new('notes', 'ui.notes'),
+            DateTimeField::new('lastValidationAt', 'ui.last_check')->hideOnForm(),
         ];
     }
 	
 	public function configureCrud(Crud $crud): Crud
 	{
 		return $crud
-			->setEntityLabelInSingular('Lizenz')
-			->setEntityLabelInPlural('Lizenzen')
+			->setEntityLabelInSingular('ui.license')
+			->setEntityLabelInPlural('ui.licenses')
             ->overrideTemplates([
                 'crud/index' => 'admin/license/index.html.twig',
             ]);

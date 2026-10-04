@@ -29,22 +29,22 @@ class CustomerCrudController extends AbstractCrudController
     {
         yield BooleanField::new('archived', 'archive.archived')->hideOnForm()->renderAsSwitch(false);
         yield DateTimeField::new('deletedAt', 'archive.date')->hideOnForm();
-		yield FormField::addFieldset('Persönliche Daten')
+		yield FormField::addFieldset('ui.personal')
 			->setIcon('fa fa-user');
 
-		yield TextField::new('company', 'Firma')
+		yield TextField::new('company', 'ui.company')
 			->setColumns(12);
 
-		yield TextField::new('firstname', 'Vorname')
+		yield TextField::new('firstname', 'ui.first_name')
 			->setColumns(6);
 
-		yield TextField::new('lastname', 'Nachname')
+		yield TextField::new('lastname', 'ui.last_name')
 			->setColumns(6);
 
-		yield EmailField::new('email', 'E-Mail-Adresse')
+		yield EmailField::new('email', 'ui.email')
 			->setColumns(12)
 			->setHelp(
-			'Diese E-Mail-Adresse wird auch für die Anmeldung verwendet.'
+			'ui.email_help'
 		);
 
 		yield ImageField::new('logoImage', 'Logo')
@@ -53,40 +53,40 @@ class CustomerCrudController extends AbstractCrudController
 			->setUploadedFileNamePattern('[uuid].[extension]')
 			->setRequired(false)
 			->setColumns(12)
-			->setHelp('Profilbild als JPG, PNG oder WebP.')
+			->setHelp('ui.image_help')
 			->setFormTypeOption('attr', [
 				'accept' => 'image/jpeg,image/png,image/webp',
 			]);
 
-		yield FormField::addFieldset('Anschrift')
+		yield FormField::addFieldset('ui.address')
 			->setIcon('fa fa-address-card');
 
-		yield TextField::new('street', 'Straße')
+		yield TextField::new('street', 'ui.street')
 			->setColumns(9);
 
-		yield TextField::new('zip', 'PLZ')
+		yield TextField::new('zip', 'ui.postal_code')
 			->setColumns(4);
 
-		yield TextField::new('city', 'Wohnort')
+		yield TextField::new('city', 'ui.city')
 			->setColumns(8);
 
-		yield FormField::addFieldset('Kontaktdaten')
+		yield FormField::addFieldset('ui.contact')
 			->setIcon('fa fa-phone');
 
-		yield TextField::new('mobile', 'Mobil')
+		yield TextField::new('mobile', 'ui.mobile')
 			->setColumns(6);
 
-		yield TextField::new('phone', 'Telefon')
+		yield TextField::new('phone', 'ui.phone')
 			->setColumns(6);
-		yield TextField::new('country', 'Land')
+		yield TextField::new('country', 'ui.country')
 			->setColumns(6);
 
-		yield TextField::new('vatId', 'USt-ID')
+		yield TextField::new('vatId', 'ui.vat_id')
 			->setColumns(6);
 
         yield ChoiceField::new('reminderLocale', 'expiry_reminder.locale')->setChoices(['Deutsch' => 'de', 'English' => 'en', 'Français' => 'fr', 'Español' => 'es']);
         yield ArrayField::new('reminderRecipients', 'expiry_reminder.recipients');
-		yield BooleanField::new('active', 'Aktiv')
+		yield BooleanField::new('active', 'ui.active')
 			->setColumns(6);		
     }
 }

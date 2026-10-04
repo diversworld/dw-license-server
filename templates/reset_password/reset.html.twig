@@ -1,12 +1,12 @@
 {% extends 'layout/authentication.html.twig' %}
-{% block title %}Neues Kennwort festlegen{% endblock %}
+{% block title %}{{ 'ui.reset_new'|trans }}{% endblock %}
 {% block auth_content %}
-    <p class="text-secondary mb-4">Gib dein neues Kennwort zweimal ein.</p>
+    <p class="text-secondary mb-4">{{ 'ui.reset_repeat'|trans }}</p>
     {{ form_start(resetForm) }}
         {{ form_errors(resetForm) }}
         {{ form_row(resetForm.plainPassword.first) }}
         {{ form_row(resetForm.plainPassword.second) }}
-        <div class="alert alert-info">Das Kennwort muss mindestens 12 Zeichen lang sein.</div>
-        <button type="submit" class="btn btn-primary w-100">Kennwort speichern</button>
+        <div class="alert alert-info">{{ 'ui.password_min'|trans }}</div>
+        <button type="submit" class="btn btn-primary w-100">{{ 'ui.password_save'|trans }}</button>
     {{ form_end(resetForm) }}
 {% endblock %}

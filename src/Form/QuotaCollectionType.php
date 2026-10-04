@@ -7,7 +7,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 final class QuotaCollectionType extends AbstractType
 {
     public function getParent(): string { return CollectionType::class; }
-    public function configureOptions(OptionsResolver $resolver): void { $resolver->setDefaults(['entry_type' => QuotaEntryType::class, 'allow_add' => true, 'allow_delete' => true, 'by_reference' => false]); }
+    public function configureOptions(OptionsResolver $resolver): void { $resolver->setDefaults(['entry_type' => QuotaEntryType::class, 'allow_add' => true, 'allow_delete' => true, 'by_reference' => false, 'invalid_message' => 'validation.duplicate_quota']); }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->addModelTransformer(new CallbackTransformer(

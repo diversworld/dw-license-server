@@ -19,7 +19,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class IssueLicenseController extends AbstractController
 {
     #[Route('/admin/licenses/{id}/issue', name: 'admin_license_issue', methods: ['GET', 'POST'])]
-    public function __invoke(License $license, Request $request, LicenseManager $manager, LicenseSigner $signer): Response
+    public function __invoke(License $license, Request $request, LicenseManager $manager, LicenseSigner $signer, \Symfony\Contracts\Translation\TranslatorInterface $translator): Response
     {
         $form = $this->createForm(InstallationType::class)->handleRequest($request);
         $token = null;
@@ -30,7 +30,7 @@ class IssueLicenseController extends AbstractController
                 $token = $manager->activate(new ActivationRequest($license->getLicenseKey(), $license->getProduct()->getSlug(), $data['tenant'], $data['domain']));
                 $publicKey = json_encode($signer->publicKeys(), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
             } catch (HttpException $e) {
-                $form->addError(new FormError($e->getMessage()));
+                $form->addError(new FormError($translator->trans($e->getMessage())));
             }
         }
         $response = $this->render('admin/issue.html.twig', ['form' => $form, 'license' => $license, 'token' => $token, 'public_key' => $publicKey]);

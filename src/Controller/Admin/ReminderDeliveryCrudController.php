@@ -17,7 +17,7 @@ final class ReminderDeliveryCrudController extends AbstractCrudController
         yield TextField::new('recipient', 'expiry_reminder.recipient');
         yield DateTimeField::new('expiry', 'license_action.expires_at');
         yield IntegerField::new('daysBefore', 'expiry_reminder.days');
-        yield TextField::new('status', 'expiry_reminder.status');
+        yield TextField::new('status', 'expiry_reminder.status')->setTemplatePath('admin/field/reminder_status.html.twig');
         yield IntegerField::new('attempts', 'expiry_reminder.attempts');
         yield ArrayField::new('history', 'expiry_reminder.history')->setTemplatePath('admin/field/reminder_history.html.twig')->hideOnIndex();
     }

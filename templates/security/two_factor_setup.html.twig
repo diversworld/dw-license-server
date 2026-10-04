@@ -11,7 +11,7 @@
         <p>{{ 'two_factor.setup_help'|trans }}</p>
         <img class="two-factor-qr img-fluid rounded border p-2 bg-white d-block mx-auto mb-3" src="{{ qrCode }}" alt="{{ 'two_factor.qr_alt'|trans }}" width="256" height="256">
         <p>{{ 'two_factor.qr_help'|trans }}</p>
-        <p>{{ app.user.userIdentifier }} — Diversworld — TOTP, SHA1, 6 digits, 30 seconds</p>
+        <p>{{ app.user.userIdentifier }} — Diversworld — {{ 'two_factor.algorithm'|trans }}</p>
         <code id="two-factor-secret" class="d-block text-break rounded bg-light p-3 mb-3">{{ secret }}</code>
         {{ form_start(form) }}{{ form_widget(form) }}<button type="submit" class="btn btn-primary w-100">{{ 'two_factor.enable'|trans }}</button>{{ form_end(form) }}
         {% if required %}<p>{{ 'two_factor.required_help'|trans }}</p>{% else %}

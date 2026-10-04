@@ -7,28 +7,28 @@
     {% if licenseView %}
         {% set viewConfig = {
             'active': {
-                'label': 'Aktive Lizenzen',
-                'description': 'Es werden nur aktive Lizenzen und noch nicht abgelaufene Lizenzen angezeigt',
+                'label': 'ui.active_licenses',
+                'description': 'ui.active_filter_help',
                 'icon': 'fa fa-check-circle'
             },
             'expiring': {
-                'label': 'Läuft innerhalb von 30 Tagen ab',
-                'description': 'Es werden nur aktive Lizenzen angezeigt, die innerhalb der nächsten 30 Tagen ablaufen',
+                'label': 'ui.expiring_filter',
+                'description': 'ui.expiring_filter_help',
                 'icon': 'fa fa-hourglass-half'
             },
             'expired': {
-                'label': 'Abgelaufene Lizenzen',
-                'description': 'Es werden nur Lizenzen angezeigt, die bereits abgelaufen sind',
+                'label': 'ui.expired_licenses',
+                'description': 'ui.expired_filter_help',
                 'icon': 'fa fa-times-circle'
             },
             'suspended': {
-                'label': 'Gesperrte Lizenzen',
-                'description': 'Es werden nur Lizenzen angezeigt, die gesperrt wurden',
+                'label': 'ui.suspended_licenses',
+                'description': 'ui.suspended_filter_help',
                 'icon': 'fa fa-ban'
             },
             'revoked': {
-                'label': 'Widerrufene Lizenzen',
-                'description': 'Es werden nur Lizenzen angezeigt, die widerrufen wurden',
+                'label': 'ui.revoked_licenses',
+                'description': 'ui.revoked_filter_help',
                 'icon': 'fa fa-recycle'
             }
         } %}
@@ -45,19 +45,19 @@
                 <div>
                     <div class="fw-bold mb-1">
                     <i class="fa {{ currentView.icon }} me-2"></i>
-                        Lizenzen
+                        {{ 'ui.licenses'|trans }}
                         <i class="fa fa-angle-right me-2"></i>
-                        {{ currentView.label }}
+                        {{ currentView.label|trans }}
                     </div>
                     <div class="small">
-                        {{ currentView.description }}
+                        {{ currentView.description|trans }}
                     </div>
                     <div class="flex-shrink-0">
                         <a class="btn btn-outline-primary btn-sm mt-2" href="{{ea_url().setController('App\\Controller\\Admin\\LicenseCrudController')
                             .setAction('index')
                             .unset('licenseView')}}">
                             <i class="fa fa-filter-circle-xmark me-1"></i>
-                            Filter Zurücksetzen
+                            {{ 'ui.filter_reset'|trans }}
                         </a>
                     </div>
                 </div>

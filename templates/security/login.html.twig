@@ -11,7 +11,7 @@
                 </strong>
 
                 <div class="text-secondary">
-                    Lizenzverwaltung
+                    {{ 'ui.management'|trans }}
                 </div>
             </div>
 
@@ -19,9 +19,9 @@
                 <div class="card-body">
                     <div class="mb-4">
                         <h2 class="fw-bold mb-2">
-                            Willkommen zurück
+                            {{ 'ui.welcome'|trans }}
                         </h2>
-                        <p class="text-secondary mb-0">Melde dich mit deinen Zugangsdaten an, um die Lizenzverwaltung zu öffnen.</p>
+                        <p class="text-secondary mb-0">{{ 'ui.login_help'|trans }}</p>
                     </div>
 
                     {% if error %}
@@ -35,7 +35,7 @@
 
                     <form method="post">
                         <div class="mb-3">
-                            <label for="username" class="form-label fw-semibold">E-Mail-Adresse</label>
+                            <label for="username" class="form-label fw-semibold">{{ 'ui.email'|trans }}</label>
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-envelope"></i>
@@ -44,28 +44,28 @@
                             </div>
                         </div>
                         <div class="mb-2">
-                            <label for="password" class="form-label fw-semibold" >Kennwort</label>
+                            <label for="password" class="form-label fw-semibold" >{{ 'ui.password'|trans }}</label>
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-lock"></i>
                                 </span>
-                                <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" placeholder="Kennwort" required>
+                                <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" placeholder="{{ 'ui.password'|trans }}" required>
                             </div>
                         </div>
                         {# Kennwort vergessen #}
                         <div class="text-end mb-4">
                             <a href="{{ path('app_forgot_password_request') }}" class="forgot-password">
-                                Kennwort vergessen?
+                                {{ 'ui.forgot_password'|trans }}
                             </a>
                         </div>
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-box-arrow-in-right me-2"></i>Anmelden</button>
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-box-arrow-in-right me-2"></i>{{ 'ui.login'|trans }}</button>
                     </form>
                 </div>
             </div>
             <div class="text-center text-secondary small mt-4">
                 <i class="bi bi-shield-lock me-1"></i>
-                Geschützter Administrationsbereich
+                {{ 'ui.protected'|trans }}
             </div>
         </div>
     </div>
