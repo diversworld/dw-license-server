@@ -6,6 +6,7 @@ namespace App\Tests\Functional;
 
 use App\Entity\User;
 use App\Security\TwoFactorPolicy;
+use App\Security\TotpSecretCipher;
 use App\Tests\Support\IsolatedWebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -15,7 +16,7 @@ final class TwoFactorPolicyDefaultsTest extends IsolatedWebTestCase
 
     protected function setUp(): void
     {
-        foreach (['TWO_FACTOR_REQUIRED_ROLES', 'TWO_FACTOR_REQUIRED_ACTIONS'] as $name) {
+        foreach (['TWO_FACTOR_REQUIRED_ROLES', 'TWO_FACTOR_REQUIRED_ACTIONS', 'TOTP_ENCRYPTION_KEY_FILE', 'TOTP_KEY_AUTO_CREATE'] as $name) {
             $this->environment[$name] = [$_ENV[$name] ?? null, $_SERVER[$name] ?? null, getenv($name)];
             unset($_ENV[$name], $_SERVER[$name]);
             putenv($name);
@@ -82,5 +83,52 @@ final class TwoFactorPolicyDefaultsTest extends IsolatedWebTestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('unknown assignable role');
         static::getContainer()->get(TwoFactorPolicy::class);
+    }
+
+    public function testPasswordLoginWorksWithoutSecurityEnvironmentVariables(): void
+    {
+        $user = $this->user('ROLE_SUPER_ADMIN');
+        $user->setPassword(static::getContainer()->get(UserPasswordHasherInterface::class)->hashPassword($user, 'test-login-password'));
+        $this->em->flush();
+        $this->em->clear();
+        $this->client->request('GET', '/login');
+        $this->client->submitForm('Anmelden', ['_username' => $user->getEmail(), '_password' => 'test-login-password']);
+        self::assertResponseRedirects();
+        $this->client->request('GET', '/admin/de');
+        self::assertResponseIsSuccessful();
+    }
+
+    public function testMissingAutoCreateSettingNeverCreatesAnEncryptionKey(): void
+    {
+        $path = sys_get_temp_dir().'/missing-environment-key-'.bin2hex(random_bytes(8));
+        $_ENV['TOTP_ENCRYPTION_KEY_FILE'] = $_SERVER['TOTP_ENCRYPTION_KEY_FILE'] = $path;
+        $cipher = static::getContainer()->get(TotpSecretCipher::class);
+        try {
+            $cipher->encrypt('JBSWY3DPEHPK3PXP');
+            self::fail('A missing key must not be automatically created.');
+        } catch (\RuntimeException $error) {
+            self::assertStringContainsString('Authenticator encryption key is missing.', $error->getMessage());
+        }
+        self::assertFileDoesNotExist($path);
+    }
+
+    public function testExplicitAutomaticKeyCreationAndPrivatePathStillTakePrecedence(): void
+    {
+        $directory = sys_get_temp_dir().'/environment-key-'.bin2hex(random_bytes(8));
+        $path = $directory.'/totp.key';
+        $_ENV['TOTP_ENCRYPTION_KEY_FILE'] = $_SERVER['TOTP_ENCRYPTION_KEY_FILE'] = $path;
+        $_ENV['TOTP_KEY_AUTO_CREATE'] = $_SERVER['TOTP_KEY_AUTO_CREATE'] = '1';
+        try {
+            $cipher = static::getContainer()->get(TotpSecretCipher::class);
+            $stored = $cipher->encrypt('JBSWY3DPEHPK3PXP');
+            self::assertFileExists($path);
+            self::assertSame(0600, fileperms($path) & 0777);
+            self::assertSame('JBSWY3DPEHPK3PXP', $cipher->decrypt($stored));
+            $originalKey = file_get_contents($path);
+            $cipher->initializeKey();
+            self::assertSame($originalKey, file_get_contents($path));
+        } finally {
+            (new \Symfony\Component\Filesystem\Filesystem())->remove($directory);
+        }
     }
 }

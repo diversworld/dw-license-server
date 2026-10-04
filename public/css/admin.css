@@ -35,40 +35,39 @@
     background-image: url('/images/flags/es.svg');
 }
 
-/* EasyAdmin keeps its Bootstrap widgets and adopts the sign-in page branding. */
-:root, .ea-light-scheme {
-    --body-bg: #f4f7fb;
-    --sidebar-bg: #172554;
-    --sidebar-logo-color: #ffffff;
-    --sidebar-menu-color: #e2e8f0;
-    --sidebar-menu-header-color: #93c5fd;
-    --sidebar-menu-icon-color: #cbd5e1;
-    --sidebar-menu-active-item-color: #ffffff;
-    --sidebar-menu-active-item-bg: rgba(255, 255, 255, .12);
-    --sidebar-menu-border-color: transparent;
-    --sidebar-border-color: transparent;
-    --link-color: #003366;
-}
+/* Theme-Werte zentral in admin-theme.css anpassen. */
 .ea-sidebar {
-    background: linear-gradient(145deg, #111827 0%, #172554 50%, #1d4ed8 100%);
+    background: var(--dw-admin-sidebar-bg);
 }
-.ea-sidebar a, .ea-sidebar .ea-sidebar-item-icon { color: #e2e8f0; }
-.ea-sidebar .ea-sidebar-group-label { color: #93c5fd; }
-.ea-sidebar .ea-sidebar-item.active, .ea-sidebar .ea-sidebar-item:hover { background-color: rgba(255, 255, 255, .1); border-radius: .6rem; }
+.ea-sidebar .ea-sidebar-group-label { color: var(--sidebar-menu-header-color); }
+.ea-sidebar .ea-sidebar-item.active, .ea-sidebar .ea-sidebar-item:hover { border-radius: var(--dw-admin-radius); }
 .ea-sidebar-logo { font-weight: 700; }
-.content-wrapper { padding-bottom: 2rem; }
-.ea-light-scheme .content-panel, .ea-light-scheme .content-body, .ea-light-scheme .card {
-    background: #ffffff;
-    border-radius: 16px;
+.content-wrapper { padding-bottom: var(--dw-admin-content-padding-bottom); }
+.content-panel, .content-body {
+    background: var(--dw-admin-content-bg);
+    border-radius: var(--dw-admin-radius);
+}
+.card {
+    --bs-card-bg: var(--dw-admin-card-bg);
+    --bs-card-color: var(--dw-admin-text);
+    background: var(--dw-admin-card-bg);
+    color: var(--dw-admin-text);
 }
 .content-panel, .card {
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    box-shadow: 0 12px 35px rgba(15, 23, 42, .06);
+    border: 1px solid var(--dw-admin-border);
+    border-radius: var(--dw-admin-radius);
+    box-shadow: var(--dw-admin-shadow);
 }
+.content-header {
+    background: var(--dw-admin-header-bg);
+    color: var(--dw-admin-text);
+    align-items: flex-start;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: var(--dw-admin-header-padding);
+}
+
 .content-header-title h1 { font-weight: 700; letter-spacing: -.025em; }
-.datagrid td, .datagrid th { padding-block: .85rem; }
+.datagrid td, .datagrid th { padding-block: var(--dw-admin-table-cell-padding); }
 .audit-changes td { white-space: pre-wrap; }
-.ea-dark-scheme .card, .ea-dark-scheme .content-panel { border-color: #334155; background: #172033; color: #e2e8f0; }
-.ea-dark-scheme, .ea-dark-scheme body { background-color: #0f172a; }
-.ea-dark-scheme { --link-color: #93c5fd; }

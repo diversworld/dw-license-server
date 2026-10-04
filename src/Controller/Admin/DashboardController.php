@@ -79,6 +79,7 @@ class DashboardController extends AbstractDashboardController
             // the name visible to end users
             ->setTitle($this->translator->trans('dashboard.title', domain: 'messages'))
             ->setFaviconPath('favicon.ico')
+            ->disableDarkMode()
             ->useEntityTranslations()
             // the domain used by default is 'messages'
             ->setTranslationDomain('messages')
@@ -128,7 +129,8 @@ class DashboardController extends AbstractDashboardController
 	{
 		return parent::configureAssets()
 			->addCssFile('css/application.css?v=20261003')
-            ->addCssFile('css/admin.css?v=20261003-design');
+            ->addCssFile('css/admin.css?v=20261004-theme')
+            ->addCssFile('css/admin-theme.css?v=20261004-theme');
 	}
 		
     public function configureMenuItems(): iterable

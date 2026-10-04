@@ -51,7 +51,7 @@ class LicenseCrudController extends AbstractCrudController
             IntegerField::new('maxDomains', 'Max. Installationen'),
             ArrayField::new('features', 'entitlements.allowed')->setHelp('entitlements.features_help'),
             ArrayField::new('quotas', 'entitlements.quotas')->setFormType(\App\Form\QuotaCollectionType::class),
-            ChoiceField::new('updatesAllowed', 'entitlements.updates')->hideOnForm()->setChoices(['entitlements.unspecified' => null, 'entitlements.allowed_updates' => true, 'entitlements.no_updates' => false]),
+            ChoiceField::new('updatesAllowed', 'entitlements.updates')->hideOnForm()->setChoices(['entitlements.allowed_updates' => 1, 'entitlements.no_updates' => 0]),
             DateTimeField::new('updatesUntil', 'entitlements.updates_until')->hideOnForm(),
             DateTimeField::new('expiresAt', 'Gültig bis')->setFormTypeOption('disabled', $pageName !== Crud::PAGE_NEW),
             TextareaField::new('notes', 'Notizen'),

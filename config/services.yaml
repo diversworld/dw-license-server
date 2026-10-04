@@ -11,6 +11,9 @@ parameters:
     # Enrollment remains voluntary unless operators explicitly configure a policy.
     env(TWO_FACTOR_REQUIRED_ROLES): '[]'
     env(TWO_FACTOR_REQUIRED_ACTIONS): '[]'
+    # Match .env defaults without creating/replacing production encryption keys.
+    env(TOTP_ENCRYPTION_KEY_FILE): '%kernel.project_dir%/config/security/totp.key'
+    env(TOTP_KEY_AUTO_CREATE): '0'
 
 services:
     # default configuration for services in *this* file

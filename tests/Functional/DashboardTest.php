@@ -46,6 +46,8 @@ class DashboardTest extends WebTestCase
         $crawler = $client->request('GET', '/admin/de');
 
         self::assertResponseIsSuccessful();
+        self::assertSelectorExists('body[data-ea-dark-scheme-is-enabled="false"]');
+        self::assertSelectorExists('link[href*="css/admin-theme.css?v=20261004-theme"]');
         self::assertSelectorTextContains('.content-header', 'Lizenzübersicht');
         self::assertSelectorTextContains('table tbody', 'Testmodul');
         self::assertSelectorTextContains('table tbody', '10');

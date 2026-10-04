@@ -1,0 +1,75 @@
+/*
+ * Zentrale Theme-Variablen fuer EasyAdmin.
+ * Farben, Abstaende und Rundungen hier anpassen; admin.css verwendet sie.
+ * Diese Datei wird nach den allgemeinen Styles geladen.
+ * EasyAdmin verwendet bewusst das helle Farbschema.
+ */
+:root,
+body.ea-light-scheme {
+    color-scheme: light;
+
+    /* Grundfarben */
+    --dw-admin-primary: #003366;
+    --dw-admin-background: #f4f7fb;
+    --dw-admin-surface: #ffffff;
+    --dw-admin-text: #334155;
+    --dw-admin-muted: #64748b;
+    --dw-admin-border: #e2e8f0;
+    --dw-admin-hover: #f1f5f9;
+
+    /* Einzelne Bereiche koennen unabhaengig angepasst werden. */
+    --dw-admin-header-bg: var(--dw-admin-background);
+    --dw-admin-content-bg: var(--dw-admin-surface);
+    --dw-admin-sidebar-bg: var(--dw-admin-surface);
+    --dw-admin-sidebar-text: var(--dw-admin-text);
+    --dw-admin-sidebar-heading: #475569;
+    --dw-admin-sidebar-active-bg: #e2e8f0;
+    --dw-admin-card-bg: var(--dw-admin-surface);
+
+    /* Form und Layout */
+    --dw-admin-radius: 16px;
+    --dw-admin-shadow: 0 12px 35px rgba(15, 23, 42, .06);
+    --dw-admin-header-padding: var(--ea-sp-18) 0 var(--ea-sp-8);
+    --dw-admin-content-padding-bottom: 2rem;
+    --dw-admin-table-cell-padding: .85rem;
+
+    /* Anbindung an die Variablen der installierten EasyAdmin-Version. */
+    --body-bg: var(--dw-admin-background);
+    --text-color: var(--dw-admin-text);
+    --text-muted: var(--dw-admin-muted);
+    --color-primary: var(--dw-admin-primary);
+    --ea-primary: var(--dw-admin-primary);
+    --link-color: var(--dw-admin-primary);
+    --content-bg: var(--dw-admin-content-bg);
+    --content-panel-bg: var(--dw-admin-content-bg);
+    --content-top-border-color: var(--dw-admin-border);
+    --content-section-border-color: var(--dw-admin-border);
+    --responsive-header-bg: var(--dw-admin-header-bg);
+    --responsive-header-logo-color: var(--dw-admin-primary);
+    --responsive-header-border-color: var(--dw-admin-border);
+    --sidebar-bg: var(--dw-admin-sidebar-bg);
+    --sidebar-logo-color: var(--dw-admin-primary);
+    --sidebar-menu-color: var(--dw-admin-sidebar-text);
+    --sidebar-menu-header-color: var(--dw-admin-sidebar-heading);
+    --sidebar-menu-icon-color: var(--dw-admin-muted);
+    --sidebar-menu-active-item-color: var(--dw-admin-primary);
+    --sidebar-menu-active-item-bg: var(--dw-admin-sidebar-active-bg);
+    --sidebar-menu-hover-color: var(--dw-admin-primary);
+    --sidebar-item-hover-bg: var(--dw-admin-hover);
+    --sidebar-border-color: var(--dw-admin-border);
+    --table-thead-color: var(--dw-admin-text);
+    --table-cell-color: var(--dw-admin-text);
+    --table-cell-border-color: var(--dw-admin-border);
+    --table-hover-cell-bg: var(--dw-admin-hover);
+    --form-control-bg: var(--dw-admin-surface);
+    --form-input-text-color: var(--dw-admin-text);
+    --form-input-border-color: var(--dw-admin-border);
+    --dropdown-bg: var(--dw-admin-surface);
+    --popover-bg: var(--dw-admin-surface);
+
+    /* Bootstrap-Komponenten im Dashboard */
+    --bs-body-bg: var(--dw-admin-background);
+    --bs-body-color: var(--dw-admin-text);
+    --bs-secondary-color: var(--dw-admin-muted);
+    --bs-border-color: var(--dw-admin-border);
+}
