@@ -128,7 +128,7 @@ class DashboardController extends AbstractDashboardController
 	{
 		return parent::configureAssets()
 			->addCssFile('css/application.css?v=20261003')
-            ->addCssFile('css/admin.css?v=20261004-blue-theme')
+            ->addCssFile('css/admin.css?v=20261004-blue-theme-2')
             ->addCssFile('css/admin-theme.css?v=20261004-blue-theme');
 	}
 		

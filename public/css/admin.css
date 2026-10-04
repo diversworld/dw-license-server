@@ -36,6 +36,14 @@
 }
 
 /* Theme-Werte zentral in admin-theme.css anpassen. */
+/* application.css setzt den allgemeinen body-Hintergrund ohne CSS-Layer.
+ * EasyAdmin muss ihn deshalb ebenfalls ausserhalb seiner Layer ueberschreiben.
+ */
+body[data-ea-dark-scheme-is-enabled] {
+    background: var(--body-bg);
+    color: var(--text-color);
+}
+
 .ea-sidebar {
     background: var(--dw-admin-sidebar-background);
 }
