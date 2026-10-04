@@ -31,10 +31,12 @@ final class ProductEntitlementsTest extends IsolatedWebTestCase
     public function testActualPlanFormCreatesFrozenLicenseAndRequiresCsrf(): void
     {
         $plan = $this->plan(); $customer = $this->em->getRepository(License::class)->findOneBy([])->getCustomer(); $this->client->loginUser($this->user('ROLE_SALES'));
-        $crawler = $this->client->request('GET', '/admin/de/licenses/from-plan'); self::assertResponseIsSuccessful();
+        $menuUrl = static::getContainer()->get('router')->generate('admin', ['_locale' => 'de', 'routeName' => 'admin_license_from_plan', 'routeParams' => ['_locale' => 'de']]);
+        $crawler = $this->client->request('GET', $menuUrl); self::assertResponseIsSuccessful();
         $form = $crawler->selectButton('Lizenz aus Plan erstellen')->form(); $values = ['form[customer]' => (string) $customer->getId(), 'form[plan]' => (string) $plan->getId(), 'form[mode]' => 'online', 'form[reason]' => 'Annual contract test'];
+        self::assertSame('/admin/de/licenses/from-plan', parse_url($form->getUri(), PHP_URL_PATH));
         $this->client->submit($form, $values + ['form[_token]' => 'forged']); self::assertResponseStatusCodeSame(422); self::assertSame(1, $this->em->getRepository(License::class)->count([]));
-        $form = $this->client->request('GET', '/admin/de/licenses/from-plan')->selectButton('Lizenz aus Plan erstellen')->form();
+        $form = $this->client->request('GET', $menuUrl)->selectButton('Lizenz aus Plan erstellen')->form();
         $this->client->submit($form, $values); self::assertResponseRedirects(); $created = $this->em->getRepository(License::class)->findOneBy(['notes' => 'Annual contract test']); self::assertNotNull($created); self::assertSame((string) $plan->getId(), $created->getPlanSnapshot()['id']); self::assertSame(2, $created->getMaxDomains());
     }
     public function testManagementApiRejectsUnknownFeatureAndSupportsPlanIssuance(): void

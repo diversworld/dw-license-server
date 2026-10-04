@@ -19,7 +19,12 @@ final class PlanIssueController extends AbstractController
     public function create(Request $request, EntityManagerInterface $em, ProductEntitlements $rights, TranslatorInterface $translator): Response
     {
         $this->denyAccessUnlessGranted('LICENSE_CREATE');
-        $form = $this->createFormBuilder()->add('customer', EntityType::class, ['label' => 'entitlements.customer', 'class' => Customer::class, 'constraints' => [new Assert\NotNull()]])->add('plan', EntityType::class, ['label' => 'entitlements.plan', 'class' => LicensePlan::class, 'query_builder' => fn ($repository) => $repository->createQueryBuilder('p')->where('p.active = true'), 'constraints' => [new Assert\NotNull()]])->add('mode', ChoiceType::class, ['label' => 'entitlements.mode', 'choices' => ['Online' => 'online', 'Offline' => 'offline']])->add('reason', TextareaType::class, ['label' => 'license_action.reason', 'constraints' => [new Assert\NotBlank(), new Assert\Length(min: 3, max: 1000)]])->getForm()->handleRequest($request);
+        // EasyAdmin can display this action through /admin?routeName=... .
+        // Always submit to the route that accepts POST, regardless of the entry URL.
+        $form = $this->createFormBuilder(null, [
+            'action' => $this->generateUrl('admin_license_from_plan', ['_locale' => $request->getLocale()]),
+            'method' => 'POST',
+        ])->add('customer', EntityType::class, ['label' => 'entitlements.customer', 'class' => Customer::class, 'constraints' => [new Assert\NotNull()]])->add('plan', EntityType::class, ['label' => 'entitlements.plan', 'class' => LicensePlan::class, 'query_builder' => fn ($repository) => $repository->createQueryBuilder('p')->where('p.active = true'), 'constraints' => [new Assert\NotNull()]])->add('mode', ChoiceType::class, ['label' => 'entitlements.mode', 'choices' => ['Online' => 'online', 'Offline' => 'offline']])->add('reason', TextareaType::class, ['label' => 'license_action.reason', 'constraints' => [new Assert\NotBlank(), new Assert\Length(min: 3, max: 1000)]])->getForm()->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $customer = $form->get('customer')->getData(); $this->denyAccessUnlessGranted('LICENSE_CREATE', $customer);
             try {
