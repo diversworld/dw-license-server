@@ -378,3 +378,4 @@ user_creation:
     password: "Mot de passe (12 caractères minimum)"
     repeat: "Confirmer le mot de passe"
     mismatch: "Les mots de passe ne correspondent pas."
+navigation.back: "Retour à la vue d’ensemble"

@@ -376,3 +376,4 @@ user_creation:
     password: "Password (at least 12 characters)"
     repeat: "Repeat password"
     mismatch: "The passwords do not match."
+navigation.back: 'Back to overview'

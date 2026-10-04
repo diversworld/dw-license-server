@@ -46,6 +46,7 @@ class DashboardTest extends WebTestCase
         $crawler = $client->request('GET', '/admin/de');
 
         self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('[data-navigation-back]');
         self::assertSelectorExists('body[data-ea-dark-scheme-is-enabled="true"]');
         self::assertSelectorExists('[data-ea-color-scheme="light"]');
         self::assertSelectorExists('[data-ea-color-scheme="dark"]');

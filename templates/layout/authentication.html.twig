@@ -4,6 +4,9 @@
         <div class="login-wrapper login-wrapper-wide">
             <div class="d-lg-none text-center mb-4"><strong class="fs-4">Diversworld</strong></div>
             <div class="card login-card"><div class="card-body">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    {% include 'layout/back_link.html.twig' %}
+                {% endif %}
                 <h1 class="h3 fw-bold mb-4">{{ block('title') }}</h1>
                 {% include 'layout/flashes.html.twig' %}
                 {% block auth_content %}{% endblock %}

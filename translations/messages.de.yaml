@@ -376,3 +376,4 @@ user_creation:
     password: "Kennwort (mindestens 12 Zeichen)"
     repeat: "Kennwort wiederholen"
     mismatch: "Die Kennwörter stimmen nicht überein."
+navigation.back: 'Zurück zur Übersicht'

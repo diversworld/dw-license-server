@@ -378,3 +378,4 @@ user_creation:
     password: "Contraseña (al menos 12 caracteres)"
     repeat: "Repetir contraseña"
     mismatch: "Las contraseñas no coinciden."
+navigation.back: 'Volver al resumen'

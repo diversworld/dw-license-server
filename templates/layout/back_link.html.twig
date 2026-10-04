@@ -1,0 +1,5 @@
+<nav class="mb-3" aria-label="{{ 'navigation.back'|trans }}">
+    <a class="btn btn-outline-secondary" data-navigation-back href="{{ path(is_granted('ROLE_CUSTOMER') ? 'portal_index' : 'admin', {_locale: app.request.locale}) }}">
+        <span aria-hidden="true">←</span> {{ 'navigation.back'|trans }}
+    </a>
+</nav>
