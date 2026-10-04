@@ -1,0 +1,14 @@
+{% use '@!EasyAdmin/crud/form_theme.html.twig' %}
+
+{# EasyAdmin renders array entries as widgets, bypassing form_row and its help. #}
+{% block collection_entry_row %}
+    {% set is_array_field = 'EasyCorp\\Bundle\\EasyAdminBundle\\Field\\ArrayField' == form_parent(form).vars.ea_vars.field.fieldFqcn|default(false) %}
+    {% if is_array_field %}
+        <div class="form-group">
+            {{ parent() }}
+            {{ form_help(form) }}
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

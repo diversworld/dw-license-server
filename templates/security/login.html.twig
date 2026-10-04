@@ -40,8 +40,9 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-envelope"></i>
                                 </span>
-                                <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" placeholder="name@beispiel.de" required autofocus>
+                                <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" placeholder="name@beispiel.de" aria-describedby="username-help" required autofocus>
                             </div>
+                            <div id="username-help" class="form-text">{{ 'form_help.login_email'|trans }}</div>
                         </div>
                         <div class="mb-2">
                             <label for="password" class="form-label fw-semibold" >{{ 'ui.password'|trans }}</label>
@@ -49,8 +50,9 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-lock"></i>
                                 </span>
-                                <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" placeholder="{{ 'ui.password'|trans }}" required>
+                                <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" placeholder="{{ 'ui.password'|trans }}" aria-describedby="password-help" required>
                             </div>
+                            <div id="password-help" class="form-text">{{ 'form_help.current_password'|trans }}</div>
                         </div>
                         {# Kennwort vergessen #}
                         <div class="text-end mb-4">

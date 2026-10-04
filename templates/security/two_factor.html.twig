@@ -27,8 +27,9 @@
                                     <span class="input-group-text">
                                         <i class="bi bi-envelope"></i>
                                     </span>
-                                    <input class="form-control" id="auth-code" name="{{ authCodeParameterName }}" autocomplete="one-time-code" required autofocus>
+                                    <input class="form-control" id="auth-code" name="{{ authCodeParameterName }}" autocomplete="one-time-code" aria-describedby="auth-code-help" required autofocus>
                                 </div>
+                                <div id="auth-code-help" class="form-text">{{ 'form_help.auth_proof'|trans }}</div>
                             </div>
                         <div class="mb-3">
                             <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">

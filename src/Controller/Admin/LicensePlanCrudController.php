@@ -19,6 +19,15 @@ final class LicensePlanCrudController extends AbstractCrudController
             ? ['entitlements.unspecified' => null, 'entitlements.allowed_updates' => true, 'entitlements.no_updates' => false]
             : ['entitlements.allowed_updates' => 1, 'entitlements.no_updates' => 0];
 
-        return [AssociationField::new('product', 'entitlements.product'), TextField::new('name', 'entitlements.name'), IntegerField::new('durationDays', 'entitlements.duration'), IntegerField::new('maxDomains', 'entitlements.installations'), ArrayField::new('features', 'entitlements.allowed'), ArrayField::new('quotas', 'entitlements.quotas')->setFormType(QuotaCollectionType::class), ChoiceField::new('updatesAllowed', 'entitlements.updates')->setChoices($updateChoices), BooleanField::new('active', 'entitlements.active')];
+        return [
+            AssociationField::new('product', 'entitlements.product')->setHelp('form_help.product'),
+            TextField::new('name', 'entitlements.name')->setHelp('form_help.name'),
+            IntegerField::new('durationDays', 'entitlements.duration')->setHelp('form_help.duration'),
+            IntegerField::new('maxDomains', 'entitlements.installations')->setHelp('form_help.installation_limit'),
+            ArrayField::new('features', 'entitlements.allowed')->setHelp('form_help.features'),
+            ArrayField::new('quotas', 'entitlements.quotas')->setFormType(QuotaCollectionType::class)->setHelp('form_help.quotas'),
+            ChoiceField::new('updatesAllowed', 'entitlements.updates')->setChoices($updateChoices)->setHelp('form_help.updates'),
+            BooleanField::new('active', 'entitlements.active')->setHelp('form_help.active'),
+        ];
     }
 }

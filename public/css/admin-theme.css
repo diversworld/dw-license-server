@@ -70,6 +70,8 @@ body.ea-dark-scheme {
     --table-cell-border-color: var(--dw-admin-border);
     --table-hover-cell-bg: var(--dw-admin-hover);
     --form-control-bg: var(--dw-admin-surface);
+    --form-help-color: var(--dw-admin-muted);
+    --form-help-active-color: var(--dw-admin-link);
     --form-input-text-color: var(--dw-admin-text);
     --form-input-border-color: var(--dw-admin-border);
     --dropdown-bg: var(--dw-admin-surface);

@@ -1,5 +1,12 @@
 {% extends '@!EasyAdmin/layout.html.twig' %}
 
+{% block search %}
+    <div class="mb-3">
+        {{ parent() }}
+        <div class="form-text">{{ 'form_help.search'|trans }}</div>
+    </div>
+{% endblock %}
+
 {% block content_header_wrapper %}
     {% if app.request.attributes.get('_route') != 'admin' %}
         {% include 'layout/back_link.html.twig' %}
