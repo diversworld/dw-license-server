@@ -7,6 +7,13 @@ final class QuotaEntryType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('feature', TextType::class, ['label' => 'entitlements.feature', 'constraints' => [new Assert\NotBlank()]])->add('limit', IntegerType::class, ['label' => 'entitlements.quota', 'constraints' => [new Assert\Positive(), new Assert\LessThanOrEqual(1000000000)]]);
+        $builder->add('feature', TextType::class, [
+            'label' => 'entitlements.feature', 
+            'constraints' => [new Assert\NotBlank()]
+        ])
+        ->add('limit', IntegerType::class, [
+            'label' => 'entitlements.quota', 
+            'constraints' => [new Assert\Positive(), new Assert\LessThanOrEqual(1000000000)]
+        ]);
     }
 }

@@ -22,18 +22,37 @@ class IssueLicenseController extends AbstractController
     public function __invoke(License $license, Request $request, LicenseManager $manager, LicenseSigner $signer, \Symfony\Contracts\Translation\TranslatorInterface $translator): Response
     {
         $form = $this->createForm(InstallationType::class)->handleRequest($request);
+
         $token = null;
         $publicKey = null;
+        
         if ($form->isSubmitted() && $form->isValid()) {
+
             $data = $form->getData();
+            
             try {
-                $token = $manager->activate(new ActivationRequest($license->getLicenseKey(), $license->getProduct()->getSlug(), $data['tenant'], $data['domain']));
+                $token = $manager->activate(
+                    new ActivationRequest(
+                        $license->getLicenseKey(), 
+                        $license->getProduct()
+                            ->getSlug(), 
+                        $data['tenant'], 
+                        $data['domain']
+                    )
+                );
+
                 $publicKey = json_encode($signer->publicKeys(), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+                
             } catch (HttpException $e) {
                 $form->addError(new FormError($translator->trans($e->getMessage())));
             }
         }
-        $response = $this->render('admin/issue.html.twig', ['form' => $form, 'license' => $license, 'token' => $token, 'public_key' => $publicKey]);
+
+        $response = $this->render('admin/issue.html.twig', [
+            'form' => $form, 
+            'license' => $license, 
+            'token' => $token, 
+            'public_key' => $publicKey]);
         $response->headers->set('Cache-Control', 'no-store');
 
         return $response;

@@ -29,7 +29,7 @@ class LicenseActionController extends AbstractController
     }
 
     #[Route('/admin/{_locale}/licenses/{id}/actions/{action}', name: 'admin_license_action', defaults: ['_locale' => 'de'], requirements: \App\Service\LicenseTransitions::ROUTE_REQUIREMENTS, methods: ['GET', 'POST'])]
-    #[Route('/admin/licenses/{id}/actions/{action}', name: 'admin_license_action_legacy', requirements: \App\Service\LicenseTransitions::ROUTE_REQUIREMENTS, methods: ['GET', 'POST'])]
+    #[Route('/admin/{_locale}/licenses/{id}/actions/{action}', name: 'admin_license_action_legacy', requirements: \App\Service\LicenseTransitions::ROUTE_REQUIREMENTS, methods: ['GET', 'POST'])]
     public function perform(License $license, string $action, Request $request): Response
     {
         $this->denyAccessUnlessGranted('LICENSE_'.strtoupper($action), $license);
@@ -49,7 +49,7 @@ class LicenseActionController extends AbstractController
             }
         }
 
-        return $this->render('admin/license/action.html.twig', ['license' => $license, 'action' => $action, 'form' => $form, 'history' => $this->historyEntries($license)]);
+        return $this->render('admin/{_locale}/license/action.html.twig', ['license' => $license, 'action' => $action, 'form' => $form, 'history' => $this->historyEntries($license)]);
     }
 
     private function historyEntries(License $license): array
